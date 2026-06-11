@@ -7,13 +7,13 @@ import SearchBar from "@/components/sections/SearchBar";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-transparent">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:py-12">
 
         {/* Hero grid */}
-        <div className="grid min-h-[calc(100vh-64px)] grid-cols-1 items-center gap-8 lg:grid-cols-2">
+        <div className="grid min-h-[unset] grid-cols-1 items-start gap-8 lg:grid-cols-2">
 
           {/* LEFT */}
-          <div className="pb-12 pt-10 text-left lg:py-0">
+          <div className="pb-6 pt-4 text-left lg:py-0">
             <HeroBadge />
             <h1 className="mt-5 text-5xl font-black leading-[1.1] tracking-tight sm:text-6xl lg:text-6xl xl:text-7xl">
               Revolutionizing

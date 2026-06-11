@@ -6,14 +6,7 @@ export default function HeroImage() {
     <div className="relative flex h-full w-full items-end justify-center">
 
       {/* Blue radial glow — background right */}
-      <div
-        className="absolute right-[-80px] top-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full pointer-events-none z-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(219,234,254,0.8) 0%, rgba(191,219,254,0.4) 40%, transparent 70%)",
-          filter: "blur(40px)",
-        }}
-      />
+      <div className="absolute bottom-0 left-0 h-[25%] w-full pointer-events-none bg-gradient-to-b from-transparent via-white/30 to-white"/>
 
       {/* Person image */}
       <Image
