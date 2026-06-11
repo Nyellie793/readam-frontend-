@@ -38,7 +38,7 @@ export default function Hero() {
         </div>
 
         {/* SearchBar — below hero grid, above subjects */}
-        <div className="pb-16">
+        <div className="pb-6 sm:pb-10">
           <SearchBar />
         </div>
 
