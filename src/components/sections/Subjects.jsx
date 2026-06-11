@@ -38,7 +38,7 @@ const subjects = [
 
 export default function Subjects() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
+    <section className="mx-auto max-w-7xl px-6 py- pb-10">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {subjects.map((subject) => {
           const Icon = subject.icon;
