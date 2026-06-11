@@ -17,7 +17,7 @@ export default function SearchBar() {
       {/* Label */}
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-4 w-4 text-orange-400" />
-        <span className="text-sm font-semibold text-gray-600">Ask Edugo</span>
+        <span className="text-sm font-semibold text-gray-600">Ask ReadAM</span>
       </div>
 
       {/* Input row */}
