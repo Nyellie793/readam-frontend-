@@ -39,7 +39,7 @@ function Stars() {
 
 export default function Testimonials() {
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 bg-gray-50">
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 bg-gray-100">
       <div className="mb-8 sm:mb-10 text-center">
         <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
           Hear What Our Users Have To Say
