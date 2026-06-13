@@ -2,22 +2,22 @@ import { Sparkles, Paperclip, Mic } from "lucide-react";
 
 export default function SearchBar() {
   return (
-    <div className="relative mx-auto w-full max-w-2xl rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-md overflow-hidden">
+    <div className="relative mx-auto w-full max-w-2xl rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg overflow-hidden">
 
       {/* Blue glow — bottom right */}
       <div
-        className="pointer-events-none absolute bottom-0 right-0 h-[120px] w-[250px] translate-x-1/4 translate-y-1/4"
+        className="pointer-events-none absolute bottom-0 right-0 h-[140px] w-[280px] translate-x-1/4 translate-y-1/4"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(191,219,254,0.6) 0%, rgba(219,234,254,0.3) 40%, transparent 70%)",
-          filter: "blur(24px)",
+            "radial-gradient(ellipse at center, rgba(147,197,253,0.7) 0%, rgba(191,219,254,0.4) 40%, transparent 70%)",
+          filter: "blur(28px)",
         }}
       />
 
       {/* Label */}
       <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-4 w-4 text-orange-400" />
-        <span className="text-sm font-semibold text-gray-600">Ask ReadAM</span>
+        <span className="text-sm font-semibold text-gray-700">Ask ReadAM</span>
       </div>
 
       {/* Input row */}
@@ -27,12 +27,23 @@ export default function SearchBar() {
         <input
           type="text"
           placeholder="Explain the theory of relativity..."
-          className="flex-1 bg-transparent text-sm text-gray-500 placeholder:text-gray-400 outline-none"
+          className="flex-1 bg-transparent text-sm text-gray-600 placeholder:text-gray-400 outline-none"
         />
 
         <Mic className="h-4 w-4 shrink-0 text-gray-400" />
 
-        <button className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 transition">
+        {/* CTA — brighter, bigger, with glow shadow */}
+        <button className="
+          flex h-10 w-10 shrink-0 items-center justify-center
+          rounded-xl
+          bg-orange-500
+          brightness-110
+          shadow-[0_4px_14px_rgba(249,115,22,0.4)]
+          hover:brightness-125
+          hover:bg-orange-600
+          hover:shadow-[0_4px_20px_rgba(249,115,22,0.6)]
+          transition-all
+        ">
           <svg
             className="h-4 w-4 text-white"
             fill="none"

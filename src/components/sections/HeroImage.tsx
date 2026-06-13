@@ -14,7 +14,7 @@ export default function HeroImage() {
         alt="Student with laptop"
         width={520}
         height={600}
-        className="relative z-10 w-[75%] object-contain sm:w-[60%] lg:w-full"
+        className="relative z-10 w-[75%] object-contain sm:w-[60%] lg:w-[75%]"
         priority
       />
 

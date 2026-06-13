@@ -3,6 +3,7 @@ import HeroButtons from "./HeroButtons";
 import HeroImage from "./HeroImage";
 import HeroStats from "./HeroStats";
 import SearchBar from "@/components/sections/SearchBar";
+import Subjects from "./Subjects";
 
 export default function Hero() {
   return (
@@ -50,6 +51,7 @@ export default function Hero() {
         {/* SearchBar */}
         <div className="mt-8 sm:mt-10">
           <SearchBar />
+          <Subjects />
         </div>
 
       </div>
