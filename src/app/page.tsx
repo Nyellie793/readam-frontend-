@@ -12,6 +12,7 @@ import Footer from "@/components/layout/Footer";
 import BackToTop from "@/components/shared/BackToTop";
 
 export default function Home() {
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-white">
       <div className="pointer-events-none absolute right-0 top-0 z-0 h-[70vh] w-[70vw] rounded-full bg-blue-100/40 blur-[120px]" />
