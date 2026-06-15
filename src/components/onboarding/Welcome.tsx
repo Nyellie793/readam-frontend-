@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, Compass, Bot, BookOpen, ArrowLeft } from "lucide-react";
@@ -14,13 +15,12 @@ export default function Welcome({ interests, userName, onBack }: Props) {
   const displayInterests =
     interests.slice(0, 2).join(" and ") || "your selected topics";
 
-  const loginType =
-    typeof window !== "undefined"
-      ? localStorage.getItem("login_type")
-      : "signup";
-
-  const greeting =
-    loginType === "login" ? "Welcome Back," : "Welcome to ReadAm,";
+    const [loginType] = useState<string>(() => {
+        if (typeof window === "undefined") return "signup";
+        return localStorage.getItem("login_type") || "signup";
+      });
+      
+      const greeting = loginType === "login" ? "Welcome Back," : "Welcome to ReadAm,";
 
   return (
     <div className="mx-auto max-w-5xl">
