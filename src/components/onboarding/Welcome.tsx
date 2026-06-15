@@ -11,7 +11,16 @@ type Props = {
 };
 
 export default function Welcome({ interests, userName, onBack }: Props) {
-  const displayInterests = interests.slice(0, 2).join(" and ") || "your selected topics";
+  const displayInterests =
+    interests.slice(0, 2).join(" and ") || "your selected topics";
+
+  const loginType =
+    typeof window !== "undefined"
+      ? localStorage.getItem("login_type")
+      : "signup";
+
+  const greeting =
+    loginType === "login" ? "Welcome Back," : "Welcome to ReadAm,";
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -57,17 +66,18 @@ export default function Welcome({ interests, userName, onBack }: Props) {
 
         {/* RIGHT — content */}
         <div>
-          {/* ← userName used here instead of hardcoded name */}
           <h1 className="text-3xl font-black leading-snug text-blue-700 sm:text-4xl">
-            Welcome to ReadAm,{" "}
+            {greeting}{" "}
             <span className="text-orange-500">{userName || "there"}!</span>
           </h1>
 
           <p className="mt-4 text-sm leading-relaxed text-gray-500">
-            Your learning journey starts now. We&apos;ve personalized your dashboard
-            based on your interests in{" "}
-            <span className="font-semibold text-gray-700">{displayInterests}</span>.
-            Here is what you can do next:
+            Your learning journey starts now. We&apos;ve personalized your
+            dashboard based on your interests in{" "}
+            <span className="font-semibold text-gray-700">
+              {displayInterests}
+            </span>
+            . Here is what you can do next:
           </p>
 
           {/* Action cards */}
@@ -76,7 +86,9 @@ export default function Welcome({ interests, userName, onBack }: Props) {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
                 <Compass className="h-5 w-5 text-blue-500" />
               </div>
-              <h3 className="mt-4 text-base font-bold text-gray-900">Explore Courses</h3>
+              <h3 className="mt-4 text-base font-bold text-gray-900">
+                Explore Courses
+              </h3>
               <p className="mt-1 text-xs leading-relaxed text-gray-400">
                 Discover top-rated lessons from expert Cameroonian tutors.
               </p>
@@ -86,7 +98,9 @@ export default function Welcome({ interests, userName, onBack }: Props) {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
                 <Bot className="h-5 w-5 text-blue-500" />
               </div>
-              <h3 className="mt-4 text-base font-bold text-gray-900">Ask AI Assistant</h3>
+              <h3 className="mt-4 text-base font-bold text-gray-900">
+                Ask AI Assistant
+              </h3>
               <p className="mt-1 text-xs leading-relaxed text-gray-400">
                 Solve complex past questions instantly with our AI tutor.
               </p>
@@ -114,7 +128,10 @@ export default function Welcome({ interests, userName, onBack }: Props) {
 
       {/* Back */}
       <div className="mt-12">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition"
+        >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
       </div>

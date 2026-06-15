@@ -19,6 +19,7 @@ export default function SignupForm() {
     localStorage.setItem("user_name", name);
     localStorage.setItem("user_email", email);
     localStorage.setItem("user_password", password);
+    localStorage.setItem("login_type", "signup");
 
     setTimeout(() => {
       setLoading(false);

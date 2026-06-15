@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -14,8 +15,9 @@ export default function LoginForm() {
     e.preventDefault();
     setLoading(true);
 
-    // Update stored email on login
+    localStorage.setItem("user_name", name);
     localStorage.setItem("user_email", email);
+    localStorage.setItem("login_type", "login"); // ← flag for welcome page
 
     setTimeout(() => {
       setLoading(false);
@@ -35,6 +37,19 @@ export default function LoginForm() {
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+
+        {/* Name */}
+        <div>
+          <label className="text-sm text-gray-600">Full Name</label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="John Doe"
+            className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
 
         <div>
           <label className="text-sm text-gray-600">Email</label>
