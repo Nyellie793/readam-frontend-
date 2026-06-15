@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation";
 import LanguageToggle from "../shared/LanguageToggle";
 import Logo from "../shared/Logo";
 
-export default function MobileMenu() {
+export default function AuthMobileMenu() {
   return (
     <Sheet>
       <SheetTrigger

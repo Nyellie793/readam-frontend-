@@ -1,14 +1,15 @@
+import AuthPageLayout from "@/components/auth/AuthLayout";
 import AuthNavbar from "@/components/auth/AuthNavbar";
-import LoginForm from "@/components/auth/LoginForm";
+import SignupForm from "@/components/auth/SignupForm";
 
 export default function Page() {
   return (
     <main className="min-h-screen bg-[#F7F8FC]">
 
       <AuthNavbar
-        text="No account yet?"
-        buttonText="Sign Up"
-        href="/signup"
+        text="Already have an account?"
+        buttonText="Sign In"
+        href="/login"
       />
 
       <section
@@ -23,7 +24,9 @@ export default function Page() {
         py-10
         "
       >
-        <LoginForm />
+        <AuthPageLayout>
+            <SignupForm />
+        </AuthPageLayout>
       </section>
 
     </main>
