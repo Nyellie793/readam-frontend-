@@ -1,22 +1,22 @@
+import Sidebar from "@/components/admin/Sidebar";
+
 export default function AdminLayout({
-    children,
-  }: {
-    children: React.ReactNode
-  }) {
-    return (
-      <div className="flex min-h-screen">
-        <aside className="w-64 bg-black text-white p-4">
-          <h2 className="text-xl font-bold">Admin</h2>
-          <nav className="mt-6 space-y-2">
-            <a href="/admin">Dashboard</a>
-            <a href="/admin/users">Users</a>
-            <a href="/admin/courses">Courses</a>
-          </nav>
-        </aside>
-  
-        <main className="flex-1 p-6 bg-gray-50">
-          {children}
-        </main>
-      </div>
-    )
-  }
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Desktop sidebar — fixed, hidden on mobile (Topbar provides a Sheet instead) */}
+      <aside className="hidden w-64 shrink-0 lg:block">
+        <div className="fixed h-screen w-64">
+          <Sidebar />
+        </div>
+      </aside>
+
+      <main className="min-w-0 flex-1">
+        {children}
+      </main>
+    </div>
+  );
+}

@@ -14,6 +14,7 @@ import { NAV_LINKS } from "@/constants/navigation";
 import { usePathname } from "next/navigation";
 
 import LanguageToggle from "../shared/LanguageToggle";
+import ThemeToggle from "../shared/ThemeToggle";
 import Logo from "../shared/Logo";
 
 export default function AuthMobileMenu() {
@@ -79,7 +80,10 @@ export default function AuthMobileMenu() {
               Language
             </p>
 
-            <LanguageToggle />
+            <div className="flex items-center justify-between gap-3">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
 
           </div>
 

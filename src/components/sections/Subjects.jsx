@@ -51,7 +51,7 @@ export default function Subjects() {
           return (
             <Card
               key={subject.title}
-              className={`cursor-pointer border-2 ${subject.borderColor} bg-white shadow-none hover:shadow-md transition-shadow rounded-2xl`}
+              className={`cursor-pointer border-2 ${subject.borderColor} bg-white shadow-none hover:shadow-lg hover:-translate-y-1 transition-all duration-300 rounded-2xl`}
             >
               <CardContent className="flex flex-col gap-4 p-6">
                 <div className={`flex h-11 w-11 items-center justify-center rounded-full ${subject.iconBg}`}>

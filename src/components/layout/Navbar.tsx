@@ -4,6 +4,7 @@ import Link from "next/link";
 import Logo from "../shared/Logo";
 import MobileMenu from "./MobileMenu";
 import LanguageToggle from "../shared/LanguageToggle";
+import ThemeToggle from "../shared/ThemeToggle";
 import { NAV_LINKS } from "@/constants/navigation";
 import { usePathname } from "next/navigation";
 
@@ -14,7 +15,7 @@ export default function Navbar() {
     pathname === "/login" || pathname === "/signup";
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 safe-top">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
 
         {/* LOGO ALWAYS */}
@@ -54,6 +55,7 @@ export default function Navbar() {
         {!isAuthPage ? (
           <div className="hidden items-center gap-3 lg:flex">
             <LanguageToggle />
+            <ThemeToggle />
 
             <Link
               href="/login"
@@ -69,6 +71,7 @@ export default function Navbar() {
           // AUTH PAGES: keep ONLY minimal actions if needed
           <div className="hidden lg:flex items-center gap-3">
             <LanguageToggle />
+            <ThemeToggle />
           </div>
         )}
 

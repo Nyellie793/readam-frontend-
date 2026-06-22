@@ -17,7 +17,7 @@ import Logo from "../shared/Logo";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#071B4D] text-white">
+    <footer className="bg-[#071B4D] text-white safe-bottom">
 
       <div className="mx-auto max-w-7xl px-6 py-16">
 

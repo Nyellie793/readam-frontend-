@@ -9,22 +9,22 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-transparent">
 
-      {/* 🌟 Blue Glow Background */}
+      {/* Background glows */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-[-120px] left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-blue-200/40 blur-[120px]" />
         <div className="absolute bottom-[-160px] right-[-120px] h-[450px] w-[450px] rounded-full bg-blue-300/30 blur-[140px]" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-8 lg:py-12">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-12">
 
-        {/* Hero grid */}
+        {/* ── Two-column hero grid ─────────────────────────────── */}
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
 
-          {/* LEFT */}
-          <div className="pt-4 pb-6 text-left lg:py-0">
+          {/* LEFT — text + buttons + stats */}
+          <div className="pt-2 pb-6 text-left lg:py-0">
             <HeroBadge />
 
-            <h1 className="mt-3 text-5xl font-black leading-[1.1] tracking-tight sm:text-6xl lg:text-6xl xl:text-7xl">
+            <h1 className="mt-3 text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
               Revolutionizing
               <br />
               Digital{" "}
@@ -41,16 +41,20 @@ export default function Hero() {
             <HeroStats />
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT — hero image */}
           <div className="relative flex items-end justify-center self-stretch">
             <HeroImage />
           </div>
 
         </div>
 
-        {/* SearchBar */}
-        <div className="mt-8 sm:mt-10">
+        {/* ── AI Search Bar — full width, centered under the image ── */}
+        <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
           <SearchBar />
+        </div>
+
+        {/* ── Subjects ─────────────────────────────────────────── */}
+        <div className="mt-8 sm:mt-10">
           <Subjects />
         </div>
 

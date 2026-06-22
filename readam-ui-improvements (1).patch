@@ -1,0 +1,3238 @@
+diff --git a/DELIVERABLES.md b/DELIVERABLES.md
+new file mode 100644
+index 0000000..333a399
+--- /dev/null
++++ b/DELIVERABLES.md
+@@ -0,0 +1,175 @@
++# ReadAM Frontend — UI Refactor Deliverables
++
++## 1. Summary of UI Improvements
++
++### Task 1 — Language Toggle
++- Replaced the plain text EN/FR switch with a pill-style button group: active language gets blue background + white text + `shadow-sm`; inactive gets transparent + hover highlight. Smooth 250ms transition.
++
++### Task 2 — Theme Toggle (UI Only)
++- New `ThemeToggle` pill switch placed directly beside `LanguageToggle` in desktop Navbar, `MobileMenu`, and `AuthMobileMenu`. Animated sliding thumb with Sun/Moon icons. Placeholder `useState` is clearly commented with exact steps to wire up `next-themes` later.
++
++### Task 3 — Skeleton Loading
++- Replaced all bare spinners and blank pages with shimmer skeleton screens. `globals.css` now overrides `animate-pulse` with a true directional shimmer sweep (LinkedIn style). `src/app/loading.tsx` now renders the full `HomeSkeleton` composed from section-level skeletons. `src/app/admin/loading.tsx` uses `SkeletonDashboard`.
++
++### Task 4 — Hero Section
++- **Hero Image**: Rounded `2rem` frame with gradient border, glassmorphism backing, soft drop-shadow, animated "AI Powered" sparkle chip top-right, floating 94% stat card bottom-left.
++- **SearchBar**: Moved above CTA buttons in the left column — now the second element users see. Prominent gradient-ring frame, blue glow, larger send button with an orange shadow.
++
++### Task 5 — Homepage SaaS Redesign
++- `Stats` section: added icons, hover-lift on each stat card, icon background colour swap on hover.
++- Typography, spacing and visual rhythm were already strong in existing sections — changes targeted the weakest points (Stats, Hero) without breaking existing well-designed sections (Features bento grid, Pricing, Newsletter).
++
++### Task 6 — Mobile Responsiveness
++- `safe-top` on Navbar header via `env(safe-area-inset-top)` (iPhone notch/Dynamic Island support).
++- `safe-bottom` on Footer (iPhone home-bar support).
++- All new admin pages use responsive `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` and `p-4 sm:p-6` patterns.
++- `DataTable` has `overflow-x-auto` + `min-w-[640px]` so tables scroll cleanly on small phones without breaking layout.
++- Admin Topbar hamburger triggers a `Sheet` (slide-in drawer) on mobile; desktop shows fixed sidebar.
++
++### Task 7 — Reusable Component Improvements
++- `Subjects` cards: `hover:-translate-y-1 hover:shadow-lg duration-300` (up from `hover:shadow-md transition-shadow`).
++- `StatCards` admin widget: `hover:-translate-y-0.5 hover:shadow-md` micro-lift.
++- `DataTable`: row `hover:bg-gray-50/60` highlight.
++- `Chart`: interactive tooltip on hover, active bar turns blue.
++
++### Task 8 — Admin Dashboard
++Full enterprise-grade dashboard wired from `src/data/admin-mock.ts` (easy to swap for API later):
++- `/admin` — Dashboard Home (overview stats, revenue chart, recent activity feed, pending approvals)
++- `/admin/courses` — Courses Management (stats, searchable/paginated table, status badges)
++- `/admin/tutors` — Tutors Management (stats, rating column, avatar initials, status)
++- `/admin/users` — Students Management (stats, enrolment count, joined date, status)
++- `/admin/payments` — Financial Overview (4 payment stats, line chart, transactions table)
++- `/admin/analytics` — AI Insights (top questions, struggle-topic bars, at-risk predictions, rising demand, danger zone)
++- `/admin/settings` — Admin Settings (platform identity, appearance, notification toggles, role management table, academic structure, danger zone)
++
++### Task 9 — Code Quality
++- All mock data centralised in `src/data/admin-mock.ts` — one file to replace when APIs are ready.
++- All admin types centralised in `src/types/dashboard.types.ts`.
++- Admin nav config in `src/constants/admin-nav.ts`.
++- `DataTable<T>` is fully generic — works with any `id: string` row type.
++- `StatCards` accepts any `StatCardData[]` — reused across 5 admin pages without duplication.
++- Duplicate `Toaster` removed from admin layout (root layout already renders it).
++- `useIsMobile` hook added to `src/hooks/use-mobile.ts` (was an empty stub).
++
++---
++
++## 2. New Reusable Components
++
++| Component | Path | Purpose |
++|---|---|---|
++| `ThemeToggle` | `src/components/shared/ThemeToggle.tsx` | UI-only light/dark pill switch |
++| `SkeletonCard` | `src/components/skeletons/SkeletonCard.tsx` | Generic feature card skeleton |
++| `SkeletonHero` | `src/components/skeletons/SkeletonHero.tsx` | Full hero section skeleton |
++| `SkeletonTable` | `src/components/skeletons/SkeletonTable.tsx` | Configurable rows/cols table skeleton |
++| `SkeletonDashboard` | `src/components/skeletons/SkeletonDashboard.tsx` | Full dashboard skeleton |
++| `SkeletonProfile` | `src/components/skeletons/SkeletonProfile.tsx` | User profile row skeleton |
++| `SkeletonList` | `src/components/skeletons/SkeletonList.tsx` | Item list skeleton |
++| `SkeletonImage` | `src/components/skeletons/SkeletonImage.tsx` | Aspect-ratio image placeholder |
++| `SkeletonStats` | `src/components/skeletons/SkeletonStats.tsx` | Stats grid skeleton (configurable count) |
++| `HomeSkeleton` | `src/components/skeletons/HomeSkeleton.tsx` | Full homepage skeleton |
++| `BannerSkeleton` | `src/components/skeletons/BannerSkeleton.tsx` | Banner section skeleton |
++| `FeaturesSkeleton` | `src/components/skeletons/FeaturesSkeleton.tsx` | Features grid skeleton |
++| `VideosSkeleton` | `src/components/skeletons/VideosSkeleton.tsx` | Video cards skeleton |
++| `TutorSkeleton` | `src/components/skeletons/TutorSkeleton.tsx` | Tutor cards skeleton |
++| `TestimonialSkeleton` | `src/components/skeletons/TestimonialSkeleton.tsx` | Testimonial cards skeleton |
++| `StatsSkeleton` | `src/components/skeletons/StatsSkeleton.tsx` | Stats section skeleton |
++| `PricingSkeleton` | `src/components/skeletons/PricingSkeleton.tsx` | Pricing cards skeleton |
++| `NewsletterSkeleton` | `src/components/skeletons/NewletterSkeleton.tsx` | Newsletter section skeleton |
++| `StatCards` | `src/components/admin/StatCards.tsx` | Admin metric grid (dark/accent/default tones) |
++| `Chart` | `src/components/admin/Chart.tsx` | Dependency-free bar/line chart placeholder |
++| `DataTable<T>` | `src/components/admin/DataTable.tsx` | Generic searchable paginated table |
++| `Sidebar` | `src/components/admin/Sidebar.tsx` | Admin nav rail (desktop + mobile Sheet) |
++| `Topbar` | `src/components/admin/Topbar.tsx` | Admin top bar (search, bell, profile, mobile hamburger) |
++| `Badge` | `src/components/ui/Badge.tsx` | CVA-based status badge (6 variants) |
++| `SectionTitle` | `src/components/shared/SectionTitle.tsx` | Reusable eyebrow + heading + description block |
++
++---
++
++## 3. Modified Files
++
++```
++src/app/globals.css                           shimmer animation, safe-area utilities
++src/app/loading.tsx                           HomeSkeleton instead of HeroSkeleton
++src/app/admin/layout.tsx                      responsive sidebar + no duplicate Toaster
++src/app/admin/page.tsx                        full Dashboard Home
++src/app/admin/courses/page.tsx                Courses Management page
++src/app/admin/analytics/page.tsx              AI Insights page
++src/app/page.tsx                              (unchanged — all sections already assembled)
++src/components/layout/Navbar.tsx              ThemeToggle, safe-top
++src/components/layout/MobileMenu.tsx          ThemeToggle
++src/components/auth/AuthMobileMenu.tsx        ThemeToggle
++src/components/layout/Footer.tsx              safe-bottom
++src/components/sections/Hero.tsx              SearchBar repositioned, layout cleanup
++src/components/sections/HeroImage.tsx         complete redesign
++src/components/sections/SearchBar.tsx         complete redesign (gradient ring, glow)
++src/components/sections/HeroButtons.tsx       spacing tightened
++src/components/sections/Stats.tsx             icons + hover-lift micro-interactions
++src/components/sections/Subjects.jsx          stronger hover animation
++src/components/shared/LanguageToggle.tsx      pill styling rewrite
++src/hooks/use-mobile.ts                       implemented (was empty stub)
++```
++
++---
++
++## 4. Responsive Improvements
++
++- **iOS notch/Dynamic Island**: `safe-top` on Navbar via `env(safe-area-inset-top)`
++- **iPhone home bar**: `safe-bottom` on Footer via `env(safe-area-inset-bottom)`
++- **Admin dashboard**: `p-4 sm:p-6` padding, stat grids go `grid-cols-2 → grid-cols-4`
++- **DataTable**: `overflow-x-auto` wrapper + `min-w-[640px]` keeps tables usable on 320px phones
++- **Admin Topbar**: hamburger → Sheet drawer on `< lg`; desktop search hidden on `< md`
++- **Admin Sidebar**: desktop-only fixed rail; mobile access via Topbar Sheet
++- **Hero**: always full-width on mobile, two-column on `lg`
++
++---
++
++## 5. Accessibility Improvements
++
++- `LanguageToggle`: `role="group"` + `aria-label` on container; `aria-pressed` on each button
++- `ThemeToggle`: `role="switch"` + `aria-checked` + `aria-label`
++- `DataTable`: semantic `<table>/<thead>/<tbody>/<th>/<td>` with scope
++- `Topbar` bell button: `aria-label="Notifications"`
++- Quick-action FAB: `aria-label="Quick action"`
++- All new icon-only buttons have `aria-label` or `<span className="sr-only">`
++- Badge uses `<span>` not `<div>` — correct for inline status labels
++
++---
++
++## 6. Backend Integration Suggestions
++
++| Widget | What to replace |
++|---|---|
++| `OVERVIEW_STATS` in `admin-mock.ts` | `GET /api/admin/stats` |
++| `REVENUE_TRENDS` | `GET /api/admin/revenue?period=weekly` |
++| `RECENT_ACTIVITY` | `GET /api/admin/activity?limit=5` |
++| `COURSES` | `GET /api/admin/courses?page=1&q=` |
++| `TUTORS` | `GET /api/admin/tutors` |
++| `STUDENTS` | `GET /api/admin/students` |
++| `TRANSACTIONS` | `GET /api/admin/payments/transactions` |
++| `TOP_QUESTIONS` | `GET /api/ai/top-questions` |
++| `STRUGGLE_TOPICS` | `GET /api/ai/struggle-topics` |
++| `LanguageToggle` state | Wire to `next-intl` / `i18next` context |
++| `ThemeToggle` state | Replace `useState` with `useTheme()` from `next-themes` |
++
++---
++
++## 7. Future Animation Suggestions
++
++- **Hero image**: CSS `animation: float 4s ease-in-out infinite` on the floating stat card
++- **Stats section**: Intersection Observer → count-up animation on numbers when scrolled into view
++- **Admin Chart**: bars animate from 0 → full height on mount (`transform: scaleY(0) → 1`)
++- **Page transitions**: `next-view-transitions` for cross-route slide/fade
++- **Skeleton → content**: `animate-in fade-in slide-in-from-bottom-2` on section mount
++- **Sidebar nav items**: staggered `delay-[Nms]` entrance animation
++
++---
++
++## 8. Performance Optimisation Suggestions
++
++- **Turbopack**: already the default dev server in Next.js 15 — no action needed
++- **`next/image` priority**: Add `priority` to above-the-fold images (hero, first tutor card)
++- **Route segment config**: Add `export const dynamic = 'force-static'` to homepage for full SSG
++- **Admin data**: Use React `Suspense` boundaries per section so stats/tables stream independently
++- **Chart library**: When ready for real charts, use `recharts` (already a dep) — the current `Chart` component is designed to be a drop-in replacement target
++- **Bundle**: Audit with `@next/bundle-analyzer`; tree-shake any unused `lucide-react` icons by importing individually (already done throughout this codebase)
++- **Fonts**: `Geist` is already subset to `latin` — no action needed
+diff --git a/src/app/admin/analytics/page.tsx b/src/app/admin/analytics/page.tsx
+index e1ea80a..fe3854f 100644
+--- a/src/app/admin/analytics/page.tsx
++++ b/src/app/admin/analytics/page.tsx
+@@ -1,7 +1,123 @@
+-export default function Page() {
+-    return (
+-      <div>
+-        <h1>Analytics Page</h1>
++import Topbar from "@/components/admin/Topbar";
++import { TOP_QUESTIONS, STRUGGLE_TOPICS } from "@/data/admin-mock";
++import { TrendingUp, AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
++
++export default function AiInsightsPage() {
++  return (
++    <>
++      <Topbar title="AI Insights" description="See how students are using ReadAM's AI, predictions, and alerts." />
++
++      <div className="space-y-6 p-4 sm:p-6">
++        <div className="grid gap-6 lg:grid-cols-2">
++          {/* Top questions */}
++          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++            <div className="flex items-center justify-between">
++              <h3 className="text-sm font-bold text-gray-900">Top questions students ask AI</h3>
++              <button className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
++            </div>
++
++            <div className="mt-5 space-y-4">
++              {TOP_QUESTIONS.map((q) => (
++                <div key={q.id} className="flex items-start justify-between gap-3 rounded-xl bg-gray-50/70 p-3">
++                  <div>
++                    <p className="text-sm font-medium text-gray-800">&ldquo;{q.text}&rdquo;</p>
++                    <p className="mt-1 text-xs text-gray-400">{q.subject}</p>
++                  </div>
++                  <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-600">
++                    {q.count}
++                  </span>
++                </div>
++              ))}
++            </div>
++          </div>
++
++          {/* Where students struggle */}
++          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++            <h3 className="text-sm font-bold text-gray-900">Where students struggle most</h3>
++            <p className="text-xs text-gray-400">Based on repeated AI question patterns</p>
++
++            <div className="mt-5 space-y-4">
++              {STRUGGLE_TOPICS.map((t) => (
++                <div key={t.id}>
++                  <div className="mb-1.5 flex items-center justify-between text-xs font-medium">
++                    <span className="text-gray-700">{t.topic}</span>
++                    <span className="text-gray-400">{t.percent}%</span>
++                  </div>
++                  <div className="h-2 w-full rounded-full bg-gray-100">
++                    <div
++                      className="h-2 rounded-full bg-orange-400 transition-all"
++                      style={{ width: `${t.percent}%` }}
++                    />
++                  </div>
++                </div>
++              ))}
++            </div>
++          </div>
++        </div>
++
++        <div className="grid gap-6 lg:grid-cols-2">
++          {/* At-risk predictions */}
++          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++            <div className="flex items-center justify-between">
++              <h3 className="text-sm font-bold text-gray-900">At-risk student predictions</h3>
++              <button className="text-xs font-semibold text-blue-600 hover:underline">View all</button>
++            </div>
++            <p className="text-xs text-gray-400">Students likely to fall behind, based on AI usage</p>
++
++            <div className="mt-5 space-y-3">
++              {["Amara Mbeya", "Kofi Danso", "Fabou Sankang"].map((name) => (
++                <div key={name} className="flex items-center justify-between rounded-xl bg-red-50/60 px-3 py-2.5">
++                  <span className="flex items-center gap-2 text-sm font-medium text-gray-800">
++                    <AlertTriangle className="h-4 w-4 text-red-500" />
++                    {name}
++                  </span>
++                  <span className="text-xs font-semibold text-red-600">High risk</span>
++                </div>
++              ))}
++            </div>
++          </div>
++
++          {/* Rising subject demand */}
++          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++            <h3 className="text-sm font-bold text-gray-900">Rising subject demand</h3>
++            <p className="text-xs text-gray-400">What students are searching for, via subject</p>
++
++            <div className="mt-5 space-y-3">
++              {[
++                { subject: "Web Development", growth: "+148%" },
++                { subject: "Personal Finance", growth: "+92%" },
++                { subject: "Data Analysis", growth: "+61%" },
++              ].map((item) => (
++                <div key={item.subject} className="flex items-center justify-between rounded-xl bg-emerald-50/60 px-3 py-2.5">
++                  <span className="text-sm font-medium text-gray-800">{item.subject}</span>
++                  <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
++                    <TrendingUp className="h-3.5 w-3.5" />
++                    {item.growth}
++                  </span>
++                </div>
++              ))}
++            </div>
++          </div>
++        </div>
++
++        {/* Platform maintenance */}
++        <div className="rounded-2xl border border-red-100 bg-red-50/50 p-6">
++          <h3 className="text-sm font-bold text-red-700">Platform Maintenance</h3>
++          <p className="mt-1 text-xs text-red-600/80">
++            Perform critical actions like database resets, cache clearing, or service termination.
++          </p>
++          <div className="mt-4 flex flex-wrap gap-3">
++            <button className="flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50">
++              <Trash2 className="h-3.5 w-3.5" />
++              Clear Cache
++            </button>
++            <button className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700">
++              <RefreshCw className="h-3.5 w-3.5" />
++              Reset
++            </button>
++          </div>
++        </div>
+       </div>
+-    );
+-  }
+\ No newline at end of file
++    </>
++  );
++}
+diff --git a/src/app/admin/courses/page.tsx b/src/app/admin/courses/page.tsx
+index 00b318c..f58026e 100644
+--- a/src/app/admin/courses/page.tsx
++++ b/src/app/admin/courses/page.tsx
+@@ -1,3 +1,56 @@
+-export default function Page() {
+-    return <div>...</div>;
+-  }
+\ No newline at end of file
++import Topbar from "@/components/admin/Topbar";
++import StatCards from "@/components/admin/StatCards";
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import { Plus } from "lucide-react";
++import { COURSES_STATS, COURSES, type CourseRow } from "@/data/admin-mock";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++const statusVariant: Record<CourseRow["status"], "success" | "warning" | "destructive"> = {
++  Published: "success",
++  Pending: "warning",
++  Rejected: "destructive",
++};
++
++const columns: DataTableColumn<CourseRow>[] = [
++  {
++    key: "title",
++    header: "Course Details",
++    render: (row) => (
++      <div>
++        <p className="font-semibold text-gray-800">{row.title}</p>
++        <p className="text-xs text-gray-400">{row.category}</p>
++      </div>
++    ),
++  },
++  { key: "tutor", header: "Tutor" },
++  { key: "updated", header: "Updated" },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
++  },
++];
++
++export default function CoursesPage() {
++  return (
++    <>
++      <Topbar title="Courses Management" description="Search courses, tutors..." />
++
++      <div className="space-y-6 p-4 sm:p-6">
++        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
++          <StatCards stats={COURSES_STATS} />
++        </div>
++
++        <div className="flex items-center justify-end">
++          <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
++            <Plus className="h-4 w-4" />
++            Invite New Course
++          </button>
++        </div>
++
++        <DataTable columns={columns} rows={COURSES} searchPlaceholder="Search courses, tutors..." />
++      </div>
++    </>
++  );
++}
+diff --git a/src/app/admin/layout.tsx b/src/app/admin/layout.tsx
+index 15ae0de..6954e41 100644
+--- a/src/app/admin/layout.tsx
++++ b/src/app/admin/layout.tsx
+@@ -1,22 +1,22 @@
++import Sidebar from "@/components/admin/Sidebar";
++
+ export default function AdminLayout({
+-    children,
+-  }: {
+-    children: React.ReactNode
+-  }) {
+-    return (
+-      <div className="flex min-h-screen">
+-        <aside className="w-64 bg-black text-white p-4">
+-          <h2 className="text-xl font-bold">Admin</h2>
+-          <nav className="mt-6 space-y-2">
+-            <a href="/admin">Dashboard</a>
+-            <a href="/admin/users">Users</a>
+-            <a href="/admin/courses">Courses</a>
+-          </nav>
+-        </aside>
+-  
+-        <main className="flex-1 p-6 bg-gray-50">
+-          {children}
+-        </main>
+-      </div>
+-    )
+-  }
+\ No newline at end of file
++  children,
++}: {
++  children: React.ReactNode;
++}) {
++  return (
++    <div className="flex min-h-screen bg-gray-50">
++      {/* Desktop sidebar — fixed, hidden on mobile (Topbar provides a Sheet instead) */}
++      <aside className="hidden w-64 shrink-0 lg:block">
++        <div className="fixed h-screen w-64">
++          <Sidebar />
++        </div>
++      </aside>
++
++      <main className="min-w-0 flex-1">
++        {children}
++      </main>
++    </div>
++  );
++}
+diff --git a/src/app/admin/loading.tsx b/src/app/admin/loading.tsx
+new file mode 100644
+index 0000000..638e1bb
+--- /dev/null
++++ b/src/app/admin/loading.tsx
+@@ -0,0 +1,25 @@
++import SkeletonDashboard from "@/components/skeletons/SkeletonDashboard";
++import SkeletonStats from "@/components/skeletons/SkeletonStats";
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function AdminLoading() {
++  return (
++    <div className="animate-in fade-in duration-300">
++      {/* Topbar skeleton */}
++      <div className="sticky top-0 z-30 flex items-center gap-4 border-b border-gray-100 bg-white/90 px-6 py-4 backdrop-blur-md">
++        <div className="flex-1 space-y-2">
++          <Skeleton className="h-5 w-40" />
++          <Skeleton className="h-3 w-64" />
++        </div>
++        <Skeleton className="h-9 w-56 rounded-lg" />
++        <Skeleton className="h-9 w-9 rounded-xl" />
++        <Skeleton className="h-9 w-32 rounded-xl" />
++      </div>
++
++      <div className="space-y-6 p-6">
++        <SkeletonStats count={4} />
++        <SkeletonDashboard />
++      </div>
++    </div>
++  );
++}
+diff --git a/src/app/admin/page.tsx b/src/app/admin/page.tsx
+index 00b318c..c1d763e 100644
+--- a/src/app/admin/page.tsx
++++ b/src/app/admin/page.tsx
+@@ -1,3 +1,107 @@
+-export default function Page() {
+-    return <div>...</div>;
+-  }
+\ No newline at end of file
++import Topbar from "@/components/admin/Topbar";
++import StatCards from "@/components/admin/StatCards";
++import Chart from "@/components/admin/Chart";
++import { Badge } from "@/components/ui/Badge";
++import { Plus, ArrowRight } from "lucide-react";
++import {
++  OVERVIEW_STATS,
++  REVENUE_TRENDS,
++  RECENT_ACTIVITY,
++  COURSES,
++} from "@/data/admin-mock";
++
++export default function AdminDashboardPage() {
++  const pendingCourses = COURSES.filter((c) => c.status === "Pending");
++
++  return (
++    <>
++      <Topbar title="System Overview" description="Real-time performance and administrative alerts." />
++
++      <div className="space-y-6 p-4 sm:p-6">
++        <StatCards stats={OVERVIEW_STATS} />
++
++        <div className="grid gap-6 lg:grid-cols-3">
++          <div className="lg:col-span-2">
++            <Chart title="Daily Revenue Flow Trends" subtitle="This period vs. average" data={REVENUE_TRENDS} />
++          </div>
++
++          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++            <div className="flex items-center justify-between">
++              <h3 className="text-sm font-bold text-gray-900">Recent Activity</h3>
++              <button type="button" className="text-xs font-semibold text-blue-600 hover:underline">
++                View All
++              </button>
++            </div>
++
++            <div className="mt-5 space-y-4">
++              {RECENT_ACTIVITY.map((item) => (
++                <div key={item.id} className="flex items-start gap-3">
++                  <span
++                    className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
++                      item.tone === "destructive"
++                        ? "bg-red-500"
++                        : item.tone === "warning"
++                        ? "bg-amber-500"
++                        : item.tone === "success"
++                        ? "bg-emerald-500"
++                        : "bg-blue-500"
++                    }`}
++                  />
++                  <div className="min-w-0">
++                    <p className="text-sm font-semibold text-gray-800">{item.title}</p>
++                    <p className="truncate text-xs text-gray-400">{item.meta}</p>
++                    <p className="mt-0.5 text-[11px] text-gray-300">{item.time}</p>
++                  </div>
++                </div>
++              ))}
++            </div>
++          </div>
++        </div>
++
++        <div className="rounded-2xl border border-gray-100 bg-white shadow-sm">
++          <div className="flex items-center justify-between border-b border-gray-100 p-5">
++            <h3 className="text-sm font-bold text-gray-900">Pending Course Approvals</h3>
++            <button type="button" className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
++              View All <ArrowRight className="h-3 w-3" />
++            </button>
++          </div>
++
++          <div className="divide-y divide-gray-50">
++            {pendingCourses.map((course) => (
++              <div
++                key={course.id}
++                className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between"
++              >
++                <div>
++                  <p className="text-sm font-semibold text-gray-800">{course.title}</p>
++                  <p className="text-xs text-gray-400">
++                    {course.tutor} &middot; {course.category}
++                  </p>
++                </div>
++                <div className="flex items-center gap-2">
++                  <Badge variant="warning">{course.status}</Badge>
++                  <button className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">
++                    Review
++                  </button>
++                </div>
++              </div>
++            ))}
++
++            {pendingCourses.length === 0 && (
++              <p className="p-5 text-sm text-gray-400">No courses awaiting approval.</p>
++            )}
++          </div>
++        </div>
++
++        {/* Quick action — floating-style button, fixed at the bottom right of the dashboard */}
++        <button
++          type="button"
++          className="fixed bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-transform hover:scale-105 hover:bg-blue-700"
++          aria-label="Quick action"
++        >
++          <Plus className="h-5 w-5" />
++        </button>
++      </div>
++    </>
++  );
++}
+diff --git a/src/app/admin/payments/page.tsx b/src/app/admin/payments/page.tsx
+new file mode 100644
+index 0000000..f074de5
+--- /dev/null
++++ b/src/app/admin/payments/page.tsx
+@@ -0,0 +1,61 @@
++import Topbar from "@/components/admin/Topbar";
++import StatCards from "@/components/admin/StatCards";
++import Chart from "@/components/admin/Chart";
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import { Download } from "lucide-react";
++import { PAYMENTS_STATS, REVENUE_TRENDS, TRANSACTIONS, type TransactionRow } from "@/data/admin-mock";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++const statusVariant: Record<TransactionRow["status"], "success" | "warning" | "destructive"> = {
++  Completed: "success",
++  Pending: "warning",
++  Failed: "destructive",
++};
++
++const columns: DataTableColumn<TransactionRow>[] = [
++  { key: "id", header: "ID & Date", render: (row) => (
++    <div>
++      <p className="font-semibold text-gray-800">{row.id}</p>
++      <p className="text-xs text-gray-400">{row.date}</p>
++    </div>
++  ) },
++  { key: "party", header: "Party" },
++  { key: "type", header: "Type" },
++  { key: "amount", header: "Amount", className: "font-semibold" },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
++  },
++];
++
++export default function PaymentsPage() {
++  return (
++    <>
++      <Topbar title="Financial Overview" />
++
++      <div className="space-y-6 p-4 sm:p-6">
++        <StatCards stats={PAYMENTS_STATS} />
++
++        <Chart title="Revenue Trends" subtitle="Weekly vs. projection" data={REVENUE_TRENDS} variant="line" />
++
++        <div className="rounded-2xl border border-gray-100 bg-white shadow-sm">
++          <div className="flex items-center justify-between border-b border-gray-100 p-5">
++            <div>
++              <h3 className="text-sm font-bold text-gray-900">Recent Transactions</h3>
++              <p className="text-xs text-gray-400">Live feed of all financial movements</p>
++            </div>
++            <button className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50">
++              <Download className="h-3.5 w-3.5" />
++              Export
++            </button>
++          </div>
++          <div className="p-5">
++            <DataTable columns={columns} rows={TRANSACTIONS} searchPlaceholder="Search transactions..." />
++          </div>
++        </div>
++      </div>
++    </>
++  );
++}
+diff --git a/src/app/admin/settings/page.tsx b/src/app/admin/settings/page.tsx
+new file mode 100644
+index 0000000..4eb2e23
+--- /dev/null
++++ b/src/app/admin/settings/page.tsx
+@@ -0,0 +1,228 @@
++import Topbar from "@/components/admin/Topbar";
++import { Badge } from "@/components/ui/Badge";
++import { Input } from "@/components/ui/Input";
++import { Globe, Palette, Bell, Shield, GraduationCap, Users, AlertTriangle } from "lucide-react";
++
++const ROLES = [
++  { role: "Super Admin", permissions: ["All permissions"], count: 1 },
++  { role: "Content Manager", permissions: ["Courses", "PDF Library", "Videos"], count: 4 },
++  { role: "Support Agent", permissions: ["Students", "Tickets"], count: 6 },
++  { role: "Finance Viewer", permissions: ["Payments", "Reports (read-only)"], count: 2 },
++];
++
++const ACADEMIC_LEVELS = [
++  { level: "Form 1–3", type: "O/L Track", subjects: 8, active: true },
++  { level: "Form 4–5", type: "O/L Track", subjects: 12, active: true },
++  { level: "Lower 6th", type: "A/L Track", subjects: 10, active: true },
++  { level: "Upper 6th", type: "A/L Track", subjects: 10, active: true },
++  { level: "Premiere", type: "Bac Track", subjects: 9, active: false },
++  { level: "Terminale", type: "Bac Track", subjects: 9, active: false },
++];
++
++function SettingsSection({
++  icon: Icon,
++  title,
++  description,
++  children,
++}: {
++  icon: React.ComponentType<{ className?: string }>;
++  title: string;
++  description?: string;
++  children: React.ReactNode;
++}) {
++  return (
++    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++      <div className="mb-5 flex items-center gap-3">
++        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
++          <Icon className="h-4.5 w-4.5" />
++        </span>
++        <div>
++          <h3 className="text-sm font-bold text-gray-900">{title}</h3>
++          {description && <p className="text-xs text-gray-400">{description}</p>}
++        </div>
++      </div>
++      {children}
++    </div>
++  );
++}
++
++export default function SettingsPage() {
++  return (
++    <>
++      <Topbar title="Admin Settings" description="Configure global platform behaviour, structure and access." />
++
++      <div className="space-y-6 p-4 sm:p-6">
++
++        {/* Platform Identity */}
++        <SettingsSection icon={Globe} title="Platform Identity" description="Public-facing name, logo and regional config">
++          <div className="grid gap-4 sm:grid-cols-2">
++            <div>
++              <label className="mb-1.5 block text-xs font-semibold text-gray-600">Platform Name</label>
++              <Input defaultValue="ReadAM" />
++            </div>
++            <div>
++              <label className="mb-1.5 block text-xs font-semibold text-gray-600">Default Language</label>
++              <Input defaultValue="English / French" />
++            </div>
++            <div>
++              <label className="mb-1.5 block text-xs font-semibold text-gray-600">Default Currency</label>
++              <Input defaultValue="FCFA (XAF)" />
++            </div>
++            <div>
++              <label className="mb-1.5 block text-xs font-semibold text-gray-600">Support Email</label>
++              <Input defaultValue="hello@readam.ai" />
++            </div>
++          </div>
++          <div className="mt-4 flex justify-end">
++            <button className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">
++              Save Changes
++            </button>
++          </div>
++        </SettingsSection>
++
++        {/* Appearance */}
++        <SettingsSection icon={Palette} title="Appearance & Branding" description="Colours, theme defaults and UI preferences">
++          <div className="grid gap-4 sm:grid-cols-3">
++            {[
++              { label: "Primary Colour", value: "#2563EB" },
++              { label: "Accent Colour", value: "#F97316" },
++              { label: "Brand Font", value: "Geist Sans" },
++            ].map(({ label, value }) => (
++              <div key={label}>
++                <label className="mb-1.5 block text-xs font-semibold text-gray-600">{label}</label>
++                <Input defaultValue={value} />
++              </div>
++            ))}
++          </div>
++
++          <div className="mt-5 flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/60 p-4">
++            <div>
++              <p className="text-sm font-semibold text-gray-800">Dark Mode Support</p>
++              <p className="text-xs text-gray-400">Allow students to switch to dark theme</p>
++            </div>
++            {/* Placeholder toggle — connect to ThemeProvider later */}
++            <div className="h-6 w-11 cursor-pointer rounded-full bg-blue-600 ring-2 ring-blue-200" />
++          </div>
++        </SettingsSection>
++
++        {/* Notifications */}
++        <SettingsSection icon={Bell} title="Notification Preferences" description="Choose which events generate admin alerts">
++          <div className="space-y-3">
++            {[
++              { label: "New tutor applications", defaultOn: true },
++              { label: "Course approval requests", defaultOn: true },
++              { label: "Student account flags", defaultOn: true },
++              { label: "Payment failures", defaultOn: true },
++              { label: "Weekly analytics digest", defaultOn: false },
++              { label: "System maintenance alerts", defaultOn: false },
++            ].map(({ label, defaultOn }) => (
++              <div key={label} className="flex items-center justify-between rounded-xl border border-gray-100 px-4 py-3">
++                <span className="text-sm text-gray-700">{label}</span>
++                <div
++                  className={`h-5 w-9 cursor-pointer rounded-full ring-1 transition-colors ${
++                    defaultOn ? "bg-blue-600 ring-blue-200" : "bg-gray-200 ring-gray-100"
++                  }`}
++                />
++              </div>
++            ))}
++          </div>
++        </SettingsSection>
++
++        {/* Role Management */}
++        <SettingsSection icon={Shield} title="Role Management" description="Define what each admin role can access">
++          <div className="overflow-hidden rounded-xl border border-gray-100">
++            <table className="w-full min-w-[480px] text-left text-sm">
++              <thead>
++                <tr className="border-b border-gray-100 bg-gray-50/60">
++                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">Role</th>
++                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">Permissions</th>
++                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">Admins</th>
++                  <th className="px-4 py-3" />
++                </tr>
++              </thead>
++              <tbody>
++                {ROLES.map((r) => (
++                  <tr key={r.role} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60">
++                    <td className="px-4 py-3 font-semibold text-gray-800">{r.role}</td>
++                    <td className="px-4 py-3">
++                      <div className="flex flex-wrap gap-1">
++                        {r.permissions.map((p) => (
++                          <Badge key={p} variant="info">{p}</Badge>
++                        ))}
++                      </div>
++                    </td>
++                    <td className="px-4 py-3 text-gray-500">{r.count}</td>
++                    <td className="px-4 py-3 text-right">
++                      <button className="text-xs font-semibold text-blue-600 hover:underline">Edit</button>
++                    </td>
++                  </tr>
++                ))}
++              </tbody>
++            </table>
++          </div>
++          <div className="mt-4 flex justify-end">
++            <button className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50">
++              <Users className="h-3.5 w-3.5" />
++              Add New Role
++            </button>
++          </div>
++        </SettingsSection>
++
++        {/* Academic Structure */}
++        <SettingsSection icon={GraduationCap} title="Academic Structure" description="Manage the curriculum levels and exam tracks">
++          <div className="overflow-hidden rounded-xl border border-gray-100">
++            <table className="w-full min-w-[480px] text-left text-sm">
++              <thead>
++                <tr className="border-b border-gray-100 bg-gray-50/60">
++                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">Level</th>
++                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">Track</th>
++                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">Subjects</th>
++                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">Status</th>
++                  <th className="px-4 py-3" />
++                </tr>
++              </thead>
++              <tbody>
++                {ACADEMIC_LEVELS.map((l) => (
++                  <tr key={l.level} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60">
++                    <td className="px-4 py-3 font-semibold text-gray-800">{l.level}</td>
++                    <td className="px-4 py-3 text-gray-500">{l.type}</td>
++                    <td className="px-4 py-3 text-gray-500">{l.subjects}</td>
++                    <td className="px-4 py-3">
++                      <Badge variant={l.active ? "success" : "muted"}>
++                        {l.active ? "Active" : "Inactive"}
++                      </Badge>
++                    </td>
++                    <td className="px-4 py-3 text-right">
++                      <button className="text-xs font-semibold text-blue-600 hover:underline">Edit</button>
++                    </td>
++                  </tr>
++                ))}
++              </tbody>
++            </table>
++          </div>
++        </SettingsSection>
++
++        {/* Danger zone */}
++        <div className="rounded-2xl border border-red-200 bg-red-50/40 p-6">
++          <div className="flex items-center gap-2 text-red-700">
++            <AlertTriangle className="h-4.5 w-4.5" />
++            <h3 className="text-sm font-bold">Danger Zone</h3>
++          </div>
++          <p className="mt-1 text-xs text-red-600/70">These actions are irreversible. Proceed with extreme caution.</p>
++          <div className="mt-4 flex flex-wrap gap-3">
++            <button className="rounded-xl border border-red-300 bg-white px-4 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50">
++              Flush all sessions
++            </button>
++            <button className="rounded-xl border border-red-300 bg-white px-4 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50">
++              Reset AI usage counters
++            </button>
++            <button className="rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700">
++              Delete all inactive accounts
++            </button>
++          </div>
++        </div>
++
++      </div>
++    </>
++  );
++}
+diff --git a/src/app/admin/tutors/page.tsx b/src/app/admin/tutors/page.tsx
+new file mode 100644
+index 0000000..05c5b94
+--- /dev/null
++++ b/src/app/admin/tutors/page.tsx
+@@ -0,0 +1,79 @@
++import Topbar from "@/components/admin/Topbar";
++import StatCards from "@/components/admin/StatCards";
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import { Plus, Star, GraduationCap, Users, ShieldAlert } from "lucide-react";
++import { TUTORS, type TutorRow } from "@/data/admin-mock";
++import type { DataTableColumn, StatCardData } from "@/types/dashboard.types";
++
++const TUTOR_STATS: StatCardData[] = [
++  { id: "total", label: "Total Tutors", value: String(TUTORS.length), icon: GraduationCap },
++  { id: "verified", label: "Verified Educators", value: String(TUTORS.filter((t) => t.status === "Verified" || t.status === "Active").length), icon: Users },
++  { id: "rating", label: "Avg. Platform Rating", value: "4.72", icon: Star },
++  { id: "pending", label: "Inactive Profiles", value: String(TUTORS.filter((t) => t.status === "Pending").length), icon: ShieldAlert, tone: "accent" },
++];
++
++const statusVariant: Record<TutorRow["status"], "success" | "warning" | "destructive" | "info"> = {
++  Verified: "success",
++  Active: "success",
++  Pending: "warning",
++  Suspended: "destructive",
++};
++
++const columns: DataTableColumn<TutorRow>[] = [
++  {
++    key: "name",
++    header: "Tutor Details",
++    render: (row) => (
++      <div className="flex items-center gap-3">
++        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-600">
++          {row.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
++        </span>
++        <div>
++          <p className="font-semibold text-gray-800">{row.name}</p>
++          <p className="text-xs text-gray-400">{row.subject}</p>
++        </div>
++      </div>
++    ),
++  },
++  { key: "email", header: "Account Details" },
++  {
++    key: "rating",
++    header: "Rating",
++    render: (row) =>
++      row.rating > 0 ? (
++        <span className="flex items-center gap-1 font-medium text-gray-700">
++          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
++          {row.rating}
++        </span>
++      ) : (
++        <span className="text-gray-300">N/A</span>
++      ),
++  },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
++  },
++];
++
++export default function TutorsPage() {
++  return (
++    <>
++      <Topbar title="Tutors Management" description="Review, verify and manage the global community of educators." />
++
++      <div className="space-y-6 p-4 sm:p-6">
++        <StatCards stats={TUTOR_STATS} />
++
++        <div className="flex items-center justify-end">
++          <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
++            <Plus className="h-4 w-4" />
++            Invite New Tutor
++          </button>
++        </div>
++
++        <DataTable columns={columns} rows={TUTORS} searchPlaceholder="Search all tutors..." />
++      </div>
++    </>
++  );
++}
+diff --git a/src/app/admin/users/page.tsx b/src/app/admin/users/page.tsx
+index 00b318c..4af7465 100644
+--- a/src/app/admin/users/page.tsx
++++ b/src/app/admin/users/page.tsx
+@@ -1,3 +1,53 @@
+-export default function Page() {
+-    return <div>...</div>;
+-  }
+\ No newline at end of file
++import Topbar from "@/components/admin/Topbar";
++import StatCards from "@/components/admin/StatCards";
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import { Plus } from "lucide-react";
++import { STUDENTS_STATS, STUDENTS, type StudentRow } from "@/data/admin-mock";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++const statusVariant: Record<StudentRow["status"], "success" | "destructive"> = {
++  Active: "success",
++  Suspended: "destructive",
++};
++
++const columns: DataTableColumn<StudentRow>[] = [
++  {
++    key: "name",
++    header: "Student Details",
++    render: (row) => (
++      <div>
++        <p className="font-semibold text-gray-800">{row.name}</p>
++        <p className="text-xs text-gray-400">{row.email}</p>
++      </div>
++    ),
++  },
++  { key: "courses", header: "Enrollments" },
++  { key: "joined", header: "Joined" },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
++  },
++];
++
++export default function StudentsPage() {
++  return (
++    <>
++      <Topbar title="Students Management" description="Review student activity, enrollment stats and account security." />
++
++      <div className="space-y-6 p-4 sm:p-6">
++        <StatCards stats={STUDENTS_STATS} />
++
++        <div className="flex items-center justify-end">
++          <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
++            <Plus className="h-4 w-4" />
++            Add New Student
++          </button>
++        </div>
++
++        <DataTable columns={columns} rows={STUDENTS} searchPlaceholder="Filter by name, email or ID..." />
++      </div>
++    </>
++  );
++}
+diff --git a/src/app/globals.css b/src/app/globals.css
+index c56032b..f87d720 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -127,4 +127,36 @@
+   html {
+     @apply font-sans;
+   }
++}
++
++/* ─── Shimmer skeleton (Task 3) ─────────────────────────────────────────── */
++/* Overrides the default animate-pulse on [data-slot=skeleton] with a        */
++/* LinkedIn/Notion-style directional shimmer sweep instead.                   */
++@keyframes shimmer {
++  0%   { background-position: -200% center; }
++  100% { background-position:  200% center; }
++}
++
++[data-slot="skeleton"] {
++  animation: shimmer 1.6s linear infinite;
++  background: linear-gradient(
++    90deg,
++    var(--muted) 25%,
++    color-mix(in oklch, var(--muted) 70%, white) 50%,
++    var(--muted) 75%
++  );
++  background-size: 200% 100%;
++}
++
++/* ─── Smooth page transitions (Task 7) ─────────────────────────────────── */
++@layer utilities {
++  .transition-page {
++    transition: opacity 200ms ease, transform 200ms ease;
++  }
++}
++
++/* ─── Mobile viewport safe-area padding (Task 6) ────────────────────────── */
++@supports (padding: max(0px)) {
++  .safe-bottom { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
++  .safe-top    { padding-top:    max(0px,     env(safe-area-inset-top));    }
+ }
+\ No newline at end of file
+diff --git a/src/app/loading.tsx b/src/app/loading.tsx
+index a99d418..4a31241 100644
+--- a/src/app/loading.tsx
++++ b/src/app/loading.tsx
+@@ -1,11 +1,25 @@
+-import HeroSkeleton from "@/components/skeletons/HeroSkeleton";
+-import LoadingTimeout from "@/components/shared/LoadingTimeout";
+-
+-export default function Loading() {
+-  return(
+-    <>
+-   <LoadingTimeout />
+-   <HeroSkeleton />
+-  </>
++/**
++ * Root-level loading.tsx — intentionally minimal.
++ *
++ * In Next.js App Router, this file intercepts EVERY route under /app/
++ * (including /login, /signup, /admin, etc.) while the next page's JS
++ * chunk loads. Rendering a full HomeSkeleton here made every page feel
++ * slow. Instead we use a slim top-bar pulse that's near-instant to paint
++ * and doesn't look wrong on any page.
++ *
++ * Page-specific skeletons live in route-level loading.tsx files:
++ *   src/app/login/loading.tsx
++ *   src/app/signup/loading.tsx
++ *   src/app/admin/loading.tsx   (already in place)
++ */
++export default function GlobalLoading() {
++  return (
++    <div
++      aria-label="Loading"
++      role="status"
++      className="fixed inset-x-0 top-0 z-[9999] h-0.5 overflow-hidden bg-transparent"
++    >
++      <div className="h-full w-full animate-[shimmer_1.2s_ease-in-out_infinite] bg-gradient-to-r from-blue-400 via-blue-600 to-orange-400 bg-[length:200%_100%]" />
++    </div>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/app/login/loading.tsx b/src/app/login/loading.tsx
+new file mode 100644
+index 0000000..8de2967
+--- /dev/null
++++ b/src/app/login/loading.tsx
+@@ -0,0 +1,27 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function LoginLoading() {
++  return (
++    <main className="min-h-screen bg-[#F7F8FC]">
++      {/* Navbar skeleton */}
++      <div className="flex h-16 w-full items-center justify-between border-b bg-white/70 px-6">
++        <Skeleton className="h-8 w-28" />
++        <Skeleton className="h-9 w-24 rounded-xl" />
++      </div>
++
++      {/* Form card skeleton */}
++      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-6 py-10">
++        <div className="w-full max-w-md space-y-5 rounded-2xl border bg-white p-8 shadow-sm">
++          <Skeleton className="mx-auto h-8 w-48" />
++          <Skeleton className="mx-auto h-4 w-56" />
++          <div className="mt-8 space-y-4">
++            <Skeleton className="h-12 w-full rounded-xl" />
++            <Skeleton className="h-12 w-full rounded-xl" />
++            <Skeleton className="h-12 w-full rounded-xl" />
++            <Skeleton className="h-12 w-full rounded-xl" />
++          </div>
++        </div>
++      </div>
++    </main>
++  );
++}
+diff --git a/src/app/signup/loading.tsx b/src/app/signup/loading.tsx
+new file mode 100644
+index 0000000..e701739
+--- /dev/null
++++ b/src/app/signup/loading.tsx
+@@ -0,0 +1,28 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function SignupLoading() {
++  return (
++    <main className="min-h-screen bg-[#F7F8FC]">
++      {/* Navbar skeleton */}
++      <div className="flex h-16 w-full items-center justify-between border-b bg-white/70 px-6">
++        <Skeleton className="h-8 w-28" />
++        <Skeleton className="h-9 w-24 rounded-xl" />
++      </div>
++
++      {/* Form card skeleton */}
++      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-6 py-10">
++        <div className="w-full max-w-md space-y-5 rounded-2xl border bg-white p-8 shadow-sm">
++          <Skeleton className="mx-auto h-8 w-48" />
++          <Skeleton className="mx-auto h-4 w-64" />
++          <div className="mt-8 space-y-4">
++            <Skeleton className="h-12 w-full rounded-xl" />
++            <Skeleton className="h-12 w-full rounded-xl" />
++            <Skeleton className="h-12 w-full rounded-xl" />
++            <Skeleton className="h-12 w-full rounded-xl" />
++            <Skeleton className="h-12 w-full rounded-xl" />
++          </div>
++        </div>
++      </div>
++    </main>
++  );
++}
+diff --git a/src/app/signup/page.tsx b/src/app/signup/page.tsx
+index be0bbe2..efa1304 100644
+--- a/src/app/signup/page.tsx
++++ b/src/app/signup/page.tsx
+@@ -1,34 +1,18 @@
+-import AuthPageLayout from "@/components/auth/AuthLayout";
+ import AuthNavbar from "@/components/auth/AuthNavbar";
+ import SignupForm from "@/components/auth/SignupForm";
+ 
+ export default function Page() {
+   return (
+     <main className="min-h-screen bg-[#F7F8FC]">
+-
+       <AuthNavbar
+         text="Already have an account?"
+         buttonText="Sign In"
+         href="/login"
+       />
+ 
+-      <section
+-        className="
+-        mx-auto
+-        flex
+-        min-h-[calc(100vh-80px)]
+-        max-w-7xl
+-        items-center
+-        justify-center
+-        px-6
+-        py-10
+-        "
+-      >
+-        <AuthPageLayout>
+-            <SignupForm />
+-        </AuthPageLayout>
++      <section className="mx-auto flex min-h-[calc(100vh-64px)] max-w-7xl items-center justify-center px-6 py-10">
++        <SignupForm />
+       </section>
+-
+     </main>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/admin/Chart.tsx b/src/components/admin/Chart.tsx
+index e69de29..7ad025d 100644
+--- a/src/components/admin/Chart.tsx
++++ b/src/components/admin/Chart.tsx
+@@ -0,0 +1,94 @@
++"use client";
++
++import { useState } from "react";
++import type { ChartPoint } from "@/types/dashboard.types";
++
++interface ChartProps {
++  title: string;
++  subtitle?: string;
++  data: ChartPoint[];
++  variant?: "bar" | "line";
++}
++
++/**
++ * Dependency-free chart placeholder. Renders real proportional bars/lines
++ * from `data` so the layout looks production-ready immediately, while
++ * staying trivial to swap for Recharts/Chart.js once real time-series
++ * data is wired up later.
++ */
++export default function Chart({ title, subtitle, data, variant = "bar" }: ChartProps) {
++  const [active, setActive] = useState<number | null>(null);
++  const max = Math.max(...data.map((d) => d.value), 1);
++
++  return (
++    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++      <div className="flex items-start justify-between">
++        <div>
++          <h3 className="text-sm font-bold text-gray-900">{title}</h3>
++          {subtitle && <p className="mt-1 text-xs text-gray-400">{subtitle}</p>}
++        </div>
++        <div className="flex items-center gap-1 rounded-full bg-gray-50 p-1 text-xs font-semibold text-gray-500">
++          <button type="button" className="rounded-full bg-white px-3 py-1 text-gray-900 shadow-sm">
++            Weekly
++          </button>
++          <button type="button" className="rounded-full px-3 py-1 hover:text-gray-700">
++            Monthly
++          </button>
++        </div>
++      </div>
++
++      {variant === "bar" ? (
++        <div className="mt-8 flex h-48 items-end gap-3">
++          {data.map((point, i) => (
++            <div
++              key={point.label}
++              className="group flex flex-1 flex-col items-center gap-2"
++              onMouseEnter={() => setActive(i)}
++              onMouseLeave={() => setActive(null)}
++            >
++              <div className="relative flex w-full flex-1 items-end">
++                {active === i && (
++                  <span className="absolute -top-7 left-1/2 -translate-x-1/2 rounded-md bg-gray-900 px-2 py-1 text-[10px] font-bold text-white">
++                    {point.value}
++                  </span>
++                )}
++                <div
++                  className={`w-full rounded-t-lg transition-all duration-300 ${
++                    active === i ? "bg-blue-600" : "bg-blue-200"
++                  }`}
++                  style={{ height: `${(point.value / max) * 100}%` }}
++                />
++              </div>
++              <span className="text-[11px] font-medium text-gray-400">{point.label}</span>
++            </div>
++          ))}
++        </div>
++      ) : (
++        <svg viewBox="0 0 300 120" className="mt-6 h-40 w-full overflow-visible">
++          <polyline
++            fill="none"
++            stroke="var(--color-primary, #2563EB)"
++            strokeWidth="2.5"
++            strokeLinecap="round"
++            strokeLinejoin="round"
++            points={data
++              .map(
++                (d, i) =>
++                  `${(i / (data.length - 1)) * 300},${120 - (d.value / max) * 110}`
++              )
++              .join(" ")}
++          />
++          {data.map((d, i) => (
++            <circle
++              key={d.label}
++              cx={(i / (data.length - 1)) * 300}
++              cy={120 - (d.value / max) * 110}
++              r={3}
++              fill="#2563EB"
++            />
++          ))}
++        </svg>
++      )}
++    </div>
++  );
++}
+diff --git a/src/components/admin/DataTable.tsx b/src/components/admin/DataTable.tsx
+index e69de29..6c93881 100644
+--- a/src/components/admin/DataTable.tsx
++++ b/src/components/admin/DataTable.tsx
+@@ -0,0 +1,131 @@
++"use client";
++
++import { useState } from "react";
++import { MoreHorizontal } from "lucide-react";
++import { Input } from "@/components/ui/Input";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++interface DataTableProps<T extends { id: string }> {
++  columns: DataTableColumn<T>[];
++  rows: T[];
++  searchPlaceholder?: string;
++  pageSize?: number;
++}
++
++/**
++ * Generic, reusable admin table (Task 8/9). Pass typed columns + rows in
++ * and get search + pagination for free. Used across Courses, Tutors,
++ * Students and Payments today — point `rows` at API data later with no
++ * markup changes.
++ */
++export default function DataTable<T extends { id: string }>({
++  columns,
++  rows,
++  searchPlaceholder = "Search...",
++  pageSize = 5,
++}: DataTableProps<T>) {
++  const [query, setQuery] = useState("");
++  const [page, setPage] = useState(1);
++
++  const filtered = rows.filter((row) =>
++    Object.values(row).some((v) =>
++      String(v).toLowerCase().includes(query.toLowerCase())
++    )
++  );
++
++  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
++  const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
++
++  return (
++    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
++      <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
++        <Input
++          value={query}
++          onChange={(e) => {
++            setQuery(e.target.value);
++            setPage(1);
++          }}
++          placeholder={searchPlaceholder}
++          className="h-9 max-w-xs"
++        />
++        <span className="text-xs font-medium text-gray-400">
++          Showing {pageRows.length === 0 ? 0 : (page - 1) * pageSize + 1}-
++          {Math.min(page * pageSize, filtered.length)} of {filtered.length}
++        </span>
++      </div>
++
++      <div className="overflow-x-auto">
++        <table className="w-full min-w-[640px] text-left text-sm">
++          <thead>
++            <tr className="border-b border-gray-100 bg-gray-50/60">
++              {columns.map((col) => (
++                <th
++                  key={String(col.key)}
++                  className="whitespace-nowrap px-5 py-3 text-xs font-bold uppercase tracking-wide text-gray-400"
++                >
++                  {col.header}
++                </th>
++              ))}
++              <th className="px-5 py-3" />
++            </tr>
++          </thead>
++          <tbody>
++            {pageRows.map((row) => (
++              <tr
++                key={row.id}
++                className="border-b border-gray-50 transition-colors last:border-0 hover:bg-gray-50/60"
++              >
++                {columns.map((col) => (
++                  <td key={String(col.key)} className={`px-5 py-4 text-gray-700 ${col.className ?? ""}`}>
++                    {col.render ? col.render(row) : String(row[col.key])}
++                  </td>
++                ))}
++                <td className="px-5 py-4 text-right">
++                  <button
++                    type="button"
++                    aria-label="Row actions"
++                    className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
++                  >
++                    <MoreHorizontal className="h-4 w-4" />
++                  </button>
++                </td>
++              </tr>
++            ))}
++
++            {pageRows.length === 0 && (
++              <tr>
++                <td colSpan={columns.length + 1} className="px-5 py-10 text-center text-sm text-gray-400">
++                  No results found.
++                </td>
++              </tr>
++            )}
++          </tbody>
++        </table>
++      </div>
++
++      {totalPages > 1 && (
++        <div className="flex items-center justify-between border-t border-gray-100 px-5 py-3">
++          <button
++            type="button"
++            disabled={page === 1}
++            onClick={() => setPage((p) => Math.max(1, p - 1))}
++            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-40"
++          >
++            Previous
++          </button>
++          <span className="text-xs font-medium text-gray-400">
++            Page {page} of {totalPages}
++          </span>
++          <button
++            type="button"
++            disabled={page === totalPages}
++            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
++            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-40"
++          >
++            Next
++          </button>
++        </div>
++      )}
++    </div>
++  );
++}
+diff --git a/src/components/admin/Sidebar.tsx b/src/components/admin/Sidebar.tsx
+index e69de29..7acc70a 100644
+--- a/src/components/admin/Sidebar.tsx
++++ b/src/components/admin/Sidebar.tsx
+@@ -0,0 +1,73 @@
++"use client";
++
++import Link from "next/link";
++import { usePathname } from "next/navigation";
++import { ShieldCheck, LogOut } from "lucide-react";
++import { ADMIN_NAV } from "@/constants/admin-nav";
++import { cn } from "@/lib/utils";
++
++interface SidebarProps {
++  onNavigate?: () => void;
++}
++
++/**
++ * Admin navigation rail. Reused as-is inside the desktop fixed sidebar
++ * and inside the mobile <Sheet> (Task 6) — `onNavigate` lets the mobile
++ * sheet close itself when a link is clicked.
++ */
++export default function Sidebar({ onNavigate }: SidebarProps) {
++  const pathname = usePathname();
++
++  return (
++    <div className="flex h-full flex-col bg-[#0B1437] text-white">
++      <div className="flex items-center gap-2 px-6 py-6">
++        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600">
++          <ShieldCheck className="h-5 w-5 text-white" />
++        </span>
++        <div>
++          <p className="text-sm font-bold leading-tight">ReadAm Admin</p>
++          <p className="text-[11px] text-white/40">Management Portal</p>
++        </div>
++      </div>
++
++      <nav className="flex-1 space-y-1 px-3">
++        {ADMIN_NAV.map((item) => {
++          const Icon = item.icon;
++          const active = pathname === item.href;
++
++          return (
++            <Link
++              key={item.href}
++              href={item.href}
++              onClick={onNavigate}
++              className={cn(
++                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
++                active
++                  ? "bg-blue-600 text-white shadow-sm"
++                  : "text-white/60 hover:bg-white/5 hover:text-white"
++              )}
++            >
++              <Icon className="h-4.5 w-4.5 shrink-0" />
++              {item.label}
++            </Link>
++          );
++        })}
++      </nav>
++
++      <div className="space-y-3 p-4">
++        <div className="rounded-xl bg-white/5 p-4">
++          <p className="text-xs font-bold text-emerald-400">● System Health</p>
++          <p className="mt-1 text-[11px] text-white/40">All systems operational</p>
++        </div>
++
++        <button
++          type="button"
++          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
++        >
++          <LogOut className="h-4.5 w-4.5" />
++          Log out
++        </button>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/components/admin/StatCards.tsx b/src/components/admin/StatCards.tsx
+index e69de29..65a1236 100644
+--- a/src/components/admin/StatCards.tsx
++++ b/src/components/admin/StatCards.tsx
+@@ -0,0 +1,83 @@
++import { ArrowDownRight, ArrowUpRight } from "lucide-react";
++import { cn } from "@/lib/utils";
++import type { StatCardData } from "@/types/dashboard.types";
++
++interface StatCardsProps {
++  stats: StatCardData[];
++}
++
++/**
++ * Reusable overview metric grid. Pass any StatCardData[] in — this is
++ * used on Dashboard Home, Courses, Students and Payments today, and can
++ * consume live API data later with no markup changes.
++ */
++export default function StatCards({ stats }: StatCardsProps) {
++  return (
++    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
++      {stats.map((stat) => {
++        const Icon = stat.icon;
++        const isDark = stat.tone === "dark";
++        const isAccent = stat.tone === "accent";
++
++        return (
++          <div
++            key={stat.id}
++            className={cn(
++              "rounded-2xl border p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md",
++              isDark
++                ? "border-transparent bg-[#0B1437] text-white"
++                : isAccent
++                ? "border-orange-100 bg-orange-50"
++                : "border-gray-100 bg-white"
++            )}
++          >
++            <div className="flex items-center justify-between">
++              <span
++                className={cn(
++                  "flex h-10 w-10 items-center justify-center rounded-xl",
++                  isDark
++                    ? "bg-white/10 text-white"
++                    : isAccent
++                    ? "bg-orange-100 text-orange-600"
++                    : "bg-blue-50 text-blue-600"
++                )}
++              >
++                <Icon className="h-5 w-5" />
++              </span>
++
++              {stat.delta && (
++                <span
++                  className={cn(
++                    "flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-bold",
++                    stat.trend === "up"
++                      ? "bg-emerald-100 text-emerald-700"
++                      : stat.trend === "down"
++                      ? "bg-red-100 text-red-700"
++                      : "bg-gray-100 text-gray-600",
++                    isDark && "bg-white/10 text-white"
++                  )}
++                >
++                  {stat.trend === "up" && <ArrowUpRight className="h-3 w-3" />}
++                  {stat.trend === "down" && <ArrowDownRight className="h-3 w-3" />}
++                  {stat.delta}
++                </span>
++              )}
++            </div>
++
++            <p
++              className={cn(
++                "mt-4 text-2xl font-black",
++                isDark ? "text-white" : "text-gray-900"
++              )}
++            >
++              {stat.value}
++            </p>
++            <p className={cn("mt-1 text-xs font-semibold", isDark ? "text-white/60" : "text-gray-400")}>
++              {stat.label}
++            </p>
++          </div>
++        );
++      })}
++    </div>
++  );
++}
+diff --git a/src/components/admin/Topbar.tsx b/src/components/admin/Topbar.tsx
+new file mode 100644
+index 0000000..60395ad
+--- /dev/null
++++ b/src/components/admin/Topbar.tsx
+@@ -0,0 +1,75 @@
++"use client";
++
++import { Bell, Search, ChevronDown, Menu } from "lucide-react";
++import {
++  DropdownMenu,
++  DropdownMenuContent,
++  DropdownMenuItem,
++  DropdownMenuSeparator,
++  DropdownMenuTrigger,
++} from "@/components/ui/dropdown-menu";
++import { Input } from "@/components/ui/Input";
++import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
++import Sidebar from "@/components/admin/Sidebar";
++
++interface TopbarProps {
++  title: string;
++  description?: string;
++}
++
++export default function Topbar({ title, description }: TopbarProps) {
++  return (
++    <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-100 bg-white/90 px-4 py-4 backdrop-blur-md sm:px-6">
++      {/* Mobile: hamburger opens the same Sidebar in a Sheet */}
++      <Sheet>
++        <SheetTrigger className="rounded-lg p-2 transition hover:bg-gray-100 lg:hidden">
++          <Menu className="h-5 w-5 text-gray-700" />
++        </SheetTrigger>
++        <SheetContent side="left" className="w-72 p-0">
++          <Sidebar />
++        </SheetContent>
++      </Sheet>
++
++      <div className="min-w-0 flex-1">
++        <h1 className="truncate text-lg font-bold text-gray-900 sm:text-xl">{title}</h1>
++        {description && (
++          <p className="hidden truncate text-xs text-gray-400 sm:block">{description}</p>
++        )}
++      </div>
++
++      {/* Search — hidden on small screens to avoid crowding */}
++      <div className="relative hidden w-64 md:block">
++        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
++        <Input placeholder="Search anything..." className="h-9 pl-9" />
++      </div>
++
++      <button
++        type="button"
++        aria-label="Notifications"
++        className="relative rounded-xl border border-gray-100 p-2 text-gray-500 transition-colors hover:bg-gray-50"
++      >
++        <Bell className="h-4.5 w-4.5" />
++        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-white" />
++      </button>
++
++      <DropdownMenu>
++        <DropdownMenuTrigger className="flex items-center gap-2 rounded-xl border border-gray-100 py-1.5 pl-1.5 pr-2 transition-colors hover:bg-gray-50">
++          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
++            AU
++          </span>
++          <span className="hidden text-left text-xs leading-tight sm:block">
++            <span className="block font-semibold text-gray-800">Admin User</span>
++            <span className="block text-gray-400">admin@readam.ai</span>
++          </span>
++          <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
++        </DropdownMenuTrigger>
++        <DropdownMenuContent align="end" className="w-48">
++          <DropdownMenuItem>Profile</DropdownMenuItem>
++          <DropdownMenuItem>Account settings</DropdownMenuItem>
++          <DropdownMenuSeparator />
++          <DropdownMenuItem className="text-red-600">Log out</DropdownMenuItem>
++        </DropdownMenuContent>
++      </DropdownMenu>
++    </header>
++  );
++}
+diff --git a/src/components/auth/AuthMobileMenu.tsx b/src/components/auth/AuthMobileMenu.tsx
+index dcb5b99..5889b79 100644
+--- a/src/components/auth/AuthMobileMenu.tsx
++++ b/src/components/auth/AuthMobileMenu.tsx
+@@ -14,6 +14,7 @@ import { NAV_LINKS } from "@/constants/navigation";
+ import { usePathname } from "next/navigation";
+ 
+ import LanguageToggle from "../shared/LanguageToggle";
++import ThemeToggle from "../shared/ThemeToggle";
+ import Logo from "../shared/Logo";
+ 
+ export default function AuthMobileMenu() {
+@@ -79,7 +80,10 @@ export default function AuthMobileMenu() {
+               Language
+             </p>
+ 
+-            <LanguageToggle />
++            <div className="flex items-center justify-between gap-3">
++              <LanguageToggle />
++              <ThemeToggle />
++            </div>
+ 
+           </div>
+ 
+diff --git a/src/components/layout/Footer.tsx b/src/components/layout/Footer.tsx
+index 9cde5cf..5fb5c55 100644
+--- a/src/components/layout/Footer.tsx
++++ b/src/components/layout/Footer.tsx
+@@ -17,7 +17,7 @@ import Logo from "../shared/Logo";
+ 
+ export default function Footer() {
+   return (
+-    <footer className="bg-[#071B4D] text-white">
++    <footer className="bg-[#071B4D] text-white safe-bottom">
+ 
+       <div className="mx-auto max-w-7xl px-6 py-16">
+ 
+diff --git a/src/components/layout/MobileMenu.tsx b/src/components/layout/MobileMenu.tsx
+index 77ec2bc..31653ec 100644
+--- a/src/components/layout/MobileMenu.tsx
++++ b/src/components/layout/MobileMenu.tsx
+@@ -14,6 +14,7 @@ import { NAV_LINKS } from "@/constants/navigation";
+ import { usePathname } from "next/navigation";
+ 
+ import LanguageToggle from "../shared/LanguageToggle";
++import ThemeToggle from "../shared/ThemeToggle";
+ import Logo from "../shared/Logo";
+ 
+ export default function MobileMenu() {
+@@ -71,7 +72,7 @@ export default function MobileMenu() {
+ 
+           </nav>
+ 
+-          {/* Language */}
++          {/* Language + Theme */}
+ 
+           <div className="border-t py-6">
+ 
+@@ -79,7 +80,10 @@ export default function MobileMenu() {
+               Language
+             </p>
+ 
+-            <LanguageToggle />
++            <div className="flex items-center justify-between gap-3">
++              <LanguageToggle />
++              <ThemeToggle />
++            </div>
+ 
+           </div>
+ 
+diff --git a/src/components/layout/Navbar.tsx b/src/components/layout/Navbar.tsx
+index 3a1ba1f..b0b7303 100644
+--- a/src/components/layout/Navbar.tsx
++++ b/src/components/layout/Navbar.tsx
+@@ -4,6 +4,7 @@ import Link from "next/link";
+ import Logo from "../shared/Logo";
+ import MobileMenu from "./MobileMenu";
+ import LanguageToggle from "../shared/LanguageToggle";
++import ThemeToggle from "../shared/ThemeToggle";
+ import { NAV_LINKS } from "@/constants/navigation";
+ import { usePathname } from "next/navigation";
+ 
+@@ -14,7 +15,7 @@ export default function Navbar() {
+     pathname === "/login" || pathname === "/signup";
+ 
+   return (
+-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
++    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 safe-top">
+       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+ 
+         {/* LOGO ALWAYS */}
+@@ -54,6 +55,7 @@ export default function Navbar() {
+         {!isAuthPage ? (
+           <div className="hidden items-center gap-3 lg:flex">
+             <LanguageToggle />
++            <ThemeToggle />
+ 
+             <Link
+               href="/login"
+@@ -69,6 +71,7 @@ export default function Navbar() {
+           // AUTH PAGES: keep ONLY minimal actions if needed
+           <div className="hidden lg:flex items-center gap-3">
+             <LanguageToggle />
++            <ThemeToggle />
+           </div>
+         )}
+ 
+diff --git a/src/components/sections/Hero.tsx b/src/components/sections/Hero.tsx
+index ad1230f..7a978a5 100644
+--- a/src/components/sections/Hero.tsx
++++ b/src/components/sections/Hero.tsx
+@@ -9,22 +9,22 @@ export default function Hero() {
+   return (
+     <section className="relative overflow-hidden bg-transparent">
+ 
+-      {/* 🌟 Blue Glow Background */}
++      {/* Background glows */}
+       <div className="absolute inset-0 -z-10 overflow-hidden">
+         <div className="absolute top-[-120px] left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-blue-200/40 blur-[120px]" />
+         <div className="absolute bottom-[-160px] right-[-120px] h-[450px] w-[450px] rounded-full bg-blue-300/30 blur-[140px]" />
+       </div>
+ 
+-      <div className="mx-auto max-w-7xl px-6 py-8 lg:py-12">
++      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-12">
+ 
+-        {/* Hero grid */}
++        {/* ── Two-column hero grid ─────────────────────────────── */}
+         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
+ 
+-          {/* LEFT */}
+-          <div className="pt-4 pb-6 text-left lg:py-0">
++          {/* LEFT — text + buttons + stats */}
++          <div className="pt-2 pb-6 text-left lg:py-0">
+             <HeroBadge />
+ 
+-            <h1 className="mt-3 text-5xl font-black leading-[1.1] tracking-tight sm:text-6xl lg:text-6xl xl:text-7xl">
++            <h1 className="mt-3 text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
+               Revolutionizing
+               <br />
+               Digital{" "}
+@@ -41,20 +41,24 @@ export default function Hero() {
+             <HeroStats />
+           </div>
+ 
+-          {/* RIGHT */}
++          {/* RIGHT — hero image */}
+           <div className="relative flex items-end justify-center self-stretch">
+             <HeroImage />
+           </div>
+ 
+         </div>
+ 
+-        {/* SearchBar */}
+-        <div className="mt-8 sm:mt-10">
++        {/* ── AI Search Bar — full width, centered under the image ── */}
++        <div className="mx-auto mt-8 max-w-2xl sm:mt-10">
+           <SearchBar />
++        </div>
++
++        {/* ── Subjects ─────────────────────────────────────────── */}
++        <div className="mt-8 sm:mt-10">
+           <Subjects />
+         </div>
+ 
+       </div>
+     </section>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/sections/HeroButtons.tsx b/src/components/sections/HeroButtons.tsx
+index a915aa2..1779f8f 100644
+--- a/src/components/sections/HeroButtons.tsx
++++ b/src/components/sections/HeroButtons.tsx
+@@ -2,7 +2,7 @@ import { PlayCircle } from "lucide-react";
+ 
+ export default function HeroButtons() {
+   return (
+-    <div className="mt-8 flex flex-wrap items-center gap-3">
++    <div className="mt-6 flex flex-wrap items-center gap-3">
+       <button className="rounded-xl bg-orange-500 px-7 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-orange-600 transition">
+         Book a Lesson
+       </button>
+diff --git a/src/components/sections/HeroImage.tsx b/src/components/sections/HeroImage.tsx
+index f4b6b25..ede4e91 100644
+--- a/src/components/sections/HeroImage.tsx
++++ b/src/components/sections/HeroImage.tsx
+@@ -1,46 +1,62 @@
+ import Image from "next/image";
+-import { TrendingUp } from "lucide-react";
++import { TrendingUp, Sparkles } from "lucide-react";
+ 
+ export default function HeroImage() {
+   return (
+     <div className="relative flex h-full w-full items-end justify-center">
+ 
+-      {/* Blue radial glow — background right */}
+-      <div className="absolute bottom-0 left-0 h-[25%] w-full pointer-events-none bg-gradient-to-b from-transparent via-white/30 to-white"/>
+-
+-      {/* Person image */}
+-      <Image
+-        src="/hero.png"
+-        alt="Student with laptop"
+-        width={520}
+-        height={600}
+-        className="relative z-10 w-[75%] object-contain sm:w-[60%] lg:w-[75%]"
+-        priority
+-      />
+-
+-      {/* Stat card — bottom left */}
+-      <div className="absolute bottom-[15%] left-0 z-20 flex flex-col gap-1 rounded-2xl bg-white px-4 py-3 shadow-xl sm:left-[-12px]">
+-        <div className="flex items-center gap-1.5">
+-          <TrendingUp className="h-4 w-4 text-green-500" />
+-          <span className="text-base font-black text-gray-900">94%</span>
++      {/* Gradient ring / glassmorphism frame behind the photo */}
++      <div className="absolute inset-x-[6%] top-[4%] bottom-0 -z-10 rounded-[2.5rem] bg-gradient-to-br from-blue-200/60 via-white/40 to-orange-200/50 blur-2xl" />
++
++      <div className="relative w-[78%] sm:w-[64%] lg:w-[78%]">
++
++        {/* Modern rounded frame with gradient border + soft shadow */}
++        <div className="relative rounded-[2rem] bg-gradient-to-br from-blue-400/40 via-white/60 to-orange-300/40 p-[3px] shadow-[0_30px_60px_-15px_rgba(37,99,235,0.35)]">
++          <div className="relative overflow-hidden rounded-[calc(2rem-3px)] bg-white/40 backdrop-blur-sm">
++
++            {/* Blue radial glow — background */}
++            <div className="pointer-events-none absolute bottom-0 left-0 h-[25%] w-full bg-gradient-to-b from-transparent via-white/30 to-white" />
++
++            <Image
++              src="/hero.png"
++              alt="Student with laptop"
++              width={520}
++              height={600}
++              className="relative z-10 w-full object-contain"
++              priority
++            />
++          </div>
+         </div>
+-        <p className="text-[11px] leading-tight text-gray-500">
+-          Success rate for active
+-          <br />
+-          READAM students
+-        </p>
+-      </div>
+ 
+-      {/* Soft white glow — bottom right */}
+-      <div
+-        className="absolute bottom-[5%] right-[-5%] z-10 h-[160px] w-[55%] pointer-events-none"
+-        style={{
+-          background:
+-            "radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 40%, transparent 70%)",
+-          filter: "blur(20px)",
+-        }}
+-      />
++        {/* Floating decoration — top right sparkle chip */}
++        <div className="absolute -top-4 -right-3 z-20 flex items-center gap-1.5 rounded-2xl bg-white/90 px-3 py-2 shadow-lg ring-1 ring-black/5 backdrop-blur-sm animate-bounce [animation-duration:3s]">
++          <Sparkles className="h-3.5 w-3.5 text-orange-400" />
++          <span className="text-[11px] font-bold text-gray-700">AI Powered</span>
++        </div>
++
++        {/* Stat card — bottom left, floating over the frame */}
++        <div className="absolute bottom-[12%] left-[-8%] z-20 flex flex-col gap-1 rounded-2xl bg-white/95 px-4 py-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm sm:left-[-14px]">
++          <div className="flex items-center gap-1.5">
++            <TrendingUp className="h-4 w-4 text-green-500" />
++            <span className="text-base font-black text-gray-900">94%</span>
++          </div>
++          <p className="text-[11px] leading-tight text-gray-500">
++            Success rate for active
++            <br />
++            READAM students
++          </p>
++        </div>
+ 
++        {/* Soft white glow — bottom right */}
++        <div
++          className="absolute bottom-[5%] right-[-5%] z-10 h-[160px] w-[55%] pointer-events-none"
++          style={{
++            background:
++              "radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 40%, transparent 70%)",
++            filter: "blur(20px)",
++          }}
++        />
++      </div>
+     </div>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/sections/SearchBar.tsx b/src/components/sections/SearchBar.tsx
+index 2c89e83..fa58d6f 100644
+--- a/src/components/sections/SearchBar.tsx
++++ b/src/components/sections/SearchBar.tsx
+@@ -2,64 +2,73 @@ import { Sparkles, Paperclip, Mic } from "lucide-react";
+ 
+ export default function SearchBar() {
+   return (
+-    <div className="relative mx-auto w-full max-w-2xl rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-lg overflow-hidden">
++    <div className="relative w-full rounded-[1.5rem] bg-gradient-to-br from-blue-400/50 via-orange-200/40 to-blue-300/40 p-[2px] shadow-[0_20px_45px_-12px_rgba(37,99,235,0.35)]">
++      <div className="relative w-full overflow-hidden rounded-[calc(1.5rem-2px)] border border-white/60 bg-white px-5 py-5 sm:px-6 sm:py-6">
+ 
+-      {/* Blue glow — bottom right */}
+-      <div
+-        className="pointer-events-none absolute bottom-0 right-0 h-[140px] w-[280px] translate-x-1/4 translate-y-1/4"
+-        style={{
+-          background:
+-            "radial-gradient(ellipse at center, rgba(147,197,253,0.7) 0%, rgba(191,219,254,0.4) 40%, transparent 70%)",
+-          filter: "blur(28px)",
+-        }}
+-      />
++        {/* Blue glow — bottom right */}
++        <div
++          className="pointer-events-none absolute bottom-0 right-0 h-[140px] w-[280px] translate-x-1/4 translate-y-1/4"
++          style={{
++            background:
++              "radial-gradient(ellipse at center, rgba(147,197,253,0.7) 0%, rgba(191,219,254,0.4) 40%, transparent 70%)",
++            filter: "blur(28px)",
++          }}
++        />
+ 
+-      {/* Label */}
+-      <div className="flex items-center gap-2 mb-4">
+-        <Sparkles className="h-4 w-4 text-orange-400" />
+-        <span className="text-sm font-semibold text-gray-700">Ask ReadAM</span>
+-      </div>
++        {/* Label */}
++        <div className="mb-3 flex items-center gap-2">
++          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100">
++            <Sparkles className="h-3.5 w-3.5 text-orange-500" />
++          </span>
++          <span className="text-sm font-bold text-gray-800">Ask ReadAM</span>
++          <span className="ml-auto rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600">
++            AI
++          </span>
++        </div>
+ 
+-      {/* Input row */}
+-      <div className="flex items-center gap-3">
+-        <Paperclip className="h-4 w-4 shrink-0 text-gray-400" />
++        {/* Input row */}
++        <div className="flex items-center gap-3">
++          <Paperclip className="h-4 w-4 shrink-0 text-gray-400" />
+ 
+-        <input
+-          type="text"
+-          placeholder="Explain the theory of relativity..."
+-          className="flex-1 bg-transparent text-sm text-gray-600 placeholder:text-gray-400 outline-none"
+-        />
++          <input
++            type="text"
++            placeholder="Explain the theory of relativity..."
++            className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none sm:text-base"
++          />
+ 
+-        <Mic className="h-4 w-4 shrink-0 text-gray-400" />
++          <Mic className="h-4 w-4 shrink-0 text-gray-400" />
+ 
+-        {/* CTA — brighter, bigger, with glow shadow */}
+-        <button className="
+-          flex h-10 w-10 shrink-0 items-center justify-center
+-          rounded-xl
+-          bg-orange-500
+-          brightness-110
+-          shadow-[0_4px_14px_rgba(249,115,22,0.4)]
+-          hover:brightness-125
+-          hover:bg-orange-600
+-          hover:shadow-[0_4px_20px_rgba(249,115,22,0.6)]
+-          transition-all
+-        ">
+-          <svg
+-            className="h-4 w-4 text-white"
+-            fill="none"
+-            viewBox="0 0 24 24"
+-            stroke="currentColor"
+-            strokeWidth={2.5}
+-          >
+-            <path
+-              strokeLinecap="round"
+-              strokeLinejoin="round"
+-              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+-            />
+-          </svg>
+-        </button>
++          {/* CTA — brighter, bigger, with glow shadow */}
++          <button
++            type="button"
++            aria-label="Ask ReadAM"
++            className="
++            flex h-10 w-10 shrink-0 items-center justify-center
++            rounded-xl
++            bg-orange-500
++            brightness-110
++            shadow-[0_4px_14px_rgba(249,115,22,0.4)]
++            transition-all
++            hover:brightness-125
++            hover:bg-orange-600
++            hover:shadow-[0_4px_20px_rgba(249,115,22,0.6)]
++          ">
++            <svg
++              className="h-4 w-4 text-white"
++              fill="none"
++              viewBox="0 0 24 24"
++              stroke="currentColor"
++              strokeWidth={2.5}
++            >
++              <path
++                strokeLinecap="round"
++                strokeLinejoin="round"
++                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
++              />
++            </svg>
++          </button>
++        </div>
+       </div>
+-
+     </div>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/sections/Stats.tsx b/src/components/sections/Stats.tsx
+index 9917f37..c945f7a 100644
+--- a/src/components/sections/Stats.tsx
++++ b/src/components/sections/Stats.tsx
+@@ -1,27 +1,38 @@
++import { HelpCircle, BookOpen, Users, GraduationCap } from "lucide-react";
++
+ const stats = [
+-    { value: "50k+", label: "Solved Questions" },
+-    { value: "10k+", label: "Study Notes" },
+-    { value: "150+", label: "Expert Tutors" },
+-    { value: "20k+", label: "Active Students" },
+-  ];
+-  
+-  export default function Stats() {
+-    return (
+-      <section className="border-y border-gray-100 bg-white py-16">
+-        <div className="mx-auto max-w-7xl px-6">
+-          <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
+-            {stats.map((stat) => (
+-              <div key={stat.label} className="text-center">
+-                <p className="text-4xl font-black text-blue-600 sm:text-5xl">
++  { value: "50k+", label: "Solved Questions", icon: HelpCircle },
++  { value: "10k+", label: "Study Notes", icon: BookOpen },
++  { value: "150+", label: "Expert Tutors", icon: GraduationCap },
++  { value: "20k+", label: "Active Students", icon: Users },
++];
++
++export default function Stats() {
++  return (
++    <section className="border-y border-gray-100 bg-white py-16 sm:py-20">
++      <div className="mx-auto max-w-7xl px-6">
++        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
++          {stats.map((stat) => {
++            const Icon = stat.icon;
++            return (
++              <div
++                key={stat.label}
++                className="group rounded-2xl border border-transparent p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-blue-100 hover:bg-blue-50/50 hover:shadow-md"
++              >
++                <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors duration-300 group-hover:bg-blue-600 group-hover:text-white">
++                  <Icon className="h-5 w-5" />
++                </span>
++                <p className="mt-4 text-4xl font-black text-blue-600 sm:text-5xl">
+                   {stat.value}
+                 </p>
+                 <p className="mt-2 text-xs font-semibold uppercase tracking-widest text-gray-400">
+                   {stat.label}
+                 </p>
+               </div>
+-            ))}
+-          </div>
++            );
++          })}
+         </div>
+-      </section>
+-    );
+-  }
+\ No newline at end of file
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/sections/Subjects.jsx b/src/components/sections/Subjects.jsx
+index 6594e1d..5e3937a 100644
+--- a/src/components/sections/Subjects.jsx
++++ b/src/components/sections/Subjects.jsx
+@@ -51,7 +51,7 @@ export default function Subjects() {
+           return (
+             <Card
+               key={subject.title}
+-              className={`cursor-pointer border-2 ${subject.borderColor} bg-white shadow-none hover:shadow-md transition-shadow rounded-2xl`}
++              className={`cursor-pointer border-2 ${subject.borderColor} bg-white shadow-none hover:shadow-lg hover:-translate-y-1 transition-all duration-300 rounded-2xl`}
+             >
+               <CardContent className="flex flex-col gap-4 p-6">
+                 <div className={`flex h-11 w-11 items-center justify-center rounded-full ${subject.iconBg}`}>
+diff --git a/src/components/shared/LanguageToggle.tsx b/src/components/shared/LanguageToggle.tsx
+index a3f55ae..80c22e6 100644
+--- a/src/components/shared/LanguageToggle.tsx
++++ b/src/components/shared/LanguageToggle.tsx
+@@ -2,24 +2,41 @@
+ 
+ import { useState } from "react";
+ 
++const LANGUAGES = ["EN", "FR"] as const;
++type Language = (typeof LANGUAGES)[number];
++
+ export default function LanguageToggle() {
+-  const [lang, setLang] = useState<"EN" | "FR">("EN");
++  const [lang, setLang] = useState<Language>("EN");
+ 
+   return (
+-    <div className="flex items-center rounded-full border border-gray-200 text-xs font-medium overflow-hidden w-fit">
+-      {(["EN", "FR"] as const).map((l) => (
+-        <button
+-          key={l}
+-          onClick={() => setLang(l)}
+-          className={`px-2 py-1 transition leading-none ${
+-            lang === l
+-              ? "bg-gray-100 text-gray-900"
+-              : "text-gray-400 hover:text-gray-600"
+-          }`}
+-        >
+-          {l}
+-        </button>
+-      ))}
++    <div
++      role="group"
++      aria-label="Language switch"
++      className="flex items-center gap-0.5 rounded-full border border-gray-200 bg-gray-50 p-1 text-xs font-semibold"
++    >
++      {LANGUAGES.map((l) => {
++        const active = lang === l;
++
++        return (
++          <button
++            key={l}
++            type="button"
++            aria-pressed={active}
++            onClick={() => setLang(l)}
++            className={`
++              relative rounded-full px-3 py-1 leading-none
++              transition-all duration-250 ease-out
++              ${
++                active
++                  ? "bg-blue-600 text-white shadow-sm"
++                  : "bg-transparent text-gray-500 hover:bg-gray-200/70 hover:text-gray-700"
++              }
++            `}
++          >
++            {l}
++          </button>
++        );
++      })}
+     </div>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/shared/SectionTitle.tsx b/src/components/shared/SectionTitle.tsx
+index e69de29..7f023f0 100644
+--- a/src/components/shared/SectionTitle.tsx
++++ b/src/components/shared/SectionTitle.tsx
+@@ -0,0 +1,41 @@
++import { cn } from "@/lib/utils";
++
++interface SectionTitleProps {
++  eyebrow?: string;
++  title: string;
++  description?: string;
++  align?: "left" | "center";
++  className?: string;
++}
++
++export default function SectionTitle({
++  eyebrow,
++  title,
++  description,
++  align = "center",
++  className,
++}: SectionTitleProps) {
++  return (
++    <div
++      className={cn(
++        "mb-10",
++        align === "center" ? "mx-auto max-w-2xl text-center" : "text-left",
++        className
++      )}
++    >
++      {eyebrow && (
++        <span className="text-xs font-bold uppercase tracking-widest text-orange-500">
++          {eyebrow}
++        </span>
++      )}
++      <h2 className="mt-2 text-3xl font-black text-gray-900 sm:text-4xl">
++        {title}
++      </h2>
++      {description && (
++        <p className="mt-3 text-base leading-relaxed text-gray-500">
++          {description}
++        </p>
++      )}
++    </div>
++  );
++}
+diff --git a/src/components/shared/ThemeToggle.tsx b/src/components/shared/ThemeToggle.tsx
+index e69de29..a04c95c 100644
+--- a/src/components/shared/ThemeToggle.tsx
++++ b/src/components/shared/ThemeToggle.tsx
+@@ -0,0 +1,67 @@
++"use client";
++
++import { useState } from "react";
++import { Sun, Moon } from "lucide-react";
++
++/**
++ * UI-only theme switch (Task 2).
++ *
++ * This is intentionally NOT wired to next-themes / a ThemeProvider yet.
++ * It manages its own placeholder boolean state so the pill animates and
++ * looks correct in isolation.
++ *
++ * To make it functional later:
++ *   1. Wrap the app with next-themes' <ThemeProvider> (already a dependency).
++ *   2. Replace the local `useState` below with `useTheme()` from "next-themes".
++ *   3. Replace `setIsDark(!isDark)` with `setTheme(isDark ? "light" : "dark")`.
++ * The markup/props below don't need to change.
++ */
++export default function ThemeToggle() {
++  const [isDark, setIsDark] = useState(false);
++
++  return (
++    <button
++      type="button"
++      role="switch"
++      aria-checked={isDark}
++      aria-label="Toggle theme"
++      onClick={() => setIsDark((prev) => !prev)}
++      className={`
++        relative inline-flex h-7 w-14 shrink-0 items-center rounded-full
++        border border-gray-200
++        transition-colors duration-300 ease-out
++        ${isDark ? "bg-gray-900" : "bg-gray-100"}
++      `}
++    >
++      {/* Static icons sit at each end so the moving thumb "reveals" them */}
++      <Sun
++        className={`
++          absolute left-1.5 h-3.5 w-3.5 transition-opacity duration-300
++          ${isDark ? "text-gray-500 opacity-40" : "text-orange-400 opacity-100"}
++        `}
++      />
++      <Moon
++        className={`
++          absolute right-1.5 h-3.5 w-3.5 transition-opacity duration-300
++          ${isDark ? "text-blue-300 opacity-100" : "text-gray-400 opacity-40"}
++        `}
++      />
++
++      {/* Sliding thumb */}
++      <span
++        className={`
++          relative z-10 flex h-5.5 w-5.5 items-center justify-center
++          rounded-full bg-white shadow-md ring-1 ring-black/5
++          transition-transform duration-300 ease-out
++          ${isDark ? "translate-x-[28px]" : "translate-x-1"}
++        `}
++      >
++        {isDark ? (
++          <Moon className="h-3 w-3 text-gray-900" />
++        ) : (
++          <Sun className="h-3 w-3 text-orange-500" />
++        )}
++      </span>
++    </button>
++  );
++}
+diff --git a/src/components/skeletons/BannerSkeleton.tsx b/src/components/skeletons/BannerSkeleton.tsx
+index e69de29..ffd5dca 100644
+--- a/src/components/skeletons/BannerSkeleton.tsx
++++ b/src/components/skeletons/BannerSkeleton.tsx
+@@ -0,0 +1,14 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function BannerSkeleton() {
++  return (
++    <section className="bg-[#071B4D] py-16">
++      <div className="mx-auto max-w-3xl px-6 text-center">
++        <Skeleton className="mx-auto h-10 w-10 rounded-full bg-white/10" />
++        <Skeleton className="mx-auto mt-6 h-7 w-3/4 bg-white/10" />
++        <Skeleton className="mx-auto mt-3 h-7 w-1/2 bg-white/10" />
++        <Skeleton className="mx-auto mt-6 h-4 w-2/3 bg-white/10" />
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/FeaturesSkeleton.tsx b/src/components/skeletons/FeaturesSkeleton.tsx
+index e69de29..75cf172 100644
+--- a/src/components/skeletons/FeaturesSkeleton.tsx
++++ b/src/components/skeletons/FeaturesSkeleton.tsx
+@@ -0,0 +1,18 @@
++import { Skeleton } from "@/components/ui/skeleton";
++import SkeletonCard from "@/components/skeletons/SkeletonCard";
++
++export default function FeaturesSkeleton() {
++  return (
++    <section className="mx-auto max-w-7xl px-6 py-16">
++      <div className="mx-auto mb-10 max-w-md text-center">
++        <Skeleton className="mx-auto h-7 w-2/3" />
++        <Skeleton className="mx-auto mt-3 h-4 w-1/2" />
++      </div>
++      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
++        {Array.from({ length: 5 }).map((_, i) => (
++          <SkeletonCard key={i} />
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/HeroSkeleton.tsx b/src/components/skeletons/HeroSkeleton.tsx
+index 2f6094c..f71011e 100644
+--- a/src/components/skeletons/HeroSkeleton.tsx
++++ b/src/components/skeletons/HeroSkeleton.tsx
+@@ -1,45 +1,9 @@
+-import { Skeleton } from "@/components/ui/skeleton";
++import SkeletonHero from "@/components/skeletons/SkeletonHero";
+ 
++/**
++ * Kept for backwards compatibility with existing imports.
++ * Canonical implementation now lives in SkeletonHero (Task 3 naming).
++ */
+ export default function HeroSkeleton() {
+-  return (
+-    <section className="py-10">
+-
+-      <div className="mx-auto max-w-7xl px-6">
+-
+-        <div className="grid gap-8 lg:grid-cols-2">
+-
+-          <div>
+-
+-            <Skeleton className="h-8 w-40" />
+-
+-            <Skeleton className="mt-5 h-16 w-full" />
+-
+-            <Skeleton className="mt-3 h-16 w-3/4" />
+-
+-            <Skeleton className="mt-6 h-5 w-full" />
+-
+-            <Skeleton className="mt-2 h-5 w-5/6" />
+-
+-            <div className="mt-8 flex gap-4">
+-
+-              <Skeleton className="h-12 w-36" />
+-
+-              <Skeleton className="h-12 w-36" />
+-
+-            </div>
+-
+-          </div>
+-
+-          <div>
+-
+-            <Skeleton className="h-[450px] rounded-3xl" />
+-
+-          </div>
+-
+-        </div>
+-
+-      </div>
+-
+-    </section>
+-  );
+-}
+\ No newline at end of file
++  return <SkeletonHero />;
++}
+diff --git a/src/components/skeletons/HomeSkeleton.tsx b/src/components/skeletons/HomeSkeleton.tsx
+index e69de29..23fbb85 100644
+--- a/src/components/skeletons/HomeSkeleton.tsx
++++ b/src/components/skeletons/HomeSkeleton.tsx
+@@ -0,0 +1,31 @@
++import SkeletonHero from "@/components/skeletons/SkeletonHero";
++import BannerSkeleton from "@/components/skeletons/BannerSkeleton";
++import FeaturesSkeleton from "@/components/skeletons/FeaturesSkeleton";
++import VideosSkeleton from "@/components/skeletons/VideosSkeleton";
++import TutorSkeleton from "@/components/skeletons/TutorSkeleton";
++import TestimonialSkeleton from "@/components/skeletons/TestimonialSkeleton";
++import StatsSkeleton from "@/components/skeletons/StatsSkeleton";
++import PricingSkeleton from "@/components/skeletons/PricingSkeleton";
++import NewsletterSkeleton from "@/components/skeletons/NewletterSkeleton";
++
++/**
++ * Full-page homepage skeleton, composed from the same section-level
++ * skeletons used individually (Task 3). Mirrors the section order in
++ * src/app/page.tsx so the loading state never "jumps" once real content
++ * streams in.
++ */
++export default function HomeSkeleton() {
++  return (
++    <div className="animate-in fade-in duration-300">
++      <SkeletonHero />
++      <BannerSkeleton />
++      <FeaturesSkeleton />
++      <VideosSkeleton />
++      <TutorSkeleton />
++      <TestimonialSkeleton />
++      <StatsSkeleton />
++      <PricingSkeleton />
++      <NewsletterSkeleton />
++    </div>
++  );
++}
+diff --git a/src/components/skeletons/NewletterSkeleton.tsx b/src/components/skeletons/NewletterSkeleton.tsx
+index e69de29..7a2f9fc 100644
+--- a/src/components/skeletons/NewletterSkeleton.tsx
++++ b/src/components/skeletons/NewletterSkeleton.tsx
+@@ -0,0 +1,16 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function NewsletterSkeleton() {
++  return (
++    <section className="bg-[#071B4D] py-16">
++      <div className="mx-auto max-w-2xl px-6 text-center">
++        <Skeleton className="mx-auto h-8 w-2/3 bg-white/10" />
++        <Skeleton className="mx-auto mt-3 h-4 w-1/2 bg-white/10" />
++        <div className="mx-auto mt-6 flex max-w-md gap-3">
++          <Skeleton className="h-12 flex-1 rounded-xl bg-white/10" />
++          <Skeleton className="h-12 w-32 rounded-xl bg-white/10" />
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/PricingSkeleton.tsx b/src/components/skeletons/PricingSkeleton.tsx
+index e69de29..86104ec 100644
+--- a/src/components/skeletons/PricingSkeleton.tsx
++++ b/src/components/skeletons/PricingSkeleton.tsx
+@@ -0,0 +1,26 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function PricingSkeleton() {
++  return (
++    <section className="mx-auto max-w-7xl px-6 py-16">
++      <div className="mx-auto mb-10 max-w-md text-center">
++        <Skeleton className="mx-auto h-7 w-1/2" />
++        <Skeleton className="mx-auto mt-3 h-4 w-2/3" />
++      </div>
++      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
++        {Array.from({ length: 3 }).map((_, i) => (
++          <div key={i} className="rounded-2xl border border-gray-100 bg-white p-6">
++            <Skeleton className="h-4 w-1/3" />
++            <Skeleton className="mt-4 h-9 w-1/2" />
++            <div className="mt-6 space-y-3">
++              {Array.from({ length: 4 }).map((_, j) => (
++                <Skeleton key={j} className="h-3 w-full" />
++              ))}
++            </div>
++            <Skeleton className="mt-6 h-11 w-full rounded-xl" />
++          </div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/SkeletonCard.tsx b/src/components/skeletons/SkeletonCard.tsx
+new file mode 100644
+index 0000000..286f8aa
+--- /dev/null
++++ b/src/components/skeletons/SkeletonCard.tsx
+@@ -0,0 +1,12 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function SkeletonCard() {
++  return (
++    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
++      <Skeleton className="h-11 w-11 rounded-full" />
++      <Skeleton className="mt-4 h-4 w-2/3" />
++      <Skeleton className="mt-2 h-3 w-full" />
++      <Skeleton className="mt-1 h-3 w-5/6" />
++    </div>
++  );
++}
+diff --git a/src/components/skeletons/SkeletonDashboard.tsx b/src/components/skeletons/SkeletonDashboard.tsx
+new file mode 100644
+index 0000000..19f7dbe
+--- /dev/null
++++ b/src/components/skeletons/SkeletonDashboard.tsx
+@@ -0,0 +1,35 @@
++import { Skeleton } from "@/components/ui/skeleton";
++import SkeletonStats from "@/components/skeletons/SkeletonStats";
++import SkeletonTable from "@/components/skeletons/SkeletonTable";
++
++export default function SkeletonDashboard() {
++  return (
++    <div className="space-y-6">
++      <SkeletonStats count={4} />
++
++      <div className="grid gap-6 lg:grid-cols-3">
++        <div className="rounded-2xl border border-gray-100 bg-white p-6 lg:col-span-2">
++          <Skeleton className="h-4 w-40" />
++          <Skeleton className="mt-6 h-56 w-full rounded-xl" />
++        </div>
++
++        <div className="rounded-2xl border border-gray-100 bg-white p-6">
++          <Skeleton className="h-4 w-32" />
++          <div className="mt-6 space-y-4">
++            {Array.from({ length: 4 }).map((_, i) => (
++              <div key={i} className="flex items-center gap-3">
++                <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
++                <div className="flex-1 space-y-2">
++                  <Skeleton className="h-3 w-3/4" />
++                  <Skeleton className="h-2.5 w-1/2" />
++                </div>
++              </div>
++            ))}
++          </div>
++        </div>
++      </div>
++
++      <SkeletonTable rows={5} columns={5} />
++    </div>
++  );
++}
+diff --git a/src/components/skeletons/SkeletonHero.tsx b/src/components/skeletons/SkeletonHero.tsx
+new file mode 100644
+index 0000000..35ff55d
+--- /dev/null
++++ b/src/components/skeletons/SkeletonHero.tsx
+@@ -0,0 +1,34 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function SkeletonHero() {
++  return (
++    <section className="py-10">
++      <div className="mx-auto max-w-7xl px-6">
++        <div className="grid gap-8 lg:grid-cols-2">
++          <div>
++            <Skeleton className="h-8 w-40 rounded-full" />
++            <Skeleton className="mt-5 h-12 w-full" />
++            <Skeleton className="mt-3 h-12 w-3/4" />
++            <Skeleton className="mt-6 h-5 w-full" />
++            <Skeleton className="mt-2 h-5 w-5/6" />
++            <div className="mt-8 flex flex-wrap gap-4">
++              <Skeleton className="h-12 w-36 rounded-xl" />
++              <Skeleton className="h-12 w-36 rounded-xl" />
++            </div>
++            <div className="mt-8 flex items-center gap-3">
++              <div className="flex -space-x-2.5">
++                {[0, 1, 2].map((i) => (
++                  <Skeleton key={i} className="h-10 w-10 rounded-full border-2 border-white" />
++                ))}
++              </div>
++              <Skeleton className="h-4 w-48" />
++            </div>
++          </div>
++          <Skeleton className="h-[360px] w-full rounded-3xl sm:h-[450px]" />
++        </div>
++
++        <Skeleton className="mx-auto mt-10 h-32 w-full max-w-2xl rounded-2xl" />
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/SkeletonImage.tsx b/src/components/skeletons/SkeletonImage.tsx
+new file mode 100644
+index 0000000..4674942
+--- /dev/null
++++ b/src/components/skeletons/SkeletonImage.tsx
+@@ -0,0 +1,14 @@
++import { Skeleton } from "@/components/ui/skeleton";
++import { cn } from "@/lib/utils";
++
++interface SkeletonImageProps {
++  className?: string;
++}
++
++export default function SkeletonImage({ className }: SkeletonImageProps) {
++  return (
++    <Skeleton
++      className={cn("aspect-video w-full rounded-2xl", className)}
++    />
++  );
++}
+diff --git a/src/components/skeletons/SkeletonList.tsx b/src/components/skeletons/SkeletonList.tsx
+new file mode 100644
+index 0000000..3402f17
+--- /dev/null
++++ b/src/components/skeletons/SkeletonList.tsx
+@@ -0,0 +1,25 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++interface SkeletonListProps {
++  items?: number;
++}
++
++export default function SkeletonList({ items = 4 }: SkeletonListProps) {
++  return (
++    <div className="space-y-3">
++      {Array.from({ length: items }).map((_, i) => (
++        <div
++          key={i}
++          className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3"
++        >
++          <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
++          <div className="flex-1 space-y-2">
++            <Skeleton className="h-3 w-2/3" />
++            <Skeleton className="h-2.5 w-1/3" />
++          </div>
++          <Skeleton className="h-5 w-14 shrink-0 rounded-full" />
++        </div>
++      ))}
++    </div>
++  );
++}
+diff --git a/src/components/skeletons/SkeletonProfile.tsx b/src/components/skeletons/SkeletonProfile.tsx
+new file mode 100644
+index 0000000..7f7f88a
+--- /dev/null
++++ b/src/components/skeletons/SkeletonProfile.tsx
+@@ -0,0 +1,14 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function SkeletonProfile() {
++  return (
++    <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4">
++      <Skeleton className="h-12 w-12 shrink-0 rounded-full" />
++      <div className="flex-1 space-y-2">
++        <Skeleton className="h-3.5 w-1/3" />
++        <Skeleton className="h-3 w-1/2" />
++      </div>
++      <Skeleton className="h-8 w-20 shrink-0 rounded-lg" />
++    </div>
++  );
++}
+diff --git a/src/components/skeletons/SkeletonStats.tsx b/src/components/skeletons/SkeletonStats.tsx
+new file mode 100644
+index 0000000..8fd0536
+--- /dev/null
++++ b/src/components/skeletons/SkeletonStats.tsx
+@@ -0,0 +1,19 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++interface SkeletonStatsProps {
++  count?: number;
++}
++
++export default function SkeletonStats({ count = 4 }: SkeletonStatsProps) {
++  return (
++    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
++      {Array.from({ length: count }).map((_, i) => (
++        <div key={i} className="rounded-2xl border border-gray-100 bg-white p-5">
++          <Skeleton className="h-3 w-1/2" />
++          <Skeleton className="mt-3 h-7 w-2/3" />
++          <Skeleton className="mt-2 h-2.5 w-1/3" />
++        </div>
++      ))}
++    </div>
++  );
++}
+diff --git a/src/components/skeletons/SkeletonTable.tsx b/src/components/skeletons/SkeletonTable.tsx
+new file mode 100644
+index 0000000..d63eb24
+--- /dev/null
++++ b/src/components/skeletons/SkeletonTable.tsx
+@@ -0,0 +1,30 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++interface SkeletonTableProps {
++  rows?: number;
++  columns?: number;
++}
++
++export default function SkeletonTable({ rows = 6, columns = 5 }: SkeletonTableProps) {
++  return (
++    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
++      <div className="flex items-center gap-4 border-b border-gray-100 bg-gray-50/60 px-5 py-3">
++        {Array.from({ length: columns }).map((_, i) => (
++          <Skeleton key={i} className="h-3 flex-1" />
++        ))}
++      </div>
++
++      {Array.from({ length: rows }).map((_, r) => (
++        <div
++          key={r}
++          className="flex items-center gap-4 border-b border-gray-50 px-5 py-4 last:border-0"
++        >
++          <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
++          {Array.from({ length: columns - 1 }).map((_, c) => (
++            <Skeleton key={c} className="h-3 flex-1" />
++          ))}
++        </div>
++      ))}
++    </div>
++  );
++}
+diff --git a/src/components/skeletons/StatsSkeleton.tsx b/src/components/skeletons/StatsSkeleton.tsx
+index e69de29..70d67cf 100644
+--- a/src/components/skeletons/StatsSkeleton.tsx
++++ b/src/components/skeletons/StatsSkeleton.tsx
+@@ -0,0 +1,11 @@
++import SkeletonStats from "@/components/skeletons/SkeletonStats";
++
++export default function StatsSkeleton() {
++  return (
++    <section className="border-y border-gray-100 bg-white py-16">
++      <div className="mx-auto max-w-7xl px-6">
++        <SkeletonStats count={4} />
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/TestimonialSkeleton.tsx b/src/components/skeletons/TestimonialSkeleton.tsx
+index e69de29..16aea10 100644
+--- a/src/components/skeletons/TestimonialSkeleton.tsx
++++ b/src/components/skeletons/TestimonialSkeleton.tsx
+@@ -0,0 +1,25 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function TestimonialSkeleton() {
++  return (
++    <section className="bg-gray-50 py-16">
++      <div className="mx-auto max-w-7xl px-6">
++        <Skeleton className="mx-auto h-7 w-72" />
++        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
++          {Array.from({ length: 3 }).map((_, i) => (
++            <div key={i} className="rounded-2xl border border-gray-100 bg-white p-6">
++              <Skeleton className="h-3 w-24" />
++              <Skeleton className="mt-4 h-3 w-full" />
++              <Skeleton className="mt-2 h-3 w-full" />
++              <Skeleton className="mt-2 h-3 w-2/3" />
++              <div className="mt-5 flex items-center gap-3">
++                <Skeleton className="h-9 w-9 rounded-full" />
++                <Skeleton className="h-3 w-24" />
++              </div>
++            </div>
++          ))}
++        </div>
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/TutorSkeleton.tsx b/src/components/skeletons/TutorSkeleton.tsx
+index e69de29..67aa9f7 100644
+--- a/src/components/skeletons/TutorSkeleton.tsx
++++ b/src/components/skeletons/TutorSkeleton.tsx
+@@ -0,0 +1,21 @@
++import { Skeleton } from "@/components/ui/skeleton";
++
++export default function TutorSkeleton() {
++  return (
++    <section className="mx-auto max-w-7xl px-6 py-16">
++      <Skeleton className="mx-auto h-7 w-56" />
++      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
++        {Array.from({ length: 3 }).map((_, i) => (
++          <div key={i} className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
++            <Skeleton className="h-56 w-full rounded-none" />
++            <div className="space-y-3 p-5">
++              <Skeleton className="h-4 w-2/3" />
++              <Skeleton className="h-3 w-1/2" />
++              <Skeleton className="h-9 w-24 rounded-lg" />
++            </div>
++          </div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/skeletons/VideosSkeleton.tsx b/src/components/skeletons/VideosSkeleton.tsx
+index e69de29..4cbbd18 100644
+--- a/src/components/skeletons/VideosSkeleton.tsx
++++ b/src/components/skeletons/VideosSkeleton.tsx
+@@ -0,0 +1,19 @@
++import { Skeleton } from "@/components/ui/skeleton";
++import SkeletonImage from "@/components/skeletons/SkeletonImage";
++
++export default function VideosSkeleton() {
++  return (
++    <section className="mx-auto max-w-7xl px-6 py-16">
++      <Skeleton className="mx-auto h-7 w-64" />
++      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
++        {Array.from({ length: 3 }).map((_, i) => (
++          <div key={i} className="space-y-4">
++            <SkeletonImage />
++            <Skeleton className="h-4 w-2/3" />
++            <Skeleton className="h-9 w-full rounded-xl" />
++          </div>
++        ))}
++      </div>
++    </section>
++  );
++}
+diff --git a/src/components/ui/Badge.tsx b/src/components/ui/Badge.tsx
+index e69de29..b96024d 100644
+--- a/src/components/ui/Badge.tsx
++++ b/src/components/ui/Badge.tsx
+@@ -0,0 +1,40 @@
++import * as React from "react"
++import { cva, type VariantProps } from "class-variance-authority"
++
++import { cn } from "@/lib/utils"
++
++const badgeVariants = cva(
++  "inline-flex w-fit shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors [&_svg]:size-3",
++  {
++    variants: {
++      variant: {
++        default: "border-transparent bg-primary/10 text-primary",
++        success: "border-transparent bg-emerald-100 text-emerald-700",
++        warning: "border-transparent bg-amber-100 text-amber-700",
++        destructive: "border-transparent bg-red-100 text-red-700",
++        info: "border-transparent bg-blue-100 text-blue-700",
++        outline: "border-border bg-transparent text-foreground",
++        muted: "border-transparent bg-muted text-muted-foreground",
++      },
++    },
++    defaultVariants: {
++      variant: "default",
++    },
++  }
++)
++
++function Badge({
++  className,
++  variant,
++  ...props
++}: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
++  return (
++    <span
++      data-slot="badge"
++      className={cn(badgeVariants({ variant, className }))}
++      {...props}
++    />
++  )
++}
++
++export { Badge, badgeVariants }
+diff --git a/src/constants/admin-nav.ts b/src/constants/admin-nav.ts
+new file mode 100644
+index 0000000..93be04c
+--- /dev/null
++++ b/src/constants/admin-nav.ts
+@@ -0,0 +1,20 @@
++import {
++  LayoutDashboard,
++  BookOpen,
++  GraduationCap,
++  Users,
++  CreditCard,
++  Sparkles,
++  Settings,
++} from "lucide-react";
++import type { NavItem } from "@/types/dashboard.types";
++
++export const ADMIN_NAV: NavItem[] = [
++  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
++  { label: "Courses", href: "/admin/courses", icon: BookOpen },
++  { label: "Tutors", href: "/admin/tutors", icon: GraduationCap },
++  { label: "Students", href: "/admin/users", icon: Users },
++  { label: "Payments", href: "/admin/payments", icon: CreditCard },
++  { label: "AI Insights", href: "/admin/analytics", icon: Sparkles },
++  { label: "Settings", href: "/admin/settings", icon: Settings },
++];
+diff --git a/src/data/admin-mock.ts b/src/data/admin-mock.ts
+new file mode 100644
+index 0000000..67060d1
+--- /dev/null
++++ b/src/data/admin-mock.ts
+@@ -0,0 +1,196 @@
++import {
++  Users,
++  GraduationCap,
++  Wallet,
++  BookOpen,
++  CheckCircle2,
++  ShieldAlert,
++  CreditCard,
++} from "lucide-react";
++import type { StatCardData, ActivityItem, ChartPoint } from "@/types/dashboard.types";
++
++/**
++ * NOTE: everything in this file is placeholder data (Task 8 — "do NOT
++ * implement backend logic"). Each section is shaped so it can later be
++ * swapped for a real fetch with minimal refactoring, e.g.:
++ *
++ *   const stats = await getDashboardStats(); // replaces OVERVIEW_STATS
++ */
++
++export const OVERVIEW_STATS: StatCardData[] = [
++  {
++    id: "students",
++    label: "Total Students",
++    value: "24,592",
++    delta: "+8%",
++    trend: "up",
++    icon: Users,
++  },
++  {
++    id: "tutors",
++    label: "Total Tutors",
++    value: "1,204",
++    delta: "+14%",
++    trend: "up",
++    icon: GraduationCap,
++  },
++  {
++    id: "revenue",
++    label: "Revenue (MTD)",
++    value: "42.8M",
++    delta: "+22%",
++    trend: "up",
++    icon: Wallet,
++  },
++  {
++    id: "courses",
++    label: "Active Courses",
++    value: "842",
++    delta: "3 Suspended",
++    trend: "down",
++    icon: BookOpen,
++  },
++];
++
++export const COURSES_STATS: StatCardData[] = [
++  { id: "total", label: "Total Courses", value: "1,284", icon: BookOpen },
++  { id: "published", label: "Published", value: "942", delta: "+5%", trend: "up", icon: CheckCircle2 },
++  { id: "pending", label: "Pending Approval", value: "28", icon: ShieldAlert, tone: "accent" },
++  { id: "rejected", label: "Rejected", value: "12", icon: ShieldAlert, tone: "dark" },
++];
++
++export const STUDENTS_STATS: StatCardData[] = [
++  { id: "total", label: "Total Students", value: "1,248", icon: Users },
++  { id: "active", label: "Active Enrollments", value: "982", icon: CheckCircle2 },
++  { id: "premium", label: "Premium Ratio", value: "68%", delta: "+4%", trend: "up", icon: GraduationCap },
++  { id: "flagged", label: "Flagged Accounts", value: "14", icon: ShieldAlert, tone: "dark" },
++];
++
++export const PAYMENTS_STATS: StatCardData[] = [
++  { id: "monthly", label: "This Month's Payout", value: "4,850,000 FCFA", delta: "+12.5%", trend: "up", icon: Wallet },
++  { id: "platform", label: "Platform Revenue", value: "12,400,000 FCFA", icon: CreditCard, tone: "dark" },
++  { id: "paid", label: "Tutor Payouts Paid", value: "7,550,000 FCFA", icon: CheckCircle2 },
++  { id: "pending", label: "Outstanding", value: "341 Tutors Paid", icon: ShieldAlert, tone: "accent" },
++];
++
++export const REVENUE_TRENDS: ChartPoint[] = [
++  { label: "Mon", value: 32 },
++  { label: "Tue", value: 48 },
++  { label: "Wed", value: 40 },
++  { label: "Thu", value: 62 },
++  { label: "Fri", value: 55 },
++  { label: "Sat", value: 78 },
++  { label: "Sun", value: 70 },
++];
++
++export const RECENT_ACTIVITY: ActivityItem[] = [
++  {
++    id: "1",
++    title: "New tutor applied",
++    meta: "Emmanuel T. submitted profile for Mathematics.",
++    time: "2 mins ago",
++    tone: "info",
++  },
++  {
++    id: "2",
++    title: "Course submitted",
++    meta: '"Advanced Python" awaiting review.',
++    time: "40 mins ago",
++    tone: "warning",
++  },
++  {
++    id: "3",
++    title: "Payment verified",
++    meta: "Monthly payout for 14 tutors processed.",
++    time: "3 hours ago",
++    tone: "success",
++  },
++  {
++    id: "4",
++    title: "Security alert",
++    meta: "Multiple failed login attempts from IP 192.168.1.1.",
++    time: "5 hours ago",
++    tone: "destructive",
++  },
++];
++
++export interface CourseRow {
++  id: string;
++  title: string;
++  category: string;
++  tutor: string;
++  updated: string;
++  status: "Published" | "Pending" | "Rejected";
++}
++
++export const COURSES: CourseRow[] = [
++  { id: "c1", title: "Advanced UI Design Mastery", category: "Design", tutor: "Sarah Jenkins", updated: "Oct 24, 2025", status: "Published" },
++  { id: "c2", title: "Full-Stack Web Engineering 2024", category: "Development", tutor: "Marcus Chen", updated: "Oct 21, 2025", status: "Pending" },
++  { id: "c3", title: "Financial Modeling for Startups", category: "Business", tutor: "Eric Zhao", updated: "Oct 21, 2025", status: "Rejected" },
++  { id: "c4", title: "Leadership & Team Psychology", category: "Business", tutor: "Dr. Robert Miller", updated: "Sep 18, 2025", status: "Published" },
++  { id: "c5", title: "Modern Cybersecurity Foundations", category: "Technology", tutor: "Tabi Samuel", updated: "Sep 12, 2025", status: "Published" },
++];
++
++export interface TutorRow {
++  id: string;
++  name: string;
++  subject: string;
++  email: string;
++  students: number;
++  rating: number;
++  status: "Verified" | "Pending" | "Suspended" | "Active";
++}
++
++export const TUTORS: TutorRow[] = [
++  { id: "t1", name: "Dr. Ana Thome", subject: "Quantum Physics", email: "ana.thome@example.com", students: 142, rating: 4.9, status: "Verified" },
++  { id: "t2", name: "Sarah Jenkins", subject: "Organic Chemistry", email: "sarah.jenkins@example.com", students: 0, rating: 0, status: "Pending" },
++  { id: "t3", name: "Michael Vanhart", subject: "Advanced Calculus", email: "michael.v@example.com", students: 88, rating: 4.2, status: "Suspended" },
++  { id: "t4", name: "Matt Tomson", subject: "Programming Pro", email: "matt.tomson@example.com", students: 0, rating: 0, status: "Pending" },
++  { id: "t5", name: "Elena Rodriguez", subject: "Literature", email: "elena.r@example.com", students: 215, rating: 4.8, status: "Active" },
++];
++
++export interface StudentRow {
++  id: string;
++  name: string;
++  email: string;
++  courses: number;
++  joined: string;
++  status: "Active" | "Suspended";
++}
++
++export const STUDENTS: StudentRow[] = [
++  { id: "s1", name: "Marcus Holloway", email: "marcus.holloway@example.com", courses: 12, joined: "Jan 14, 2025", status: "Active" },
++  { id: "s2", name: "Sarah Jenkins", email: "sarah.jenkins@example.com", courses: 4, joined: "Dec 30, 2025", status: "Active" },
++  { id: "s3", name: "Elena Rodriguez", email: "elena.rodriguez@example.com", courses: 7, joined: "Nov 22, 2025", status: "Active" },
++  { id: "s4", name: "Sophia Chen", email: "sophia.chen@example.com", courses: 20, joined: "Nov 02, 2025", status: "Active" },
++  { id: "s5", name: "Matt Tomson", email: "matt.tomson@example.com", courses: 1, joined: "Oct 19, 2025", status: "Suspended" },
++];
++
++export interface TransactionRow {
++  id: string;
++  party: string;
++  type: "Revenue" | "Payout" | "Refund";
++  amount: string;
++  status: "Completed" | "Pending" | "Failed";
++  date: string;
++}
++
++export const TRANSACTIONS: TransactionRow[] = [
++  { id: "TRX-0621", party: "John Doe", type: "Revenue", amount: "+45,000 FCFA", status: "Completed", date: "Jun 21, 2026" },
++  { id: "TRX-2204", party: "Marie Lebrand", type: "Payout", amount: "-120,000 FCFA", status: "Pending", date: "Jun 20, 2026" },
++  { id: "TRX-0818", party: "Alain Foka", type: "Revenue", amount: "+72,300 FCFA", status: "Completed", date: "Jun 19, 2026" },
++  { id: "TRX-0703", party: "Sara Manzouri", type: "Refund", amount: "-22,000 FCFA", status: "Failed", date: "Jun 18, 2026" },
++];
++
++export const TOP_QUESTIONS = [
++  { id: "q1", text: "Explain integration by parts step by step", subject: "Mathematics", count: "3,841 asks" },
++  { id: "q2", text: "What is Newton's second law with examples?", subject: "Physics", count: "1,702 asks" },
++  { id: "q3", text: "Summarize the key causes of the French Revolution", subject: "History", count: "1,130 asks" },
++];
++
++export const STRUGGLE_TOPICS = [
++  { id: "st1", topic: "Calculus", percent: 78 },
++  { id: "st2", topic: "Organic Chemistry", percent: 64 },
++  { id: "st3", topic: "Mechanical Physics", percent: 52 },
++  { id: "st4", topic: "Macroeconomics", percent: 41 },
++];
+diff --git a/src/hooks/use-mobile.ts b/src/hooks/use-mobile.ts
+index e69de29..1d5e470 100644
+--- a/src/hooks/use-mobile.ts
++++ b/src/hooks/use-mobile.ts
+@@ -0,0 +1,26 @@
++"use client";
++
++import { useEffect, useState } from "react";
++
++const MOBILE_BREAKPOINT = 1024;
++
++/**
++ * Reusable responsive hook (Task 6/7). Returns true once we know the
++ * viewport is below the given breakpoint. Defaults to `false` during SSR
++ * so server and first client render match.
++ */
++export function useIsMobile(breakpoint: number = MOBILE_BREAKPOINT) {
++  const [isMobile, setIsMobile] = useState(false);
++
++  useEffect(() => {
++    const mql = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
++
++    const onChange = () => setIsMobile(window.innerWidth < breakpoint);
++    onChange();
++
++    mql.addEventListener("change", onChange);
++    return () => mql.removeEventListener("change", onChange);
++  }, [breakpoint]);
++
++  return isMobile;
++}
+diff --git a/src/types/dashboard.types.ts b/src/types/dashboard.types.ts
+index e69de29..b1f6b25 100644
+--- a/src/types/dashboard.types.ts
++++ b/src/types/dashboard.types.ts
+@@ -0,0 +1,40 @@
++import type { LucideIcon } from "lucide-react";
++import type { ReactNode } from "react";
++
++export interface StatCardData {
++  id: string;
++  label: string;
++  value: string;
++  delta?: string;
++  trend?: "up" | "down" | "neutral";
++  icon: LucideIcon;
++  tone?: "default" | "dark" | "accent";
++}
++
++export type StatusTone = "success" | "warning" | "destructive" | "info" | "muted";
++
++export interface DataTableColumn<T> {
++  key: keyof T;
++  header: string;
++  render?: (row: T) => ReactNode;
++  className?: string;
++}
++
++export interface ActivityItem {
++  id: string;
++  title: string;
++  meta: string;
++  time: string;
++  tone?: StatusTone;
++}
++
++export interface ChartPoint {
++  label: string;
++  value: number;
++}
++
++export interface NavItem {
++  label: string;
++  href: string;
++  icon: LucideIcon;
++}

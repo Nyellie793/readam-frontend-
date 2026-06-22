@@ -128,3 +128,35 @@
     @apply font-sans;
   }
 }
+
+/* ─── Shimmer skeleton (Task 3) ─────────────────────────────────────────── */
+/* Overrides the default animate-pulse on [data-slot=skeleton] with a        */
+/* LinkedIn/Notion-style directional shimmer sweep instead.                   */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+[data-slot="skeleton"] {
+  animation: shimmer 1.6s linear infinite;
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    color-mix(in oklch, var(--muted) 70%, white) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ─── Smooth page transitions (Task 7) ─────────────────────────────────── */
+@layer utilities {
+  .transition-page {
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+}
+
+/* ─── Mobile viewport safe-area padding (Task 6) ────────────────────────── */
+@supports (padding: max(0px)) {
+  .safe-bottom { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+  .safe-top    { padding-top:    max(0px,     env(safe-area-inset-top));    }
+}

@@ -14,6 +14,7 @@ import { NAV_LINKS } from "@/constants/navigation";
 import { usePathname } from "next/navigation";
 
 import LanguageToggle from "../shared/LanguageToggle";
+import ThemeToggle from "../shared/ThemeToggle";
 import Logo from "../shared/Logo";
 
 export default function MobileMenu() {
@@ -71,7 +72,7 @@ export default function MobileMenu() {
 
           </nav>
 
-          {/* Language */}
+          {/* Language + Theme */}
 
           <div className="border-t py-6">
 
@@ -79,7 +80,10 @@ export default function MobileMenu() {
               Language
             </p>
 
-            <LanguageToggle />
+            <div className="flex items-center justify-between gap-3">
+              <LanguageToggle />
+              <ThemeToggle />
+            </div>
 
           </div>
 
