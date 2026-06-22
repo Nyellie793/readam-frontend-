@@ -1,3 +1,5 @@
+"use client";
+
 import Topbar from "@/components/admin/Topbar";
 import StatCards from "@/components/admin/StatCards";
 import Chart from "@/components/admin/Chart";

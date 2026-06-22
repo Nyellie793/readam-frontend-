@@ -1,3 +1,5 @@
+"use client";
+
 import Topbar from "@/components/admin/Topbar";
 import { TOP_QUESTIONS, STRUGGLE_TOPICS } from "@/data/admin-mock";
 import { TrendingUp, AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
