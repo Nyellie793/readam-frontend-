@@ -1,0 +1,1661 @@
+diff --git a/next.config.ts b/next.config.ts
+index 9e00c11..e9ffa30 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -1,9 +1,7 @@
+ import type { NextConfig } from "next";
+ 
+ const nextConfig: NextConfig = {
+-  turbopack: {
+-    root: __dirname,
+-  },
++  /* config options here */
+ };
+ 
+-export default nextConfig;
+\ No newline at end of file
++export default nextConfig;
+diff --git a/package.json b/package.json
+index 7f92b44..5113678 100644
+--- a/package.json
++++ b/package.json
+@@ -9,6 +9,7 @@
+     "lint": "eslint"
+   },
+   "dependencies": {
++    "@hookform/resolvers": "^5.4.0",
+     "class-variance-authority": "^0.7.1",
+     "clsx": "^2.1.1",
+     "embla-carousel-react": "^8.6.0",
+diff --git a/src/app/admin/analytics/page.tsx b/src/app/admin/analytics/page.tsx
+index 97fd298..fe3854f 100644
+--- a/src/app/admin/analytics/page.tsx
++++ b/src/app/admin/analytics/page.tsx
+@@ -1,5 +1,3 @@
+-"use client";
+-
+ import Topbar from "@/components/admin/Topbar";
+ import { TOP_QUESTIONS, STRUGGLE_TOPICS } from "@/data/admin-mock";
+ import { TrendingUp, AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
+diff --git a/src/app/admin/courses/page.tsx b/src/app/admin/courses/page.tsx
+index e95acd2..4b8e071 100644
+--- a/src/app/admin/courses/page.tsx
++++ b/src/app/admin/courses/page.tsx
+@@ -1,57 +1,23 @@
+-"use client";
+-
+ import Topbar from "@/components/admin/Topbar";
+ import StatCards from "@/components/admin/StatCards";
+-import DataTable from "@/components/admin/DataTable";
+-import { Badge } from "@/components/ui/Badge";
++import CoursesTable from "@/components/admin/tables/CoursesTable";
+ import { Plus } from "lucide-react";
+-import { COURSES_STATS, COURSES, type CourseRow } from "@/data/admin-mock";
+-import type { DataTableColumn } from "@/types/dashboard.types";
+-
+-const statusVariant: Record<CourseRow["status"], "success" | "warning" | "destructive"> = {
+-  Published: "success",
+-  Pending: "warning",
+-  Rejected: "destructive",
+-};
+-
+-const columns: DataTableColumn<CourseRow>[] = [
+-  {
+-    key: "title",
+-    header: "Course Details",
+-    render: (row) => (
+-      <div>
+-        <p className="font-semibold text-gray-800">{row.title}</p>
+-        <p className="text-xs text-gray-400">{row.category}</p>
+-      </div>
+-    ),
+-  },
+-  { key: "tutor", header: "Tutor" },
+-  { key: "updated", header: "Updated" },
+-  {
+-    key: "status",
+-    header: "Status",
+-    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
+-  },
+-];
++import { COURSES_STATS, COURSES } from "@/data/admin-mock";
+ 
++// ✅ Server Component — passes only serializable data (no render functions)
+ export default function CoursesPage() {
+   return (
+     <>
+-      <Topbar title="Courses Management" description="Search courses, tutors..." />
+-
++      <Topbar title="Courses Management" description="Review, approve and manage all platform courses." />
+       <div className="space-y-6 p-4 sm:p-6">
+-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+-          <StatCards stats={COURSES_STATS} />
+-        </div>
+-
+-        <div className="flex items-center justify-end">
++        <StatCards stats={COURSES_STATS} />
++        <div className="flex justify-end">
+           <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+             <Plus className="h-4 w-4" />
+-            Invite New Course
++            Add Course
+           </button>
+         </div>
+-
+-        <DataTable columns={columns} rows={COURSES} searchPlaceholder="Search courses, tutors..." />
++        <CoursesTable rows={COURSES} />
+       </div>
+     </>
+   );
+diff --git a/src/app/admin/layout.tsx b/src/app/admin/layout.tsx
+index 6954e41..34b6982 100644
+--- a/src/app/admin/layout.tsx
++++ b/src/app/admin/layout.tsx
+@@ -1,22 +1,16 @@
+ import Sidebar from "@/components/admin/Sidebar";
+ 
+-export default function AdminLayout({
+-  children,
+-}: {
+-  children: React.ReactNode;
+-}) {
++export default function AdminLayout({ children }: { children: React.ReactNode }) {
+   return (
+     <div className="flex min-h-screen bg-gray-50">
+-      {/* Desktop sidebar — fixed, hidden on mobile (Topbar provides a Sheet instead) */}
++      {/* Desktop sidebar — hidden on mobile (Topbar handles mobile nav via Sheet) */}
+       <aside className="hidden w-64 shrink-0 lg:block">
+         <div className="fixed h-screen w-64">
+           <Sidebar />
+         </div>
+       </aside>
+ 
+-      <main className="min-w-0 flex-1">
+-        {children}
+-      </main>
++      <main className="min-w-0 flex-1">{children}</main>
+     </div>
+   );
+ }
+diff --git a/src/app/admin/login/layout.tsx b/src/app/admin/login/layout.tsx
+new file mode 100644
+index 0000000..8155284
+--- /dev/null
++++ b/src/app/admin/login/layout.tsx
+@@ -0,0 +1,8 @@
++/**
++ * The admin login page must NOT be wrapped in the sidebar layout,
++ * so we give it its own layout that renders children directly.
++ * This overrides the parent /admin/layout.tsx for this segment.
++ */
++export default function AdminLoginLayout({ children }: { children: React.ReactNode }) {
++  return <>{children}</>;
++}
+diff --git a/src/app/admin/login/page.tsx b/src/app/admin/login/page.tsx
+new file mode 100644
+index 0000000..5046b0d
+--- /dev/null
++++ b/src/app/admin/login/page.tsx
+@@ -0,0 +1,98 @@
++"use client";
++
++import { useForm } from "react-hook-form";
++import { z } from "zod/v4";
++import { zodResolver } from "@hookform/resolvers/zod";
++import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
++import { useState } from "react";
++import { useAuth } from "@/hooks/use-auth";
++
++const schema = z.object({
++  email: z.email("Enter a valid email"),
++  password: z.string().min(1, "Password is required"),
++});
++type FormData = z.infer<typeof schema>;
++
++export default function AdminLoginPage() {
++  const { login, loading } = useAuth();
++  const [showPw, setShowPw] = useState(false);
++
++  const {
++    register,
++    handleSubmit,
++    formState: { errors },
++  } = useForm<FormData>({ resolver: zodResolver(schema) });
++
++  return (
++    <main className="flex min-h-screen items-center justify-center bg-[#0B1437] px-6 py-12">
++      <div className="w-full max-w-md">
++        {/* Logo */}
++        <div className="mb-8 flex flex-col items-center gap-3">
++          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg">
++            <ShieldCheck className="h-7 w-7 text-white" />
++          </span>
++          <div className="text-center">
++            <h1 className="text-2xl font-black text-white">Admin Portal</h1>
++            <p className="mt-1 text-sm text-white/40">ReadAM Management System</p>
++          </div>
++        </div>
++
++        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
++          <form onSubmit={handleSubmit(login)} className="space-y-5">
++            <div>
++              <label className="text-sm font-medium text-white/70">
++                Admin Email
++              </label>
++              <input
++                type="email"
++                autoComplete="email"
++                {...register("email")}
++                placeholder="admin@readam.ai"
++                className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
++              />
++              {errors.email && (
++                <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
++              )}
++            </div>
++
++            <div>
++              <label className="text-sm font-medium text-white/70">Password</label>
++              <div className="relative">
++                <input
++                  type={showPw ? "text" : "password"}
++                  autoComplete="current-password"
++                  {...register("password")}
++                  placeholder="••••••••"
++                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 pr-11 text-white placeholder:text-white/30 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
++                />
++                <button
++                  type="button"
++                  onClick={() => setShowPw((v) => !v)}
++                  className="absolute right-3 top-1/2 mt-0.5 -translate-y-1/2 text-white/30 hover:text-white/70"
++                >
++                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
++                </button>
++              </div>
++              {errors.password && (
++                <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>
++              )}
++            </div>
++
++            <button
++              type="submit"
++              disabled={loading}
++              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
++            >
++              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
++              {loading ? "Verifying…" : "Access Dashboard"}
++            </button>
++          </form>
++        </div>
++
++        <p className="mt-6 text-center text-xs text-white/20">
++          ReadAM Admin · Restricted access only
++        </p>
++      </div>
++    </main>
++  );
++}
+diff --git a/src/app/admin/payments/page.tsx b/src/app/admin/payments/page.tsx
+index c3ef07e..427b712 100644
+--- a/src/app/admin/payments/page.tsx
++++ b/src/app/admin/payments/page.tsx
+@@ -1,47 +1,17 @@
+-"use client";
+-
+ import Topbar from "@/components/admin/Topbar";
+ import StatCards from "@/components/admin/StatCards";
+ import Chart from "@/components/admin/Chart";
+-import DataTable from "@/components/admin/DataTable";
+-import { Badge } from "@/components/ui/Badge";
++import TransactionsTable from "@/components/admin/tables/TransactionsTable";
+ import { Download } from "lucide-react";
+-import { PAYMENTS_STATS, REVENUE_TRENDS, TRANSACTIONS, type TransactionRow } from "@/data/admin-mock";
+-import type { DataTableColumn } from "@/types/dashboard.types";
+-
+-const statusVariant: Record<TransactionRow["status"], "success" | "warning" | "destructive"> = {
+-  Completed: "success",
+-  Pending: "warning",
+-  Failed: "destructive",
+-};
+-
+-const columns: DataTableColumn<TransactionRow>[] = [
+-  { key: "id", header: "ID & Date", render: (row) => (
+-    <div>
+-      <p className="font-semibold text-gray-800">{row.id}</p>
+-      <p className="text-xs text-gray-400">{row.date}</p>
+-    </div>
+-  ) },
+-  { key: "party", header: "Party" },
+-  { key: "type", header: "Type" },
+-  { key: "amount", header: "Amount", className: "font-semibold" },
+-  {
+-    key: "status",
+-    header: "Status",
+-    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
+-  },
+-];
++import { PAYMENTS_STATS, REVENUE_TRENDS, TRANSACTIONS } from "@/data/admin-mock";
+ 
+ export default function PaymentsPage() {
+   return (
+     <>
+       <Topbar title="Financial Overview" />
+-
+       <div className="space-y-6 p-4 sm:p-6">
+         <StatCards stats={PAYMENTS_STATS} />
+-
+         <Chart title="Revenue Trends" subtitle="Weekly vs. projection" data={REVENUE_TRENDS} variant="line" />
+-
+         <div className="rounded-2xl border border-gray-100 bg-white shadow-sm">
+           <div className="flex items-center justify-between border-b border-gray-100 p-5">
+             <div>
+@@ -54,7 +24,7 @@ export default function PaymentsPage() {
+             </button>
+           </div>
+           <div className="p-5">
+-            <DataTable columns={columns} rows={TRANSACTIONS} searchPlaceholder="Search transactions..." />
++            <TransactionsTable rows={TRANSACTIONS} />
+           </div>
+         </div>
+       </div>
+diff --git a/src/app/admin/settings/page.tsx b/src/app/admin/settings/page.tsx
+index b25c3d3..4eb2e23 100644
+--- a/src/app/admin/settings/page.tsx
++++ b/src/app/admin/settings/page.tsx
+@@ -1,5 +1,3 @@
+-"use client";
+-
+ import Topbar from "@/components/admin/Topbar";
+ import { Badge } from "@/components/ui/Badge";
+ import { Input } from "@/components/ui/Input";
+diff --git a/src/app/admin/tutors/page.tsx b/src/app/admin/tutors/page.tsx
+index 3fd8c66..980484c 100644
+--- a/src/app/admin/tutors/page.tsx
++++ b/src/app/admin/tutors/page.tsx
+@@ -1,80 +1,30 @@
+-"use client";
+-
+ import Topbar from "@/components/admin/Topbar";
+ import StatCards from "@/components/admin/StatCards";
+-import DataTable from "@/components/admin/DataTable";
+-import { Badge } from "@/components/ui/Badge";
+-import { Plus, Star, GraduationCap, Users, ShieldAlert } from "lucide-react";
+-import { TUTORS, type TutorRow } from "@/data/admin-mock";
+-import type { DataTableColumn, StatCardData } from "@/types/dashboard.types";
++import TutorsTable from "@/components/admin/tables/TutorsTable";
++import { Plus, GraduationCap, Users, Star, ShieldAlert } from "lucide-react";
++import { TUTORS } from "@/data/admin-mock";
++import type { StatCardData } from "@/types/dashboard.types";
+ 
+ const TUTOR_STATS: StatCardData[] = [
+-  { id: "total", label: "Total Tutors", value: String(TUTORS.length), icon: GraduationCap },
+-  { id: "verified", label: "Verified Educators", value: String(TUTORS.filter((t) => t.status === "Verified" || t.status === "Active").length), icon: Users },
+-  { id: "rating", label: "Avg. Platform Rating", value: "4.72", icon: Star },
+-  { id: "pending", label: "Inactive Profiles", value: String(TUTORS.filter((t) => t.status === "Pending").length), icon: ShieldAlert, tone: "accent" },
+-];
+-
+-const statusVariant: Record<TutorRow["status"], "success" | "warning" | "destructive" | "info"> = {
+-  Verified: "success",
+-  Active: "success",
+-  Pending: "warning",
+-  Suspended: "destructive",
+-};
+-
+-const columns: DataTableColumn<TutorRow>[] = [
+-  {
+-    key: "name",
+-    header: "Tutor Details",
+-    render: (row) => (
+-      <div className="flex items-center gap-3">
+-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-600">
+-          {row.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+-        </span>
+-        <div>
+-          <p className="font-semibold text-gray-800">{row.name}</p>
+-          <p className="text-xs text-gray-400">{row.subject}</p>
+-        </div>
+-      </div>
+-    ),
+-  },
+-  { key: "email", header: "Account Details" },
+-  {
+-    key: "rating",
+-    header: "Rating",
+-    render: (row) =>
+-      row.rating > 0 ? (
+-        <span className="flex items-center gap-1 font-medium text-gray-700">
+-          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+-          {row.rating}
+-        </span>
+-      ) : (
+-        <span className="text-gray-300">N/A</span>
+-      ),
+-  },
+-  {
+-    key: "status",
+-    header: "Status",
+-    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
+-  },
++  { id: "total",    label: "Total Tutors",        value: String(TUTORS.length), icon: GraduationCap },
++  { id: "verified", label: "Verified Educators",  value: String(TUTORS.filter((t) => t.status === "Verified" || t.status === "Active").length), icon: Users },
++  { id: "rating",   label: "Avg. Rating",         value: "4.72", icon: Star },
++  { id: "pending",  label: "Pending Profiles",    value: String(TUTORS.filter((t) => t.status === "Pending").length), icon: ShieldAlert, tone: "accent" },
+ ];
+ 
+ export default function TutorsPage() {
+   return (
+     <>
+-      <Topbar title="Tutors Management" description="Review, verify and manage the global community of educators." />
+-
++      <Topbar title="Tutors Management" description="Verify and manage the global educator community." />
+       <div className="space-y-6 p-4 sm:p-6">
+         <StatCards stats={TUTOR_STATS} />
+-
+-        <div className="flex items-center justify-end">
++        <div className="flex justify-end">
+           <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+             <Plus className="h-4 w-4" />
+-            Invite New Tutor
++            Invite Tutor
+           </button>
+         </div>
+-
+-        <DataTable columns={columns} rows={TUTORS} searchPlaceholder="Search all tutors..." />
++        <TutorsTable rows={TUTORS} />
+       </div>
+     </>
+   );
+diff --git a/src/app/admin/users/page.tsx b/src/app/admin/users/page.tsx
+index 64ff978..72d738b 100644
+--- a/src/app/admin/users/page.tsx
++++ b/src/app/admin/users/page.tsx
+@@ -1,54 +1,22 @@
+-"use client";
+-
+ import Topbar from "@/components/admin/Topbar";
+ import StatCards from "@/components/admin/StatCards";
+-import DataTable from "@/components/admin/DataTable";
+-import { Badge } from "@/components/ui/Badge";
++import StudentsTable from "@/components/admin/tables/StudentsTable";
+ import { Plus } from "lucide-react";
+-import { STUDENTS_STATS, STUDENTS, type StudentRow } from "@/data/admin-mock";
+-import type { DataTableColumn } from "@/types/dashboard.types";
+-
+-const statusVariant: Record<StudentRow["status"], "success" | "destructive"> = {
+-  Active: "success",
+-  Suspended: "destructive",
+-};
+-
+-const columns: DataTableColumn<StudentRow>[] = [
+-  {
+-    key: "name",
+-    header: "Student Details",
+-    render: (row) => (
+-      <div>
+-        <p className="font-semibold text-gray-800">{row.name}</p>
+-        <p className="text-xs text-gray-400">{row.email}</p>
+-      </div>
+-    ),
+-  },
+-  { key: "courses", header: "Enrollments" },
+-  { key: "joined", header: "Joined" },
+-  {
+-    key: "status",
+-    header: "Status",
+-    render: (row) => <Badge variant={statusVariant[row.status]}>{row.status}</Badge>,
+-  },
+-];
++import { STUDENTS_STATS, STUDENTS } from "@/data/admin-mock";
+ 
+ export default function StudentsPage() {
+   return (
+     <>
+-      <Topbar title="Students Management" description="Review student activity, enrollment stats and account security." />
+-
++      <Topbar title="Students Management" description="Monitor enrolment, activity and account security." />
+       <div className="space-y-6 p-4 sm:p-6">
+         <StatCards stats={STUDENTS_STATS} />
+-
+-        <div className="flex items-center justify-end">
++        <div className="flex justify-end">
+           <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+             <Plus className="h-4 w-4" />
+-            Add New Student
++            Add Student
+           </button>
+         </div>
+-
+-        <DataTable columns={columns} rows={STUDENTS} searchPlaceholder="Filter by name, email or ID..." />
++        <StudentsTable rows={STUDENTS} />
+       </div>
+     </>
+   );
+diff --git a/src/app/welcome-back/page.tsx b/src/app/welcome-back/page.tsx
+index 59b8b38..cf572e0 100644
+--- a/src/app/welcome-back/page.tsx
++++ b/src/app/welcome-back/page.tsx
+@@ -1,27 +1,31 @@
+ "use client";
+ 
+-import { useState } from "react";
++import { useState, useEffect } from "react";
+ import Welcome from "@/components/onboarding/Welcome";
+ import OnboardingShell from "@/components/onboarding/OnboardingShell";
+ 
+-function getStoredName(): string {
+-  if (typeof window === "undefined") return "there";
+-  return localStorage.getItem("user_name") || "there";
+-}
++export default function WelcomeBack() {
++  // Start with safe SSR defaults — both server and client render the same
++  // thing on first pass, eliminating the hydration mismatch.
++  const [name, setName] = useState<string>("there");
++  const [interests, setInterests] = useState<string[]>([]);
+ 
+-function getStoredInterests(name: string): string[] {
+-  if (typeof window === "undefined") return [];
+-  try {
+-    const stored = localStorage.getItem(`${name}_interests`);
+-    return stored ? JSON.parse(stored) : [];
+-  } catch {
+-    return [];
+-  }
+-}
++  // After mount (client only), pull the real values from localStorage.
++  useEffect(() => {
++    const storedName = localStorage.getItem("user_name") || "there";
+ 
+-export default function WelcomeBack() {
+-  const [name] = useState<string>(getStoredName);
+-  const [interests] = useState<string[]>(() => getStoredInterests(name));
++    const storedInterests = (() => {
++      try {
++        const raw = localStorage.getItem(`${storedName}_interests`);
++        return raw ? (JSON.parse(raw) as string[]) : [];
++      } catch {
++        return [];
++      }
++    })();
++
++    setName(storedName);
++    setInterests(storedInterests);
++  }, []);
+ 
+   return (
+     <OnboardingShell currentStep={2}>
+@@ -32,4 +36,4 @@ export default function WelcomeBack() {
+       />
+     </OnboardingShell>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/admin/tables/CoursesTable.tsx b/src/components/admin/tables/CoursesTable.tsx
+new file mode 100644
+index 0000000..06c2ca9
+--- /dev/null
++++ b/src/components/admin/tables/CoursesTable.tsx
+@@ -0,0 +1,49 @@
++"use client";
++
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import type { CourseRow } from "@/data/admin-mock";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++const statusVariant: Record<CourseRow["status"], "success" | "warning" | "destructive"> = {
++  Published: "success",
++  Pending: "warning",
++  Rejected: "destructive",
++};
++
++// ✅ render functions live here — inside the Client Component
++const columns: DataTableColumn<CourseRow>[] = [
++  {
++    key: "title",
++    header: "Course Details",
++    render: (row) => (
++      <div>
++        <p className="font-semibold text-gray-800">{row.title}</p>
++        <p className="text-xs text-gray-400">{row.category}</p>
++      </div>
++    ),
++  },
++  { key: "tutor", header: "Tutor" },
++  { key: "updated", header: "Updated" },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => (
++      <Badge variant={statusVariant[row.status]}>{row.status}</Badge>
++    ),
++  },
++];
++
++interface Props {
++  rows: CourseRow[];
++}
++
++export default function CoursesTable({ rows }: Props) {
++  return (
++    <DataTable
++      columns={columns}
++      rows={rows}
++      searchPlaceholder="Search courses, tutors…"
++    />
++  );
++}
+diff --git a/src/components/admin/tables/StudentsTable.tsx b/src/components/admin/tables/StudentsTable.tsx
+new file mode 100644
+index 0000000..e8b16c6
+--- /dev/null
++++ b/src/components/admin/tables/StudentsTable.tsx
+@@ -0,0 +1,43 @@
++"use client";
++
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import type { StudentRow } from "@/data/admin-mock";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++const statusVariant: Record<StudentRow["status"], "success" | "destructive"> = {
++  Active: "success",
++  Suspended: "destructive",
++};
++
++const columns: DataTableColumn<StudentRow>[] = [
++  {
++    key: "name",
++    header: "Student Details",
++    render: (row) => (
++      <div>
++        <p className="font-semibold text-gray-800">{row.name}</p>
++        <p className="text-xs text-gray-400">{row.email}</p>
++      </div>
++    ),
++  },
++  { key: "courses", header: "Enrollments" },
++  { key: "joined", header: "Joined" },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => (
++      <Badge variant={statusVariant[row.status]}>{row.status}</Badge>
++    ),
++  },
++];
++
++export default function StudentsTable({ rows }: { rows: StudentRow[] }) {
++  return (
++    <DataTable
++      columns={columns}
++      rows={rows}
++      searchPlaceholder="Filter by name, email or ID…"
++    />
++  );
++}
+diff --git a/src/components/admin/tables/TransactionsTable.tsx b/src/components/admin/tables/TransactionsTable.tsx
+new file mode 100644
+index 0000000..7256590
+--- /dev/null
++++ b/src/components/admin/tables/TransactionsTable.tsx
+@@ -0,0 +1,48 @@
++"use client";
++
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import type { TransactionRow } from "@/data/admin-mock";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++const statusVariant: Record<
++  TransactionRow["status"],
++  "success" | "warning" | "destructive"
++> = {
++  Completed: "success",
++  Pending: "warning",
++  Failed: "destructive",
++};
++
++const columns: DataTableColumn<TransactionRow>[] = [
++  {
++    key: "id",
++    header: "ID & Date",
++    render: (row) => (
++      <div>
++        <p className="font-semibold text-gray-800">{row.id}</p>
++        <p className="text-xs text-gray-400">{row.date}</p>
++      </div>
++    ),
++  },
++  { key: "party", header: "Party" },
++  { key: "type", header: "Type" },
++  { key: "amount", header: "Amount", className: "font-semibold" },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => (
++      <Badge variant={statusVariant[row.status]}>{row.status}</Badge>
++    ),
++  },
++];
++
++export default function TransactionsTable({ rows }: { rows: TransactionRow[] }) {
++  return (
++    <DataTable
++      columns={columns}
++      rows={rows}
++      searchPlaceholder="Search transactions…"
++    />
++  );
++}
+diff --git a/src/components/admin/tables/TutorsTable.tsx b/src/components/admin/tables/TutorsTable.tsx
+new file mode 100644
+index 0000000..fed33c3
+--- /dev/null
++++ b/src/components/admin/tables/TutorsTable.tsx
+@@ -0,0 +1,66 @@
++"use client";
++
++import DataTable from "@/components/admin/DataTable";
++import { Badge } from "@/components/ui/Badge";
++import { Star } from "lucide-react";
++import type { TutorRow } from "@/data/admin-mock";
++import type { DataTableColumn } from "@/types/dashboard.types";
++
++const statusVariant: Record<
++  TutorRow["status"],
++  "success" | "warning" | "destructive" | "info"
++> = {
++  Verified: "success",
++  Active: "success",
++  Pending: "warning",
++  Suspended: "destructive",
++};
++
++const columns: DataTableColumn<TutorRow>[] = [
++  {
++    key: "name",
++    header: "Tutor Details",
++    render: (row) => (
++      <div className="flex items-center gap-3">
++        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-600">
++          {row.name
++            .split(" ")
++            .map((n) => n[0])
++            .slice(0, 2)
++            .join("")}
++        </span>
++        <div>
++          <p className="font-semibold text-gray-800">{row.name}</p>
++          <p className="text-xs text-gray-400">{row.subject}</p>
++        </div>
++      </div>
++    ),
++  },
++  { key: "email", header: "Email" },
++  {
++    key: "rating",
++    header: "Rating",
++    render: (row) =>
++      row.rating > 0 ? (
++        <span className="flex items-center gap-1 font-medium text-gray-700">
++          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
++          {row.rating}
++        </span>
++      ) : (
++        <span className="text-gray-300">N/A</span>
++      ),
++  },
++  {
++    key: "status",
++    header: "Status",
++    render: (row) => (
++      <Badge variant={statusVariant[row.status]}>{row.status}</Badge>
++    ),
++  },
++];
++
++export default function TutorsTable({ rows }: { rows: TutorRow[] }) {
++  return (
++    <DataTable columns={columns} rows={rows} searchPlaceholder="Search tutors…" />
++  );
++}
+diff --git a/src/components/auth/LoginForm.tsx b/src/components/auth/LoginForm.tsx
+index 70e0c00..ebc74a8 100644
+--- a/src/components/auth/LoginForm.tsx
++++ b/src/components/auth/LoginForm.tsx
+@@ -1,97 +1,96 @@
+ "use client";
+ 
+ import Link from "next/link";
++import { useForm } from "react-hook-form";
++import { z } from "zod/v4";
++import { zodResolver } from "@hookform/resolvers/zod";
++import { Eye, EyeOff, Loader2 } from "lucide-react";
+ import { useState } from "react";
+-import { useRouter } from "next/navigation";
++import { useAuth } from "@/hooks/use-auth";
+ 
+-export default function LoginForm() {
+-  const [loading, setLoading] = useState(false);
+-  const [name, setName] = useState("");
+-  const [email, setEmail] = useState("");
+-  const [password, setPassword] = useState("");
+-  const router = useRouter();
++const schema = z.object({
++  email: z.email("Enter a valid email address"),
++  password: z.string().min(6, "Password must be at least 6 characters"),
++});
+ 
+-  function handleSubmit(e: React.FormEvent) {
+-    e.preventDefault();
+-    setLoading(true);
++type FormData = z.infer<typeof schema>;
+ 
+-    localStorage.setItem("user_name", name);
+-    localStorage.setItem("user_email", email);
+-    localStorage.setItem("login_type", "login"); // ← flag for welcome page
++export default function LoginForm() {
++  const { login, loading } = useAuth();
++  const [showPw, setShowPw] = useState(false);
+ 
+-    setTimeout(() => {
+-      setLoading(false);
+-      router.push("/welcome-back");
+-    }, 1000);
+-  }
++  const {
++    register,
++    handleSubmit,
++    formState: { errors },
++  } = useForm<FormData>({ resolver: zodResolver(schema) });
+ 
+   return (
+-    <div className="w-full max-w-md rounded-2xl bg-white p-6 sm:p-8 shadow-sm border">
+-
+-      <h1 className="text-3xl font-bold text-center">
++    <div className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
++      <h1 className="text-center text-3xl font-bold">
+         Welcome <span className="text-blue-600">Back</span>
+       </h1>
+-
+-      <p className="mt-2 text-center text-gray-500 text-sm">
+-        Login to continue learning on ReadAm
++      <p className="mt-2 text-center text-sm text-gray-500">
++        Login to continue learning on ReadAM
+       </p>
+ 
+-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+-
+-        {/* Name */}
+-        <div>
+-          <label className="text-sm text-gray-600">Full Name</label>
+-          <input
+-            type="text"
+-            required
+-            value={name}
+-            onChange={(e) => setName(e.target.value)}
+-            placeholder="John Doe"
+-            className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+-          />
+-        </div>
+-
++      <form onSubmit={handleSubmit(login)} className="mt-8 space-y-4">
++        {/* Email */}
+         <div>
+           <label className="text-sm text-gray-600">Email</label>
+           <input
+             type="email"
+-            required
+-            value={email}
+-            onChange={(e) => setEmail(e.target.value)}
++            autoComplete="email"
++            {...register("email")}
+             placeholder="you@example.com"
+             className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+           />
++          {errors.email && (
++            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
++          )}
+         </div>
+ 
++        {/* Password */}
+         <div>
+           <label className="text-sm text-gray-600">Password</label>
+-          <input
+-            type="password"
+-            required
+-            value={password}
+-            onChange={(e) => setPassword(e.target.value)}
+-            placeholder="••••••••"
+-            className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+-          />
++          <div className="relative">
++            <input
++              type={showPw ? "text" : "password"}
++              autoComplete="current-password"
++              {...register("password")}
++              placeholder="••••••••"
++              className="mt-1 w-full rounded-xl border px-4 py-3 pr-11 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
++            />
++            <button
++              type="button"
++              onClick={() => setShowPw((v) => !v)}
++              className="absolute right-3 top-1/2 mt-0.5 -translate-y-1/2 text-gray-400 hover:text-gray-600"
++              aria-label={showPw ? "Hide password" : "Show password"}
++            >
++              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
++            </button>
++          </div>
++          {errors.password && (
++            <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
++          )}
+         </div>
+ 
+         <button
+           type="submit"
+           disabled={loading}
+-          className="w-full rounded-xl bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-60 disabled:cursor-not-allowed"
++          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+         >
+-          {loading ? "Signing in..." : "Sign In"}
++          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
++          {loading ? "Signing in…" : "Sign In"}
+         </button>
+-
+       </form>
+ 
+       <p className="mt-6 text-center text-sm text-gray-500 sm:hidden">
+         No account yet?{" "}
+-        <Link className="text-blue-600 font-medium" href="/signup">
++        <Link className="font-medium text-blue-600" href="/signup">
+           Sign Up
+         </Link>
+       </p>
+-
+     </div>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/auth/SignupForm.tsx b/src/components/auth/SignupForm.tsx
+index 1e1fa4d..1b20ca6 100644
+--- a/src/components/auth/SignupForm.tsx
++++ b/src/components/auth/SignupForm.tsx
+@@ -1,98 +1,139 @@
+ "use client";
+ 
+ import Link from "next/link";
++import { useForm } from "react-hook-form";
++import { z } from "zod/v4";
++import { zodResolver } from "@hookform/resolvers/zod";
++import { Eye, EyeOff, Loader2 } from "lucide-react";
+ import { useState } from "react";
+-import { useRouter } from "next/navigation";
++import { useAuth } from "@/hooks/use-auth";
++
++const schema = z
++  .object({
++    full_name: z.string().min(2, "Enter your full name"),
++    email: z.email("Enter a valid email address"),
++    password: z.string().min(6, "Password must be at least 6 characters"),
++    confirm_password: z.string(),
++  })
++  .refine((d) => d.password === d.confirm_password, {
++    message: "Passwords do not match",
++    path: ["confirm_password"],
++  });
++
++type FormData = z.infer<typeof schema>;
+ 
+ export default function SignupForm() {
+-  const [loading, setLoading] = useState(false);
+-  const [name, setName] = useState("");
+-  const [email, setEmail] = useState("");
+-  const [password, setPassword] = useState("");
+-  const router = useRouter();
++  const { register: registerUser, loading } = useAuth();
++  const [showPw, setShowPw] = useState(false);
+ 
+-  function handleSubmit(e: React.FormEvent) {
+-    e.preventDefault();
+-    setLoading(true);
++  const {
++    register,
++    handleSubmit,
++    formState: { errors },
++  } = useForm<FormData>({ resolver: zodResolver(schema) });
+ 
+-    // Save to localStorage
+-    localStorage.setItem("user_name", name);
+-    localStorage.setItem("user_email", email);
+-    localStorage.setItem("user_password", password);
+-    localStorage.setItem("login_type", "signup");
+-
+-    setTimeout(() => {
+-      setLoading(false);
+-      router.push("/onboarding-1");
+-    }, 1000);
++  function onSubmit({ full_name, email, password }: FormData) {
++    registerUser({ full_name, email, password });
+   }
+ 
+   return (
+-    <div className="w-full max-w-md rounded-2xl bg-white p-6 sm:p-8 shadow-sm border">
+-
+-      <h1 className="text-3xl font-bold text-center">
+-        Create Your <span className="text-blue-600">ReadAm</span> Account
++    <div className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
++      <h1 className="text-center text-3xl font-bold">
++        Create Your <span className="text-blue-600">ReadAM</span> Account
+       </h1>
+-
+-      <p className="mt-2 text-center text-gray-500 text-sm">
++      <p className="mt-2 text-center text-sm text-gray-500">
+         Join students learning smarter with AI
+       </p>
+ 
+-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+-
++      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
++        {/* Full name */}
+         <div>
+           <label className="text-sm text-gray-600">Full Name</label>
+           <input
+             type="text"
+-            required
+-            value={name}
+-            onChange={(e) => setName(e.target.value)}
++            autoComplete="name"
++            {...register("full_name")}
+             placeholder="John Doe"
+             className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+           />
++          {errors.full_name && (
++            <p className="mt-1 text-xs text-red-500">{errors.full_name.message}</p>
++          )}
+         </div>
+ 
++        {/* Email */}
+         <div>
+           <label className="text-sm text-gray-600">Email</label>
+           <input
+             type="email"
+-            required
+-            value={email}
+-            onChange={(e) => setEmail(e.target.value)}
++            autoComplete="email"
++            {...register("email")}
+             placeholder="you@example.com"
+             className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+           />
++          {errors.email && (
++            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
++          )}
+         </div>
+ 
++        {/* Password */}
+         <div>
+           <label className="text-sm text-gray-600">Password</label>
++          <div className="relative">
++            <input
++              type={showPw ? "text" : "password"}
++              autoComplete="new-password"
++              {...register("password")}
++              placeholder="••••••••"
++              className="mt-1 w-full rounded-xl border px-4 py-3 pr-11 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
++            />
++            <button
++              type="button"
++              onClick={() => setShowPw((v) => !v)}
++              className="absolute right-3 top-1/2 mt-0.5 -translate-y-1/2 text-gray-400 hover:text-gray-600"
++              aria-label={showPw ? "Hide password" : "Show password"}
++            >
++              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
++            </button>
++          </div>
++          {errors.password && (
++            <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
++          )}
++        </div>
++
++        {/* Confirm password */}
++        <div>
++          <label className="text-sm text-gray-600">Confirm Password</label>
+           <input
+-            type="password"
+-            required
+-            value={password}
+-            onChange={(e) => setPassword(e.target.value)}
++            type={showPw ? "text" : "password"}
++            autoComplete="new-password"
++            {...register("confirm_password")}
+             placeholder="••••••••"
+             className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+           />
++          {errors.confirm_password && (
++            <p className="mt-1 text-xs text-red-500">
++              {errors.confirm_password.message}
++            </p>
++          )}
+         </div>
+ 
+         <button
+           type="submit"
+           disabled={loading}
+-          className="w-full rounded-xl bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-60 disabled:cursor-not-allowed"
++          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+         >
+-          {loading ? "Creating account..." : "Sign Up"}
++          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
++          {loading ? "Creating account…" : "Sign Up"}
+         </button>
+-
+       </form>
+ 
+       <p className="mt-6 text-center text-sm text-gray-500 sm:hidden">
+         Already have an account?{" "}
+-        <Link className="text-blue-600 font-medium" href="/login">
++        <Link className="font-medium text-blue-600" href="/login">
+           Sign In
+         </Link>
+       </p>
+-
+     </div>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/sections/HeroImage.tsx b/src/components/sections/HeroImage.tsx
+index ede4e91..b33c9fa 100644
+--- a/src/components/sections/HeroImage.tsx
++++ b/src/components/sections/HeroImage.tsx
+@@ -3,39 +3,40 @@ import { TrendingUp, Sparkles } from "lucide-react";
+ 
+ export default function HeroImage() {
+   return (
+-    <div className="relative flex h-full w-full items-end justify-center">
++    <div className="relative flex h-full w-full items-center justify-center">
+ 
+-      {/* Gradient ring / glassmorphism frame behind the photo */}
++      {/* Ambient glow behind the frame */}
+       <div className="absolute inset-x-[6%] top-[4%] bottom-0 -z-10 rounded-[2.5rem] bg-gradient-to-br from-blue-200/60 via-white/40 to-orange-200/50 blur-2xl" />
+ 
+       <div className="relative w-[78%] sm:w-[64%] lg:w-[78%]">
+ 
+-        {/* Modern rounded frame with gradient border + soft shadow */}
++        {/* Gradient-border frame */}
+         <div className="relative rounded-[2rem] bg-gradient-to-br from-blue-400/40 via-white/60 to-orange-300/40 p-[3px] shadow-[0_30px_60px_-15px_rgba(37,99,235,0.35)]">
+           <div className="relative overflow-hidden rounded-[calc(2rem-3px)] bg-white/40 backdrop-blur-sm">
+ 
+-            {/* Blue radial glow — background */}
+-            <div className="pointer-events-none absolute bottom-0 left-0 h-[25%] w-full bg-gradient-to-b from-transparent via-white/30 to-white" />
+-
++            {/* ✅ object-center + object-cover so the boy is centered in the frame */}
+             <Image
+               src="/hero.png"
+               alt="Student with laptop"
+               width={520}
+-              height={600}
+-              className="relative z-10 w-full object-contain"
++              height={580}
++              className="relative z-10 h-[340px] w-full object-cover object-center sm:h-[420px] lg:h-[480px]"
+               priority
+             />
++
++            {/* Bottom fade to white */}
++            <div className="pointer-events-none absolute bottom-0 left-0 h-[20%] w-full bg-gradient-to-b from-transparent to-white/60" />
+           </div>
+         </div>
+ 
+-        {/* Floating decoration — top right sparkle chip */}
+-        <div className="absolute -top-4 -right-3 z-20 flex items-center gap-1.5 rounded-2xl bg-white/90 px-3 py-2 shadow-lg ring-1 ring-black/5 backdrop-blur-sm animate-bounce [animation-duration:3s]">
++        {/* Floating sparkle chip — top right */}
++        <div className="absolute -right-3 -top-4 z-20 flex animate-bounce items-center gap-1.5 rounded-2xl bg-white/90 px-3 py-2 shadow-lg ring-1 ring-black/5 backdrop-blur-sm [animation-duration:3s]">
+           <Sparkles className="h-3.5 w-3.5 text-orange-400" />
+           <span className="text-[11px] font-bold text-gray-700">AI Powered</span>
+         </div>
+ 
+-        {/* Stat card — bottom left, floating over the frame */}
+-        <div className="absolute bottom-[12%] left-[-8%] z-20 flex flex-col gap-1 rounded-2xl bg-white/95 px-4 py-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm sm:left-[-14px]">
++        {/* 94% stat card — bottom left */}
++        <div className="absolute bottom-[14%] left-[-8%] z-20 flex flex-col gap-1 rounded-2xl bg-white/95 px-4 py-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm sm:left-[-14px]">
+           <div className="flex items-center gap-1.5">
+             <TrendingUp className="h-4 w-4 text-green-500" />
+             <span className="text-base font-black text-gray-900">94%</span>
+@@ -46,16 +47,6 @@ export default function HeroImage() {
+             READAM students
+           </p>
+         </div>
+-
+-        {/* Soft white glow — bottom right */}
+-        <div
+-          className="absolute bottom-[5%] right-[-5%] z-10 h-[160px] w-[55%] pointer-events-none"
+-          style={{
+-            background:
+-              "radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 40%, transparent 70%)",
+-            filter: "blur(20px)",
+-          }}
+-        />
+       </div>
+     </div>
+   );
+diff --git a/src/hooks/use-auth.ts b/src/hooks/use-auth.ts
+index e69de29..3f5783c 100644
+--- a/src/hooks/use-auth.ts
++++ b/src/hooks/use-auth.ts
+@@ -0,0 +1,81 @@
++"use client";
++
++import { useState, useCallback } from "react";
++import { useRouter } from "next/navigation";
++import { toast } from "sonner";
++import AUTH from "@/services/auth.service";
++import { saveSession, clearSession, getStoredUser } from "@/lib/auth";
++import { isAdmin } from "@/lib/auth";
++import { ROUTES } from "@/lib/constants";
++import { ApiRequestError } from "@/lib/api";
++import type { LoginPayload, RegisterPayload } from "@/types/user.types";
++
++export function useAuth() {
++  const router = useRouter();
++  const [loading, setLoading] = useState(false);
++
++  const login = useCallback(
++    async (payload: LoginPayload) => {
++      setLoading(true);
++      try {
++        const data = await AUTH.login(payload);
++        saveSession(data);
++
++        toast.success(`Welcome back, ${data.user.full_name.split(" ")[0]}!`);
++
++        if (isAdmin(data.user)) {
++          router.push(ROUTES.admin);
++        } else {
++          router.push(ROUTES.welcomeBack);
++        }
++      } catch (err) {
++        const msg =
++          err instanceof ApiRequestError
++            ? err.detail
++            : "Login failed. Please try again.";
++        toast.error(msg);
++      } finally {
++        setLoading(false);
++      }
++    },
++    [router]
++  );
++
++  const register = useCallback(
++    async (payload: RegisterPayload) => {
++      setLoading(true);
++      try {
++        const data = await AUTH.register(payload);
++        saveSession(data);
++
++        // Store name for onboarding pages (keeps existing onboarding flow working)
++        localStorage.setItem("user_name", data.user.full_name);
++
++        toast.success("Account created!");
++        router.push(ROUTES.onboarding1);
++      } catch (err) {
++        const msg =
++          err instanceof ApiRequestError
++            ? err.detail
++            : "Sign up failed. Please try again.";
++        toast.error(msg);
++      } finally {
++        setLoading(false);
++      }
++    },
++    [router]
++  );
++
++  const logout = useCallback(async () => {
++    try {
++      await AUTH.logout();
++    } catch {
++      // best-effort
++    } finally {
++      clearSession();
++      router.push(ROUTES.login);
++    }
++  }, [router]);
++
++  return { login, register, logout, loading, user: getStoredUser() };
++}
+diff --git a/src/lib/api.ts b/src/lib/api.ts
+index e69de29..8d3211b 100644
+--- a/src/lib/api.ts
++++ b/src/lib/api.ts
+@@ -0,0 +1,81 @@
++/**
++ * Lightweight fetch-based API client.
++ * All endpoints are built on top of NEXT_PUBLIC_API_URL so switching
++ * environments only requires one env-var change.
++ */
++import { API_BASE_URL, TOKEN_KEY } from "@/lib/constants";
++import type { ApiError } from "@/types/user.types";
++
++function getToken(): string | null {
++  if (typeof window === "undefined") return null;
++  return localStorage.getItem(TOKEN_KEY);
++}
++
++export class ApiRequestError extends Error {
++  status: number;
++  detail: string;
++
++  constructor(status: number, detail: string) {
++    super(detail);
++    this.status = status;
++    this.detail = detail;
++  }
++}
++
++async function parseError(res: Response): Promise<string> {
++  try {
++    const body = (await res.json()) as ApiError;
++    if (typeof body.detail === "string") return body.detail;
++    if (Array.isArray(body.detail)) return body.detail.map((e) => e.msg).join(", ");
++  } catch {
++    // ignore parse error
++  }
++  return `Request failed (${res.status})`;
++}
++
++async function request<T>(
++  path: string,
++  options: RequestInit = {},
++  auth = false
++): Promise<T> {
++  const headers: Record<string, string> = {
++    "Content-Type": "application/json",
++    ...(options.headers as Record<string, string>),
++  };
++
++  if (auth) {
++    const token = getToken();
++    if (token) headers["Authorization"] = `Bearer ${token}`;
++  }
++
++  const res = await fetch(`${API_BASE_URL}${path}`, {
++    ...options,
++    headers,
++  });
++
++  if (!res.ok) {
++    const detail = await parseError(res);
++    throw new ApiRequestError(res.status, detail);
++  }
++
++  // 204 No Content
++  if (res.status === 204) return undefined as T;
++  return res.json() as Promise<T>;
++}
++
++export const api = {
++  get: <T>(path: string, auth = true) =>
++    request<T>(path, { method: "GET" }, auth),
++
++  post: <T>(path: string, body: unknown, auth = false) =>
++    request<T>(path, { method: "POST", body: JSON.stringify(body) }, auth),
++
++  put: <T>(path: string, body: unknown, auth = true) =>
++    request<T>(path, { method: "PUT", body: JSON.stringify(body) }, auth),
++
++  patch: <T>(path: string, body: unknown, auth = true) =>
++    request<T>(path, { method: "PATCH", body: JSON.stringify(body) }, auth),
++
++  delete: <T>(path: string, auth = true) =>
++    request<T>(path, { method: "DELETE" }, auth),
++};
+diff --git a/src/lib/auth.ts b/src/lib/auth.ts
+new file mode 100644
+index 0000000..7791f3f
+--- /dev/null
++++ b/src/lib/auth.ts
+@@ -0,0 +1,51 @@
++/**
++ * Client-side auth token management.
++ * Centralises all reads/writes to localStorage so we only need to change
++ * one file if we later switch to httpOnly cookies via a Next.js API proxy.
++ */
++import { TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY, ADMIN_ROLES } from "@/lib/constants";
++import type { User, AuthResponse } from "@/types/user.types";
++
++export function saveSession(data: AuthResponse): void {
++  localStorage.setItem(TOKEN_KEY, data.access_token);
++  localStorage.setItem(USER_KEY, JSON.stringify(data.user));
++  if (data.refresh_token) {
++    localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token);
++  }
++  // Also write role to a plain cookie so middleware can read it
++  // (middleware cannot access localStorage — it runs on the Edge)
++  document.cookie = `readam_role=${data.user.role}; path=/; max-age=${60 * 60 * 24 * 7}`;
++  document.cookie = `readam_auth=1; path=/; max-age=${60 * 60 * 24 * 7}`;
++}
++
++export function clearSession(): void {
++  localStorage.removeItem(TOKEN_KEY);
++  localStorage.removeItem(REFRESH_TOKEN_KEY);
++  localStorage.removeItem(USER_KEY);
++  document.cookie = "readam_role=; path=/; max-age=0";
++  document.cookie = "readam_auth=; path=/; max-age=0";
++}
++
++export function getStoredUser(): User | null {
++  if (typeof window === "undefined") return null;
++  try {
++    const raw = localStorage.getItem(USER_KEY);
++    return raw ? (JSON.parse(raw) as User) : null;
++  } catch {
++    return null;
++  }
++}
++
++export function getToken(): string | null {
++  if (typeof window === "undefined") return null;
++  return localStorage.getItem(TOKEN_KEY);
++}
++
++export function isAuthenticated(): boolean {
++  return !!getToken();
++}
++
++export function isAdmin(user: User | null): boolean {
++  if (!user) return false;
++  return (ADMIN_ROLES as readonly string[]).includes(user.role);
++}
+diff --git a/src/lib/constants.ts b/src/lib/constants.ts
+index e69de29..e7cdb95 100644
+--- a/src/lib/constants.ts
++++ b/src/lib/constants.ts
+@@ -0,0 +1,19 @@
++export const API_BASE_URL =
++  process.env.NEXT_PUBLIC_API_URL ?? "https://web-production-0dce.up.railway.app";
++
++export const TOKEN_KEY = "readam_access_token";
++export const REFRESH_TOKEN_KEY = "readam_refresh_token";
++export const USER_KEY = "readam_user";
++
++export const ADMIN_ROLES = ["admin", "super_admin"] as const;
++
++export const ROUTES = {
++  home: "/",
++  login: "/login",
++  signup: "/signup",
++  onboarding1: "/onboarding-1",
++  onboarding2: "/onboarding-2",
++  welcomeBack: "/welcome-back",
++  admin: "/admin",
++  adminLogin: "/admin/login",
++} as const;
+diff --git a/src/middleware.ts b/src/middleware.ts
+new file mode 100644
+index 0000000..8274038
+--- /dev/null
++++ b/src/middleware.ts
+@@ -0,0 +1,63 @@
++/**
++ * Next.js Edge Middleware — route protection.
++ *
++ * Reads two cookies written by src/lib/auth.ts after a successful login:
++ *   readam_auth=1          → user is authenticated
++ *   readam_role=admin      → user role
++ *
++ * Rules
++ * ─────
++ *   /admin/*    → must be authenticated AND have role admin|super_admin
++ *   /onboarding-* /welcome-back → must be authenticated
++ *   /login /signup → redirect to home if already authenticated
++ */
++import { NextResponse } from "next/server";
++import type { NextRequest } from "next/server";
++import { ADMIN_ROLES } from "@/lib/constants";
++
++const ADMIN_ROUTES = /^\/admin(\/|$)/;
++const AUTH_REQUIRED = /^\/(onboarding-\d|welcome-back)/;
++const GUEST_ONLY = /^\/(login|signup)(\/|$)/;
++
++export function middleware(req: NextRequest) {
++  const { pathname } = req.nextUrl;
++
++  const isAuth = req.cookies.get("readam_auth")?.value === "1";
++  const role = req.cookies.get("readam_role")?.value ?? "";
++  const isAdminRole = (ADMIN_ROLES as readonly string[]).includes(role);
++
++  /* ── Admin routes ───────────────────────────────────────── */
++  if (ADMIN_ROUTES.test(pathname)) {
++    // Not logged in at all → go to admin login page
++    if (!isAuth) {
++      return NextResponse.redirect(new URL("/admin/login", req.url));
++    }
++    // Logged in but not an admin → go home
++    if (!isAdminRole) {
++      return NextResponse.redirect(new URL("/", req.url));
++    }
++  }
++
++  /* ── Auth-required routes (onboarding, welcome-back) ───── */
++  if (AUTH_REQUIRED.test(pathname) && !isAuth) {
++    return NextResponse.redirect(new URL("/login", req.url));
++  }
++
++  /* ── Guest-only routes (login, signup) ──────────────────── */
++  if (GUEST_ONLY.test(pathname) && isAuth) {
++    const dest = isAdminRole ? "/admin" : "/";
++    return NextResponse.redirect(new URL(dest, req.url));
++  }
++
++  return NextResponse.next();
++}
++
++export const config = {
++  matcher: [
++    "/admin/:path*",
++    "/onboarding-:path*",
++    "/welcome-back",
++    "/login",
++    "/signup",
++  ],
++};
+diff --git a/src/services/admin.service.ts b/src/services/admin.service.ts
+new file mode 100644
+index 0000000..6dc23ac
+--- /dev/null
++++ b/src/services/admin.service.ts
+@@ -0,0 +1,47 @@
++/**
++ * Admin service — wraps every admin API endpoint.
++ * All calls require a valid admin JWT (auth = true).
++ *
++ * Swap the placeholder paths below once the real API docs confirm routes.
++ */
++import { api } from "@/lib/api";
++
++const ADMIN = {
++  /* ── Dashboard ──────────────────────────────────────────── */
++  getDashboardStats: () => api.get("/admin/dashboard/stats"),
++  getRecentActivity: () => api.get("/admin/dashboard/activity"),
++
++  /* ── Courses ─────────────────────────────────────────────── */
++  getCourses: (page = 1, q = "") =>
++    api.get(`/admin/courses?page=${page}&q=${encodeURIComponent(q)}`),
++  approveCourse: (id: string) => api.patch(`/admin/courses/${id}/approve`, {}),
++  rejectCourse: (id: string) => api.patch(`/admin/courses/${id}/reject`, {}),
++
++  /* ── Tutors ──────────────────────────────────────────────── */
++  getTutors: (page = 1, q = "") =>
++    api.get(`/admin/tutors?page=${page}&q=${encodeURIComponent(q)}`),
++  verifyTutor: (id: string) => api.patch(`/admin/tutors/${id}/verify`, {}),
++  suspendTutor: (id: string) => api.patch(`/admin/tutors/${id}/suspend`, {}),
++
++  /* ── Students ────────────────────────────────────────────── */
++  getStudents: (page = 1, q = "") =>
++    api.get(`/admin/students?page=${page}&q=${encodeURIComponent(q)}`),
++  suspendStudent: (id: string) => api.patch(`/admin/students/${id}/suspend`, {}),
++
++  /* ── Payments ────────────────────────────────────────────── */
++  getPaymentStats: () => api.get("/admin/payments/stats"),
++  getTransactions: (page = 1) => api.get(`/admin/payments/transactions?page=${page}`),
++
++  /* ── AI Insights ─────────────────────────────────────────── */
++  getTopQuestions: () => api.get("/admin/ai/top-questions"),
++  getStruggleTopics: () => api.get("/admin/ai/struggle-topics"),
++  getAtRiskStudents: () => api.get("/admin/ai/at-risk"),
++
++  /* ── Settings ────────────────────────────────────────────── */
++  getPlatformSettings: () => api.get("/admin/settings"),
++  updatePlatformSettings: (body: Record<string, unknown>) =>
++    api.patch("/admin/settings", body),
++  getRoles: () => api.get("/admin/roles"),
++};
++
++export default ADMIN;
+diff --git a/src/services/auth.service.ts b/src/services/auth.service.ts
+new file mode 100644
+index 0000000..947544b
+--- /dev/null
++++ b/src/services/auth.service.ts
+@@ -0,0 +1,33 @@
++/**
++ * Auth service — wraps every authentication API endpoint.
++ *
++ * Endpoints are based on the backend API at:
++ *   https://web-production-0dce.up.railway.app/docs
++ *
++ * Update the path strings below if the actual routes differ from these
++ * conventional FastAPI defaults.
++ */
++import { api } from "@/lib/api";
++import type { AuthResponse, LoginPayload, RegisterPayload, User } from "@/types/user.types";
++
++const AUTH = {
++  /** POST /auth/register */
++  register: (payload: RegisterPayload) =>
++    api.post<AuthResponse>("/auth/register", payload),
++
++  /** POST /auth/login  (form-encoded or JSON — adjust if needed) */
++  login: (payload: LoginPayload) =>
++    api.post<AuthResponse>("/auth/login", payload),
++
++  /** GET /auth/me — returns the current user from their JWT */
++  me: () => api.get<User>("/auth/me", true),
++
++  /** POST /auth/logout */
++  logout: () => api.post<void>("/auth/logout", {}, true),
++
++  /** POST /auth/refresh */
++  refresh: (refreshToken: string) =>
++    api.post<AuthResponse>("/auth/refresh", { refresh_token: refreshToken }),
++};
++
++export default AUTH;
+diff --git a/src/types/user.types.ts b/src/types/user.types.ts
+index e69de29..cc0ea7c 100644
+--- a/src/types/user.types.ts
++++ b/src/types/user.types.ts
+@@ -0,0 +1,40 @@
++export type UserRole = "student" | "tutor" | "admin" | "super_admin";
++
++export interface User {
++  id: string;
++  full_name: string;
++  email: string;
++  role: UserRole;
++  is_active: boolean;
++  avatar_url?: string;
++  created_at?: string;
++}
++
++export interface AuthTokens {
++  access_token: string;
++  token_type: string;
++  refresh_token?: string;
++}
++
++export interface AuthResponse {
++  user: User;
++  access_token: string;
++  token_type: string;
++  refresh_token?: string;
++}
++
++export interface LoginPayload {
++  email: string;
++  password: string;
++}
++
++export interface RegisterPayload {
++  full_name: string;
++  email: string;
++  password: string;
++}
++
++export interface ApiError {
++  detail: string | { msg: string; type: string }[];
++  status?: number;
++}

@@ -1,98 +1,139 @@
 "use client";
 
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { z } from "zod/v4";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
+
+const schema = z
+  .object({
+    full_name: z.string().min(2, "Enter your full name"),
+    email: z.email("Enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirm_password: z.string(),
+  })
+  .refine((d) => d.password === d.confirm_password, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
+
+type FormData = z.infer<typeof schema>;
 
 export default function SignupForm() {
-  const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const router = useRouter();
+  const { register: registerUser, loading } = useAuth();
+  const [showPw, setShowPw] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-    // Save to localStorage
-    localStorage.setItem("user_name", name);
-    localStorage.setItem("user_email", email);
-    localStorage.setItem("user_password", password);
-    localStorage.setItem("login_type", "signup");
-
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/onboarding-1");
-    }, 1000);
+  function onSubmit({ full_name, email, password }: FormData) {
+    registerUser({ full_name, email, password });
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl bg-white p-6 sm:p-8 shadow-sm border">
-
-      <h1 className="text-3xl font-bold text-center">
-        Create Your <span className="text-blue-600">ReadAm</span> Account
+    <div className="w-full max-w-md rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
+      <h1 className="text-center text-3xl font-bold">
+        Create Your <span className="text-blue-600">ReadAM</span> Account
       </h1>
-
-      <p className="mt-2 text-center text-gray-500 text-sm">
+      <p className="mt-2 text-center text-sm text-gray-500">
         Join students learning smarter with AI
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+        {/* Full name */}
         <div>
           <label className="text-sm text-gray-600">Full Name</label>
           <input
             type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            autoComplete="name"
+            {...register("full_name")}
             placeholder="John Doe"
             className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
           />
+          {errors.full_name && (
+            <p className="mt-1 text-xs text-red-500">{errors.full_name.message}</p>
+          )}
         </div>
 
+        {/* Email */}
         <div>
           <label className="text-sm text-gray-600">Email</label>
           <input
             type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            {...register("email")}
             placeholder="you@example.com"
             className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
           />
+          {errors.email && (
+            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+          )}
         </div>
 
+        {/* Password */}
         <div>
           <label className="text-sm text-gray-600">Password</label>
+          <div className="relative">
+            <input
+              type={showPw ? "text" : "password"}
+              autoComplete="new-password"
+              {...register("password")}
+              placeholder="••••••••"
+              className="mt-1 w-full rounded-xl border px-4 py-3 pr-11 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPw((v) => !v)}
+              className="absolute right-3 top-1/2 mt-0.5 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label={showPw ? "Hide password" : "Show password"}
+            >
+              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
+          )}
+        </div>
+
+        {/* Confirm password */}
+        <div>
+          <label className="text-sm text-gray-600">Confirm Password</label>
           <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            type={showPw ? "text" : "password"}
+            autoComplete="new-password"
+            {...register("confirm_password")}
             placeholder="••••••••"
             className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
           />
+          {errors.confirm_password && (
+            <p className="mt-1 text-xs text-red-500">
+              {errors.confirm_password.message}
+            </p>
+          )}
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 active:scale-[0.98] transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "Creating account..." : "Sign Up"}
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          {loading ? "Creating account…" : "Sign Up"}
         </button>
-
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-500 sm:hidden">
         Already have an account?{" "}
-        <Link className="text-blue-600 font-medium" href="/login">
+        <Link className="font-medium text-blue-600" href="/login">
           Sign In
         </Link>
       </p>
-
     </div>
   );
 }

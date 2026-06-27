@@ -1,3 +1,4 @@
+import AuthPageLayout from "@/components/auth/AuthLayout";
 import AuthNavbar from "@/components/auth/AuthNavbar";
 import LoginForm from "@/components/auth/LoginForm";
 
@@ -23,7 +24,9 @@ export default function Page() {
         py-10
         "
       >
-        <LoginForm />
+        <AuthPageLayout>
+          <LoginForm />
+        </AuthPageLayout>
       </section>
 
     </main>

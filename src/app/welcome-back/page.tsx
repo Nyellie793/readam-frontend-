@@ -1,27 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Welcome from "@/components/onboarding/Welcome";
 import OnboardingShell from "@/components/onboarding/OnboardingShell";
 
-function getStoredName(): string {
-  if (typeof window === "undefined") return "there";
-  return localStorage.getItem("user_name") || "there";
-}
-
-function getStoredInterests(name: string): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(`${name}_interests`);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
 export default function WelcomeBack() {
-  const [name] = useState<string>(getStoredName);
-  const [interests] = useState<string[]>(() => getStoredInterests(name));
+  // Start with safe SSR defaults — both server and client render the same
+  // thing on first pass, eliminating the hydration mismatch.
+  const [name, setName] = useState<string>("there");
+  const [interests, setInterests] = useState<string[]>([]);
+
+  // After mount (client only), pull the real values from localStorage.
+  useEffect(() => {
+    const storedName = localStorage.getItem("user_name") || "there";
+
+    const storedInterests = (() => {
+      try {
+        const raw = localStorage.getItem(`${storedName}_interests`);
+        return raw ? (JSON.parse(raw) as string[]) : [];
+      } catch {
+        return [];
+      }
+    })();
+
+    setName(storedName);
+    setInterests(storedInterests);
+  }, []);
 
   return (
     <OnboardingShell currentStep={2}>

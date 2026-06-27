@@ -1,5 +1,3 @@
-"use client";
-
 import Topbar from "@/components/admin/Topbar";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
