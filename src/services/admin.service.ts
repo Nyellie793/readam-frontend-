@@ -1,47 +1,49 @@
-/**
- * Admin service — wraps every admin API endpoint.
- * All calls require a valid admin JWT (auth = true).
- *
- * Swap the placeholder paths below once the real API docs confirm routes.
- */
 import { api } from "@/lib/api";
 
 const ADMIN = {
-  /* ── Dashboard ──────────────────────────────────────────── */
-  getDashboardStats: () => api.get("/admin/dashboard/stats"),
-  getRecentActivity: () => api.get("/admin/dashboard/activity"),
+  /* ── Dashboard stats ─────────────────────────────────────────────────────── */
+  /** GET /v1/admin/stats — courses, tutors, students counts */
+  getStats: () => api.get("/v1/admin/stats"),
 
-  /* ── Courses ─────────────────────────────────────────────── */
-  getCourses: (page = 1, q = "") =>
-    api.get(`/admin/courses?page=${page}&q=${encodeURIComponent(q)}`),
-  approveCourse: (id: string) => api.patch(`/admin/courses/${id}/approve`, {}),
-  rejectCourse: (id: string) => api.patch(`/admin/courses/${id}/reject`, {}),
+  /* ── Users ───────────────────────────────────────────────────────────────── */
+  /** GET /v1/admin/users?role=student|tutor|admin&page=1&page_size=20 */
+  getUsers: (page = 1, role?: string) =>
+    api.get(`/v1/admin/users?page=${page}${role ? `&role=${role}` : ""}`),
 
-  /* ── Tutors ──────────────────────────────────────────────── */
-  getTutors: (page = 1, q = "") =>
-    api.get(`/admin/tutors?page=${page}&q=${encodeURIComponent(q)}`),
-  verifyTutor: (id: string) => api.patch(`/admin/tutors/${id}/verify`, {}),
-  suspendTutor: (id: string) => api.patch(`/admin/tutors/${id}/suspend`, {}),
+  /** PATCH /v1/admin/users/{user_id} — suspend/reactivate or change role */
+  updateUser: (userId: string, body: { is_active?: boolean; role?: string }) =>
+    api.patch(`/v1/admin/users/${userId}`, body),
 
-  /* ── Students ────────────────────────────────────────────── */
-  getStudents: (page = 1, q = "") =>
-    api.get(`/admin/students?page=${page}&q=${encodeURIComponent(q)}`),
-  suspendStudent: (id: string) => api.patch(`/admin/students/${id}/suspend`, {}),
+  /* ── Tutors ──────────────────────────────────────────────────────────────── */
+  /** GET /v1/admin/tutors?filter_by=all|verified|pending_verification */
+  getTutors: (page = 1, filter: "all" | "verified" | "pending_verification" = "all") =>
+    api.get(`/v1/admin/tutors?page=${page}&filter_by=${filter}`),
 
-  /* ── Payments ────────────────────────────────────────────── */
-  getPaymentStats: () => api.get("/admin/payments/stats"),
-  getTransactions: (page = 1) => api.get(`/admin/payments/transactions?page=${page}`),
+  /** PATCH /v1/admin/tutors/{tutor_id}/verify */
+  verifyTutor: (tutorId: string, is_verified: boolean) =>
+    api.patch(`/v1/admin/tutors/${tutorId}/verify`, { is_verified }),
 
-  /* ── AI Insights ─────────────────────────────────────────── */
-  getTopQuestions: () => api.get("/admin/ai/top-questions"),
-  getStruggleTopics: () => api.get("/admin/ai/struggle-topics"),
-  getAtRiskStudents: () => api.get("/admin/ai/at-risk"),
+  /* ── Courses ─────────────────────────────────────────────────────────────── */
+  /** GET /v1/admin/courses?status=pending_review|published|draft|rejected */
+  getCourses: (page = 1, status?: string) =>
+    api.get(`/v1/admin/courses?page=${page}${status ? `&status=${status}` : ""}`),
 
-  /* ── Settings ────────────────────────────────────────────── */
-  getPlatformSettings: () => api.get("/admin/settings"),
-  updatePlatformSettings: (body: Record<string, unknown>) =>
-    api.patch("/admin/settings", body),
-  getRoles: () => api.get("/admin/roles"),
+  /** GET /v1/admin/courses/{course_id} */
+  getCourseDetail: (courseId: string) =>
+    api.get(`/v1/admin/courses/${courseId}`),
+
+  /** POST /v1/admin/courses/{course_id}/approve */
+  approveCourse: (courseId: string) =>
+    api.post(`/v1/admin/courses/${courseId}/approve`, {}, true),
+
+  /** POST /v1/admin/courses/{course_id}/reject */
+  rejectCourse: (courseId: string) =>
+    api.post(`/v1/admin/courses/${courseId}/reject`, {}, true),
+
+  /* ── Students ────────────────────────────────────────────────────────────── */
+  /** GET /v1/admin/students?search=&page=1&page_size=20 */
+  getStudents: (page = 1, search = "") =>
+    api.get(`/v1/admin/students?page=${page}${search ? `&search=${encodeURIComponent(search)}` : ""}`),
 };
 
 export default ADMIN;
