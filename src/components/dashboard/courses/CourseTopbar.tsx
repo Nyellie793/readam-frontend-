@@ -4,7 +4,7 @@ import { Bell, Menu, Search, Sparkles } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import { Input } from "@/components/ui/Input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import CourseFilters from "@/components/courses/CourseFilters";
+import CourseFilters from "@/components/dashboard/courses/CourseFilters";
 
 interface CourseTopbarProps {
   searchPlaceholder?: string;
@@ -27,8 +27,8 @@ export default function CourseTopbar({
           <SheetTrigger className="rounded-lg p-2 transition hover:bg-gray-100 lg:hidden">
             <Menu className="h-5 w-5 text-gray-700" />
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
-            <CourseFilters />
+          <SheetContent side="left" className="w-72 overflow-y-auto p-0">
+            <CourseFilters showLogo={false}/>
           </SheetContent>
         </Sheet>
       )}

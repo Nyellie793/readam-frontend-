@@ -7,9 +7,15 @@ import LanguageToggle from "../shared/LanguageToggle";
 import ThemeToggle from "../shared/ThemeToggle";
 import { NAV_LINKS } from "@/constants/navigation";
 import { usePathname } from "next/navigation";
+import UserDropdown from "../auth/UserDropdown";
+import { getStoredUser } from "@/lib/auth";
 
 export default function Navbar() {
   const pathname = usePathname();
+
+  const user = getStoredUser();
+
+  const isAuthenticated = !!user;
 
   const isAuthPage =
     pathname === "/login" || pathname === "/signup";
@@ -57,15 +63,18 @@ export default function Navbar() {
             <LanguageToggle />
             <ThemeToggle />
 
-            <Link
-              href="/login"
-              className="
-                rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white
-                transition hover:bg-blue-700
-              "
-            >
-              Log In
-            </Link>
+            {isAuthenticated ? (
+              <UserDropdown email={user?.email}/>
+            ) : (
+              <Link 
+                href="/login"
+                className="
+                  rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white
+                  transition hover:bg-blue-700
+                  ">
+                    Log In
+                  </Link>
+            )}
           </div>
         ) : (
           // AUTH PAGES: keep ONLY minimal actions if needed

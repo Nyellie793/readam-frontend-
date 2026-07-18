@@ -39,7 +39,7 @@ export default function SignupForm() {
 
   function onSubmit({ full_name, email, password }: FormData) {
     // role is passed separately — useAuth.register calls /v1/auth/role after /v1/auth/register
-    registerUser({ name: full_name, email, password, role });
+    registerUser({ full_name: full_name, email, password, role });
   }
 
   return (

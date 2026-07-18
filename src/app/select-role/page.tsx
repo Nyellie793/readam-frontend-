@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaGraduationCap } from "react-icons/fa6";
-import Link from "next/link";
 import { User, Bot } from "lucide-react";
+import Logo from "@/components/shared/Logo";
 
 const ROLES = [
   { id: "student", title: "Student", description: "Access personalized learning paths, AI tutoring, and track your progress.", Icon: User },
@@ -19,7 +18,7 @@ export default function SelectRolePage() {
   return (
     <main className="min-h-screen bg-[#F4F6FB]">
       <header className="border-b bg-white px-6 py-4">
-        <Link href="/"><FaGraduationCap className="h-7 w-7 text-blue-600" /></Link>
+        <Logo />
       </header>
       <div className="mx-auto flex min-h-[calc(100vh-65px)] max-w-3xl flex-col items-center justify-center px-6 py-14">
         <h1 className="text-center text-4xl font-black text-gray-900">How will you use ReadAm?</h1>

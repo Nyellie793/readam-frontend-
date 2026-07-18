@@ -19,7 +19,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex min-h-full flex-col bg-white">
       <div className="px-6 py-6">
         <Logo />
       </div>

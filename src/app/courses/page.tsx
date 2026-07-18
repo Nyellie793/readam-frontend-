@@ -1,8 +1,8 @@
 import { ChevronDown } from "lucide-react";
-import CourseTopbar from "@/components/courses/CourseTopbar";
-import CourseFilters from "@/components/courses/CourseFilters";
-import CourseCard from "@/components/courses/CourseCard";
-import AiTutorBanner from "@/components/courses/AiTutorBanner";
+import CourseTopbar from "@/components/dashboard/courses/CourseTopbar";
+import CourseFilters from "@/components/dashboard/courses/CourseFilters";
+import CourseCard from "@/components/dashboard/courses/CourseCard";
+import AiTutorBanner from "@/components/dashboard/courses/AiTutorBanner";
 import { RECOMMENDED_COURSES, POPULAR_COURSES } from "@/data/courses";
 
 export default function CoursesPage() {

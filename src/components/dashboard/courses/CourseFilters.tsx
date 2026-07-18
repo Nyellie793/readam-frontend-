@@ -15,6 +15,7 @@ const CONTENT_TYPES = [
 
 interface CourseFiltersProps {
   onNavigate?: () => void;
+  showLogo?: boolean;
 }
 
 /**
@@ -23,15 +24,20 @@ interface CourseFiltersProps {
  * Reused as-is inside the desktop fixed sidebar and inside a mobile
  * <Sheet> the same way admin/Sidebar does.
  */
-export default function CourseFilters({ onNavigate }: CourseFiltersProps) {
+export default function CourseFilters({ 
+  onNavigate,
+  showLogo = true,
+ }: CourseFiltersProps) {
   const pathname = usePathname();
   const navItems = STUDENT_NAV.slice(0, 3);
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <div className="px-6 py-6">
-        <Logo />
-      </div>
+      {showLogo && (
+        <div className="px-6 py-6 border-gray-100">
+          <Logo />
+        </div>
+      )}
 
       <nav className="space-y-1 px-3">
         {navItems.map((item) => {

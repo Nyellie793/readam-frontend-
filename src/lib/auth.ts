@@ -50,3 +50,15 @@ export function isAdmin(user: User | null): boolean {
   if (!user || !user.role) return false;
   return (ADMIN_ROLES as readonly string[]).includes(user.role);
 }
+
+export function logout() {
+  document.cookie =
+    "readam_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+
+  document.cookie =
+    "readam_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("refresh_token");
+  localStorage.removeItem("user");
+}
