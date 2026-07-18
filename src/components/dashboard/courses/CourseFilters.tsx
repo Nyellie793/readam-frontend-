@@ -32,7 +32,7 @@ export default function CourseFilters({
   const navItems = STUDENT_NAV.slice(0, 3);
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex min-h-full flex-col bg-white">
       {showLogo && (
         <div className="px-6 py-6 border-gray-100">
           <Logo />
@@ -94,7 +94,7 @@ export default function CourseFilters({
         </div>
       </div>
 
-      <div className="mt-auto p-6">
+      <div className="mt-auto pt-10 p-6">
         <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
           <p className="text-sm font-semibold text-gray-900">Study Streak</p>
           <div className="mt-2 flex items-center gap-1.5 text-sm">

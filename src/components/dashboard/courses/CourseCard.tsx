@@ -1,3 +1,6 @@
+"use client"
+
+import Link from "next/link";
 import Image from "next/image";
 import { Bookmark, Play, Star } from "lucide-react";
 import type { Course } from "@/types/course.types";
@@ -10,17 +13,14 @@ const TAG_TONE: Record<NonNullable<Course["tags"][number]["tone"]>, string> = {
   premium: "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white",
 };
 
-/**
- * Reused across the dashboard "Recommended for You" grid and the
- * /courses catalog (recommended + popular sections). Pass any Course
- * shaped object — this is designed to consume live API data later
- * with no markup changes.
- */
 export default function CourseCard({ course }: { course: Course }) {
   const isVideo = course.format === "Video" || course.format === "Interactive";
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <Link
+      href={`/dashboard/courses/${course.id}`}
+      className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+    >
       <div className="relative aspect-16/10 w-full overflow-hidden bg-gray-100">
         <Image
           src={course.image}
@@ -58,6 +58,7 @@ export default function CourseCard({ course }: { course: Course }) {
           </h3>
           <button
             aria-label="Save course"
+            onClick={(e) => e.preventDefault()}
             className="shrink-0 text-gray-400 transition-colors hover:text-gray-700"
           >
             <Bookmark className="size-[18px]" />
@@ -83,19 +84,18 @@ export default function CourseCard({ course }: { course: Course }) {
 
         <div className="mt-1 flex items-center justify-between border-t border-gray-100 pt-3">
           <span className="text-sm font-semibold text-gray-900">{course.price}</span>
-          <button
-            type="button"
+          <span
             className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+              "rounded-lg px-3 py-1.5 text-xs font-semibold",
               course.cta === "Upgrade to Premium"
-                ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
-                : "bg-blue-600 text-white hover:bg-blue-700"
+                ? "bg-gray-100 text-gray-900"
+                : "bg-blue-600 text-white"
             )}
           >
             {course.cta}
-          </button>
+          </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
