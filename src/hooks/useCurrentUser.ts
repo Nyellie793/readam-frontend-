@@ -7,9 +7,10 @@ export default function useCurrentUser() {
 
   return {
     user,
+
+
     name:
       user?.full_name ??
-      user?.name ??
       "Student",
 
     email:
@@ -17,7 +18,6 @@ export default function useCurrentUser() {
       "",
 
     avatar:
-      user?.profile_picture ??
       "",
   };
 }

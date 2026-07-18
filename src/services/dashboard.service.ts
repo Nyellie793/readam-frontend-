@@ -1,28 +1,13 @@
-import {api} from "@/lib/api";
+import { api } from "@/lib/api";
 
 export async function getDashboard() {
-
-    const response =
-        await api.get("/student/dashboard");
-
-    return response.data;
-
+  return await api.get("/student/dashboard");
 }
 
 export async function getRecommendedCourses() {
-
-    const response =
-        await api.get("/courses/recommended");
-
-    return response.data;
-
+  return await api.get("/courses/recommended");
 }
 
 export async function getRecentlyViewed() {
-
-    const response =
-        await api.get("/courses/recent");
-
-    return response.data;
-
+  return await api.get("/courses/recent");
 }

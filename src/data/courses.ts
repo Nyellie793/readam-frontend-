@@ -146,17 +146,3 @@ export const DASHBOARD_RECOMMENDED: Course[] = [
 ];
 
 
-export interface Course {
-  id: string;
-  title: string;
-  instructor: string;
-  instructorRole?: string;
-  description?: string;   // ADD THIS
-  rating: number;
-  reviews: string;
-  price: string;
-  image: string;
-  tags: CourseTag[];
-  cta: CourseCTA;
-  format: CourseFormat;
-}

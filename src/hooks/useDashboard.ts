@@ -1,37 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { getDashboard } from "@/services/dashboard.service";
 
-export default function useDashboard(){
+export default function useDashboard() {
+  const [dashboard, setDashboard] = useState<unknown>(null);
 
-    const [dashboard,setDashboard] = useState();
+  const [loading, setLoading] = useState(true);
 
-    const [loading,setLoading] = useState(true);
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getDashboard();
+        setDashboard(data);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    useEffect(()=>{
+    load();
+  }, []);
 
-        async function load(){
-
-            const data = await getDashboard();
-
-            setDashboard(data);
-
-            setLoading(false);
-
-        }
-
-        load();
-
-    },[]);
-
-    return {
-
-        dashboard,
-
-        loading
-
-    };
-
+  return {
+    dashboard,
+    loading,
+  };
 }
