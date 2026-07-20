@@ -120,6 +120,13 @@ export default function SignupForm() {
           <GoogleIcon />
           Sign in with Google
         </button>
+        {/* Mobile only — visible when navbar auth link is hidden */}
+        <p className="mt-6 text-center text-sm text-gray-500 sm:hidden">
+          Already have an account?{" "}
+          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+            Sign In
+          </Link>
+        </p>
       </form>
     </div>
   );

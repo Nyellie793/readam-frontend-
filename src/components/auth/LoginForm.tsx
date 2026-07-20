@@ -94,6 +94,14 @@ export default function LoginForm() {
           <GoogleIcon />
           Sign in with Google
         </button>
+
+        {/* Mobile only - visible when navbar auth link is hidden*/}
+        <p className="mt-6 text-center text-sm text-gray-500 sm:hidden">
+          No account yet?{" "}
+          <Link href="/select-role" className="font-semibold text-blue-600 hover:underline">
+            Sign Up
+          </Link>
+        </p>
       </form>
     </div>
   );

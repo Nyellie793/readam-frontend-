@@ -6,20 +6,19 @@ import ContinueLearningCard from "@/components/dashboard/courses/ContinueLearnin
 import { COURSE_OUTLINE, CONTINUE_LEARNING } from "@/data/student-mock";
 import { RECOMMENDED_COURSES, POPULAR_COURSES } from "@/data/courses";
 
-// Find the course from all available courses by id
 function getCourse(id: string) {
   return [...RECOMMENDED_COURSES, ...POPULAR_COURSES].find((c) => c.id === id);
 }
 
-export default function LessonPage({
+export default async function LessonPage({
   params,
 }: {
-  params: { courseId: string };
+  params: Promise<{ courseId: string }>;
 }) {
-  const course = getCourse(params.courseId);
+  const { courseId } = await params;
+  const course = getCourse(courseId);
   const isPdf = course?.format === "PDF";
 
-  // PDF courses get their own full-screen reader layout
   if (isPdf) {
     return (
       <PdfViewer
@@ -29,7 +28,6 @@ export default function LessonPage({
     );
   }
 
-  // Video / Interactive layout
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10">
