@@ -1,133 +1,91 @@
-"use client";
-
-import { useState } from "react";
-import { ChevronDown, Menu, Search, Bell, Sparkles, X } from "lucide-react";
-import CourseCard from "@/components/dashboard/courses/CourseCard";
-import AiTutorBanner from "@/components/dashboard/courses/AiTutorBanner";
-import CourseSidebar from "@/components/dashboard/courses/CoursesSidebar";
-import CourseFilters from "@/components/dashboard/courses/CourseFilters";
+import { Download } from "lucide-react";
+import VideoPlayer from "@/components/dashboard/courses/VideoPlayer";
+import PdfViewer from "@/components/dashboard/courses/PDFViewer";
+import CourseOutline from "@/components/dashboard/courses/CourseOutline";
+import ContinueLearningCard from "@/components/dashboard/courses/ContinueLearningCard";
+import { COURSE_OUTLINE, CONTINUE_LEARNING } from "@/data/student-mock";
 import { RECOMMENDED_COURSES, POPULAR_COURSES } from "@/data/courses";
 
-export default function CoursesPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+function getCourse(id: string) {
+  return [...RECOMMENDED_COURSES, ...POPULAR_COURSES].find(c => c.id === id);
+}
+
+export default async function LessonPage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  const { courseId } = await params;
+  const course = getCourse(courseId);
+  const isPdf = course?.format === "PDF";
+
+  if (isPdf) {
+    return (
+      <PdfViewer
+        title={course?.title ?? "Course Document"}
+        totalPages={45}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10">
+        <div className="flex flex-col gap-6 lg:flex-row">
 
-      {/* ── Mobile top bar ── */}
-      <div className="flex h-14 items-center justify-between border-b border-gray-100 bg-white px-4 lg:hidden">
-        {/* Hamburger opens course filters drawer */}
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100"
-          aria-label="Open filters"
-        >
-          <Menu size={20} />
-        </button>
+          <div className="min-w-0 flex-1">
+            <VideoPlayer
+              poster="https://picsum.photos/seed/lecture-screen/1200/675"
+              currentTime="12:45"
+              duration="45:00"
+              progress={28}
+            />
 
-        <span className="text-sm font-semibold text-gray-800">Explore Courses</span>
-
-        <div className="flex items-center gap-1">
-          <button onClick={() => setSearchOpen(o => !o)}
-            className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label="Search">
-            <Search className="size-5" />
-          </button>
-          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label="Notifications">
-            <Bell className="size-5" />
-          </button>
-          <button className="rounded-full p-2 text-violet-500 hover:bg-gray-100" aria-label="AI">
-            <Sparkles className="size-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile search bar — expands when search icon tapped */}
-      {searchOpen && (
-        <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-2 lg:hidden">
-          <Search className="size-4 shrink-0 text-gray-400" />
-          <input
-            autoFocus
-            placeholder="Search for courses..."
-            className="flex-1 bg-transparent text-sm outline-none"
-          />
-          <button onClick={() => setSearchOpen(false)}>
-            <X className="size-4 text-gray-400" />
-          </button>
-        </div>
-      )}
-
-      {/* Mobile filter drawer */}
-      {drawerOpen && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/40 lg:hidden"
-            onClick={() => setDrawerOpen(false)} />
-          <aside className="fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-white shadow-xl lg:hidden">
-            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
-              <span className="text-sm font-semibold text-gray-700">Filters</span>
-              <button onClick={() => setDrawerOpen(false)}
-                className="rounded-lg p-1.5 hover:bg-gray-100">
-                <X className="size-5 text-gray-600" />
+            <div className="mt-5 flex items-start justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-blue-600">
+                  {course?.tags[1]?.label ?? "Course"} • Chapter 1
+                </p>
+                <h1 className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">
+                  {course?.title ?? "Course Lesson"}
+                </h1>
+                <p className="mt-3 text-sm leading-relaxed text-gray-500">
+                  In this module, we explore the fundamental techniques covered in this lesson,
+                  building on core concepts and applying them to practical problems.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="flex shrink-0 items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-gray-50"
+              >
+                <Download className="size-4" />
+                Resources
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <CourseFilters showLogo={false} onNavigate={() => setDrawerOpen(false)} />
-            </div>
-          </aside>
-        </>
-      )}
 
-      {/* ── Desktop topbar ── */}
-      <header className="hidden h-[73px] items-center gap-4 border-b border-gray-100 bg-white px-6 lg:flex">
-        <div className="relative mx-auto w-full max-w-2xl flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-          <input
-            placeholder="Search for engineering or design courses..."
-            className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
-          />
+            <div className="mt-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900">Continue Learning</h2>
+                <button type="button" className="text-sm font-semibold text-blue-600 hover:underline">
+                  View All
+                </button>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-3">
+                {CONTINUE_LEARNING.map((item) => (
+                  <ContinueLearningCard key={item.id} {...item} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full lg:w-80 lg:shrink-0">
+            <div className="lg:sticky lg:top-6">
+              <CourseOutline modules={COURSE_OUTLINE} progress={45} />
+            </div>
+          </div>
+
         </div>
-        <button className="rounded-full p-2 text-gray-500 hover:bg-gray-50"><Bell className="size-5" /></button>
-        <button className="rounded-full p-2 text-violet-500 hover:bg-gray-50"><Sparkles className="size-5" /></button>
-      </header>
-
-      {/* ── Body: sidebar + content ── */}
-      <div className="flex">
-        {/* Desktop sidebar — ONE sidebar, no duplication */}
-        <CourseSidebar />
-
-        <main className="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-10">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Recommended for You</h1>
-              <p className="mt-1 text-sm text-gray-500">Based on your interest in Engineering & Design</p>
-            </div>
-            <button className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Sort by: Most Relevant <ChevronDown className="size-4" />
-            </button>
-          </div>
-
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {RECOMMENDED_COURSES.map(course => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
-
-          <div className="mt-10">
-            <h2 className="text-2xl font-bold text-gray-900">Popular This Week</h2>
-            <p className="mt-1 text-sm text-gray-500">Trending topics in your community</p>
-          </div>
-
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {POPULAR_COURSES.map(course => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
-
-          <div className="mt-10">
-            <AiTutorBanner />
-          </div>
-        </main>
-      </div>
+      </main>
     </div>
   );
 }
