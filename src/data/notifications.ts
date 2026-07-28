@@ -1,0 +1,55 @@
+import { NotificationItem } from "@/components/notifications/NotificationCard";
+
+export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: "1",
+    type: "graded",
+    title: "Assignment Graded",
+    description: "Your submission for \"Advanced UI Architecture\" has been reviewed. You scored an A+. Great job on the layout structure!",
+    highlightedText: "A+",
+    time: "2h ago",
+    unread: true,
+    actionLink: "/dashboard",
+    actionText: "View Feedback",
+  },
+  {
+    id: "2",
+    type: "reminder",
+    title: "AI Tutor Reminder",
+    description: "Based on your last quiz, I've prepared a new set of practice questions for \"System Design Patterns\". Shall we begin?",
+    time: "5h ago",
+    unread: true,
+  },
+  {
+    id: "3",
+    type: "failed",
+    title: "Payment Failed",
+    description: "We couldn't process your monthly subscription. Please update your payment method to keep access to premium courses.",
+    time: "Yesterday, 4:30 PM",
+    unread: false,
+  },
+  {
+    id: "4",
+    type: "discussion",
+    title: "New Discussion Reply",
+    description: "Sarah Miller replied to your post: \"What's the best way to handle global state in 2024?\"",
+    time: "Yesterday, 11:15 AM",
+    unread: false,
+  },
+  {
+    id: "5",
+    type: "system",
+    title: "System Maintenance",
+    description: "Completed on Oct 12, 2023",
+    time: "Oct 12, 2023",
+    unread: false,
+  },
+  {
+    id: "6",
+    type: "course",
+    title: "New Course: Design Pro",
+    description: "Released on Jun 10, 2026",
+    time: "Jun 10, 2026",
+    unread: false,
+  },
+];

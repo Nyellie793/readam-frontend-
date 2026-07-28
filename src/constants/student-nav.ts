@@ -13,7 +13,7 @@ export const STUDENT_NAV: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Explore Courses", href: "/dashboard/courses", icon: BookOpen },
   { label: "AI Tutor", href: "/dashboard/ai-tutor", icon: Sparkles },
-  { label: "Payments", href: "/payments", icon: CreditCard },
+  { label: "Payments", href: "/payment", icon: CreditCard },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
