@@ -1,32 +1,105 @@
-import { Download } from "lucide-react";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { Lock } from "lucide-react";
 import VideoPlayer from "@/components/dashboard/courses/VideoPlayer";
 import PdfViewer from "@/components/dashboard/courses/PDFViewer";
 import CourseOutline from "@/components/dashboard/courses/CourseOutline";
 import ContinueLearningCard from "@/components/dashboard/courses/ContinueLearningCard";
-import { COURSE_OUTLINE, CONTINUE_LEARNING } from "@/data/student-mock";
-import { RECOMMENDED_COURSES, POPULAR_COURSES } from "@/data/courses";
+import STUDENT from "@/services/student.service";
+import { ApiRequestError } from "@/lib/api";
+import type { CourseDetailResponse, LessonContentResponse, ModuleLesson } from "@/types/api.types";
 
-function getCourse(id: string) {
-  return [...RECOMMENDED_COURSES, ...POPULAR_COURSES].find(c => c.id === id);
-}
+export default function LessonPage() {
+  const { courseId } = useParams<{ courseId: string }>();
 
-export default async function LessonPage({
-  params,
-}: {
-  params: Promise<{ courseId: string }>;
-}) {
-  const { courseId } = await params;
-  const course = getCourse(courseId);
-  const isPdf = course?.format === "PDF";
+  const [course, setCourse] = useState<CourseDetailResponse | null>(null);
+  const [courseLoading, setCourseLoading] = useState(true);
+  const [courseError, setCourseError] = useState<string | null>(null);
 
-  if (isPdf) {
+  const [hasAccess, setHasAccess] = useState(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+
+  const [lesson, setLesson] = useState<LessonContentResponse | null>(null);
+  const [lessonLoading, setLessonLoading] = useState(false);
+  const [lessonDenied, setLessonDenied] = useState(false);
+
+  const allLessons = useMemo(
+    () =>
+      [...(course?.modules ?? [])]
+        .sort((a, b) => a.order - b.order)
+        .flatMap((m) => [...m.lessons].sort((a, b) => a.order - b.order)),
+    [course]
+  );
+
+  useEffect(() => {
+    setCourseLoading(true);
+    STUDENT.getCourse(courseId)
+      .then((data) => {
+        setCourse(data);
+        const firstAvailable = [...data.modules]
+          .sort((a, b) => a.order - b.order)
+          .flatMap((m) => [...m.lessons].sort((a, b) => a.order - b.order))[0];
+        setSelectedLessonId(firstAvailable?.id ?? null);
+      })
+      .catch((e) => setCourseError(e.message))
+      .finally(() => setCourseLoading(false));
+
+    STUDENT.getEnrollments()
+      .then((data) => {
+        const enrollment = data.items.find((e) => e.course_id === courseId);
+        setHasAccess(
+          !!enrollment &&
+            enrollment.status === "active" &&
+            (!enrollment.expires_at || new Date(enrollment.expires_at) > new Date())
+        );
+      })
+      .catch(() => setHasAccess(false));
+  }, [courseId]);
+
+  useEffect(() => {
+    if (!selectedLessonId) return;
+    setLessonLoading(true);
+    setLessonDenied(false);
+    setLesson(null);
+    STUDENT.getLessonContent(courseId, selectedLessonId)
+      .then(setLesson)
+      .catch((e) => {
+        if (e instanceof ApiRequestError && e.status === 403) {
+          setLessonDenied(true);
+        }
+      })
+      .finally(() => setLessonLoading(false));
+  }, [courseId, selectedLessonId]);
+
+  function handleSelectLesson(l: ModuleLesson) {
+    setSelectedLessonId(l.id);
+  }
+
+  function handleProgress(positionSeconds: number, completed: boolean) {
+    if (!selectedLessonId) return;
+    STUDENT.updateLessonProgress(courseId, selectedLessonId, {
+      last_position_seconds: positionSeconds,
+      completed,
+    }).catch(() => null);
+  }
+
+  if (courseLoading) {
+    return <div className="flex min-h-screen items-center justify-center text-sm text-gray-400">Loading course…</div>;
+  }
+
+  if (courseError || !course) {
     return (
-      <PdfViewer
-        title={course?.title ?? "Course Document"}
-        totalPages={45}
-      />
+      <div className="flex min-h-screen items-center justify-center text-sm text-red-500">
+        {courseError ?? "Course not found."}
+      </div>
     );
   }
+
+  const currentIndex = allLessons.findIndex((l) => l.id === selectedLessonId);
+  const upNext = currentIndex >= 0 ? allLessons.slice(currentIndex + 1, currentIndex + 4) : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,53 +107,87 @@ export default async function LessonPage({
         <div className="flex flex-col gap-6 lg:flex-row">
 
           <div className="min-w-0 flex-1">
-            <VideoPlayer
-              poster="https://picsum.photos/seed/lecture-screen/1200/675"
-              currentTime="12:45"
-              duration="45:00"
-              progress={28}
-            />
+            {lessonLoading && (
+              <div className="flex aspect-video items-center justify-center rounded-2xl bg-gray-950 text-sm text-white/60">
+                Loading lesson…
+              </div>
+            )}
 
-            <div className="mt-5 flex items-start justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-blue-600">
-                  {course?.tags[1]?.label ?? "Course"} • Chapter 1
-                </p>
-                <h1 className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl">
-                  {course?.title ?? "Course Lesson"}
-                </h1>
-                <p className="mt-3 text-sm leading-relaxed text-gray-500">
-                  In this module, we explore the fundamental techniques covered in this lesson,
-                  building on core concepts and applying them to practical problems.
-                </p>
+            {!lessonLoading && lessonDenied && (
+              <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-2xl bg-gray-950 text-white/80">
+                <Lock className="size-8" />
+                <p className="text-sm">Purchase this course or subscribe to access this lesson.</p>
+                <Link
+                  href="/payment"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  View Plans
+                </Link>
               </div>
-              <button
-                type="button"
-                className="flex shrink-0 items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-gray-50"
-              >
-                <Download className="size-4" />
-                Resources
-              </button>
-            </div>
+            )}
 
-            <div className="mt-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-gray-900">Continue Learning</h2>
-                <button type="button" className="text-sm font-semibold text-blue-600 hover:underline">
-                  View All
-                </button>
+            {!lessonLoading && !lessonDenied && lesson?.type === "video" && lesson.content_url && (
+              <VideoPlayer
+                src={lesson.content_url}
+                poster={course.thumbnail_url ?? undefined}
+                onProgress={handleProgress}
+              />
+            )}
+
+            {!lessonLoading && !lessonDenied && lesson?.type === "video" && !lesson.content_url && (
+              <div className="flex aspect-video items-center justify-center rounded-2xl bg-gray-950 text-sm text-white/60">
+                Video not uploaded yet.
               </div>
-              <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                {CONTINUE_LEARNING.map((item) => (
-                  <ContinueLearningCard key={item.id} {...item} />
-                ))}
+            )}
+
+            {!lessonLoading && !lessonDenied && lesson?.type === "pdf" && (
+              <PdfViewer title={lesson.title} fileUrl={lesson.content_url} />
+            )}
+
+            {!lessonLoading && !lessonDenied && lesson?.type === "quiz" && (
+              <div className="flex aspect-video flex-col items-center justify-center gap-2 rounded-2xl bg-gray-950 text-white/80">
+                <p className="text-sm">Quiz lessons aren&apos;t supported in this view yet.</p>
               </div>
-            </div>
+            )}
+
+            {!lessonLoading && !lessonDenied && lesson && lesson.type !== "pdf" && (
+              <div className="mt-5 flex items-start justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <div className="min-w-0">
+                  <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{lesson.title}</h1>
+                  {lesson.description && (
+                    <p className="mt-3 text-sm leading-relaxed text-gray-500">{lesson.description}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {upNext.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-lg font-bold text-gray-900">Up Next</h2>
+                <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-3">
+                  {upNext.map((item) => (
+                    <ContinueLearningCard
+                      key={item.id}
+                      title={item.title}
+                      meta={item.is_preview ? "Free preview" : "Next in course"}
+                      durationSeconds={item.duration_seconds}
+                      image={course.thumbnail_url}
+                      onClick={() => setSelectedLessonId(item.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="w-full lg:w-80 lg:shrink-0">
             <div className="lg:sticky lg:top-6">
-              <CourseOutline modules={COURSE_OUTLINE} progress={45} />
+              <CourseOutline
+                modules={course.modules}
+                selectedLessonId={selectedLessonId ?? undefined}
+                hasAccess={hasAccess}
+                onSelectLesson={handleSelectLesson}
+              />
             </div>
           </div>
 

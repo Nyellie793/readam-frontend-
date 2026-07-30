@@ -1,27 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Welcome from "@/components/onboarding/Welcome";
 import OnboardingShell from "@/components/onboarding/OnboardingShell";
-
-function getStoredName(): string {
-  if (typeof window === "undefined") return "there";
-  return localStorage.getItem("user_name") || "there";
-}
-
-function getStoredInterests(name: string): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(`${name}_interests`);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
-  }
-}
+import STUDENT from "@/services/student.service";
+import { getStoredUser } from "@/lib/auth";
 
 export default function WelcomeBack() {
-  const [name] = useState<string>(getStoredName);
-  const [interests] = useState<string[]>(() => getStoredInterests(name));
+  const [interests, setInterests] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (getStoredUser()?.role === "student") {
+      STUDENT.getProfile()
+        .then((profile) => setInterests(profile.interests))
+        .catch(() => null);
+    }
+  }, []);
+
+  const name = getStoredUser()?.full_name ?? "there";
 
   return (
     <OnboardingShell currentStep={2}>

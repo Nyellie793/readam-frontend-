@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Bell, Menu, Search, Sparkles, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import CourseFilters from "@/components/dashboard/courses/CourseFilters";
@@ -28,14 +29,14 @@ export default function CourseTopbar({
         )}
 
         <div className={`flex items-center gap-2 ${searchPlaceholder ? "" : "ml-auto"}`}>
-          <button type="button" aria-label="Notifications"
+          <Link href="/notifications" aria-label="Notifications"
             className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-50">
             <Bell className="size-5" />
-          </button>
-          <button type="button" aria-label="Ask ReadAm AI"
+          </Link>
+          <Link href="/dashboard/ai-tutor" aria-label="Ask ReadAm AI"
             className="rounded-full p-2 text-violet-500 transition-colors hover:bg-gray-50 hover:text-violet-600">
             <Sparkles className="size-5" />
-          </button>
+          </Link>
         </div>
       </header>
 

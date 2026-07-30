@@ -1,18 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { Bell, Sparkles } from "lucide-react";
 
 export default function DashboardActions() {
   return (
     <div className="flex items-center gap-3">
 
-      <button
+      <Link
+        href="/notifications"
         className="rounded-full border border-gray-100 p-2.5 text-gray-500 hover:bg-gray-50"
       >
         <Bell className="size-[18px]" />
-      </button>
+      </Link>
 
-      <button
+      <Link
+        href="/dashboard/ai-tutor"
         className="
         flex
         items-center
@@ -31,7 +34,7 @@ export default function DashboardActions() {
       >
         <Sparkles className="size-4" />
         AI Assistant
-      </button>
+      </Link>
 
     </div>
   );

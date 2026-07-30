@@ -1,20 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Flame } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import { STUDENT_NAV } from "@/constants/student-nav";
+import STUDENT from "@/services/student.service";
 import { cn } from "@/lib/utils";
 
-const INITIAL_TYPES = [
-  { id: "video", label: "Video Lessons", checked: true },
-  { id: "pdf", label: "PDF Guides", checked: false },
-  { id: "tests", label: "Practice Tests", checked: false },
+// Real backend LessonType values — a course "matches" a checked type if it
+// has at least one lesson of that type (see course_service.list_published_courses).
+const CONTENT_TYPES = [
+  { id: "video", label: "Video Lessons" },
+  { id: "pdf", label: "PDF Guides" },
+  { id: "quiz", label: "Practice Tests" },
 ];
 
-const LEVELS = ["Engineering", "Design", "Business", "Science"];
+// Real backend CourseCategory values (readam.db.models.course.CourseCategory) — not
+// a display-only guess, so the filter below actually narrows results.
+const CATEGORIES = [
+  { value: "", label: "All Categories" },
+  { value: "science_and_tech", label: "Science & Tech" },
+  { value: "finance", label: "Finance" },
+  { value: "arts", label: "Arts" },
+  { value: "languages", label: "Languages" },
+  { value: "health", label: "Health" },
+  { value: "exams", label: "Exam Prep" },
+  { value: "career", label: "Career" },
+  { value: "law", label: "Law" },
+  { value: "engineering", label: "Engineering" },
+  { value: "design", label: "Design" },
+  { value: "personal", label: "Personal Development" },
+  { value: "other", label: "Other" },
+];
 
 interface CourseFiltersProps {
   onNavigate?: () => void;
@@ -26,15 +45,35 @@ export default function CourseFilters({
   showLogo = true,
 }: CourseFiltersProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const navItems = STUDENT_NAV.slice(0, 3);
 
-  const [contentTypes, setContentTypes] = useState(INITIAL_TYPES);
-  const [level, setLevel] = useState("Engineering");
+  const category = searchParams.get("category") ?? "";
+  const checkedTypes = searchParams.getAll("content_type");
+
+  const [streakDays, setStreakDays] = useState<number | null>(null);
+
+  useEffect(() => {
+    STUDENT.getGamification()
+      .then((data) => setStreakDays(data.current_streak_days))
+      .catch(() => null);
+  }, []);
 
   function toggleType(id: string) {
-    setContentTypes((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, checked: !t.checked } : t))
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    const current = params.getAll("content_type");
+    params.delete("content_type");
+    const next = current.includes(id) ? current.filter((t) => t !== id) : [...current, id];
+    for (const t of next) params.append("content_type", t);
+    router.push(`/dashboard/courses?${params.toString()}`);
+  }
+
+  function handleCategoryChange(value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set("category", value);
+    else params.delete("category");
+    router.push(`/dashboard/courses?${params.toString()}`);
   }
 
   return (
@@ -71,14 +110,14 @@ export default function CourseFilters({
       <div className="mt-6 border-t border-gray-100 px-6 pt-6">
         <p className="text-sm font-bold text-gray-900">Content Type</p>
         <div className="mt-3 flex flex-col gap-2.5">
-          {contentTypes.map((type) => (
+          {CONTENT_TYPES.map((type) => (
             <label
               key={type.id}
               className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700"
             >
               <input
                 type="checkbox"
-                checked={type.checked}
+                checked={checkedTypes.includes(type.id)}
                 onChange={() => toggleType(type.id)}
                 className="size-4 rounded border-gray-300 accent-blue-600"
               />
@@ -89,15 +128,15 @@ export default function CourseFilters({
       </div>
 
       <div className="mt-6 border-t border-gray-100 px-6 pt-6">
-        <p className="text-sm font-bold text-gray-900">Education Level</p>
+        <p className="text-sm font-bold text-gray-900">Category</p>
         <div className="relative mt-3">
           <select
-            value={level}
-            onChange={(e) => setLevel(e.target.value)}
+            value={category}
+            onChange={(e) => handleCategoryChange(e.target.value)}
             className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30"
           >
-            {LEVELS.map((l) => (
-              <option key={l}>{l}</option>
+            {CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
             ))}
           </select>
           <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
@@ -109,10 +148,15 @@ export default function CourseFilters({
           <p className="text-sm font-semibold text-gray-900">Study Streak</p>
           <div className="mt-2 flex items-center gap-1.5 text-sm">
             <Flame className="size-4 fill-orange-500 text-orange-500" />
-            <span className="font-semibold text-gray-900">7 Day Streak</span>
+            <span className="font-semibold text-gray-900">
+              {streakDays === null ? "…" : `${streakDays} Day Streak`}
+            </span>
           </div>
           <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-            <div className="h-full w-2/3 rounded-full bg-orange-500" />
+            <div
+              className="h-full rounded-full bg-orange-500"
+              style={{ width: `${Math.min(100, ((streakDays ?? 0) / 7) * 100)}%` }}
+            />
           </div>
         </div>
       </div>

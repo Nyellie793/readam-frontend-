@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { toast } from "sonner";
+import STUDENT from "@/services/student.service";
+import { ApiRequestError } from "@/lib/api";
 
 // Custom Switch component for clean styling and state management
 function Switch({
@@ -35,21 +37,42 @@ function Switch({
   );
 }
 
-export default function PreferencesToggles() {
-  const [preferences, setPreferences] = useState({
-    emailAlerts: true,
-    studyReminders: true,
-    weeklyDigest: false,
-    darkMode: false,
-  });
+type NotificationKey = "email_alerts" | "study_reminders" | "weekly_digest";
 
-  const handleToggle = (key: keyof typeof preferences) => {
-    setPreferences((prev) => {
-      const updated = { ...prev, [key]: !prev[key] };
-      toast.success(`Preference updated!`);
-      return updated;
-    });
-  };
+export default function PreferencesToggles() {
+  const [prefs, setPrefs] = useState<Record<NotificationKey, boolean>>({
+    email_alerts: true,
+    study_reminders: true,
+    weekly_digest: false,
+  });
+  const [loading, setLoading] = useState(true);
+  // Dark mode is intentionally left decorative — see ThemeToggle.tsx for why.
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    STUDENT.getNotificationPrefs()
+      .then((data) =>
+        setPrefs({
+          email_alerts: data.email_alerts,
+          study_reminders: data.study_reminders,
+          weekly_digest: data.weekly_digest,
+        })
+      )
+      .catch(() => null)
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleToggle(key: NotificationKey) {
+    const next = !prefs[key];
+    setPrefs((prev) => ({ ...prev, [key]: next }));
+    try {
+      await STUDENT.updateNotificationPrefs({ [key]: next });
+      toast.success("Preference updated!");
+    } catch (err) {
+      setPrefs((prev) => ({ ...prev, [key]: !next })); // revert on failure
+      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't update preference.");
+    }
+  }
 
   return (
     <Card className="border border-gray-100 shadow-sm rounded-2xl overflow-hidden bg-white">
@@ -62,42 +85,40 @@ export default function PreferencesToggles() {
           </div>
 
           <div className="space-y-3.5">
-            {/* Email Toggles */}
             <div className="flex items-center justify-between py-1">
               <div>
                 <p className="text-xs font-bold text-gray-800">Email Alerts</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">Receive updates on graded exams and teacher feedback.</p>
               </div>
               <Switch
-                checked={preferences.emailAlerts}
-                onCheckedChange={() => handleToggle("emailAlerts")}
+                checked={prefs.email_alerts}
+                onCheckedChange={() => handleToggle("email_alerts")}
               />
             </div>
 
-            {/* Reminders Toggle */}
             <div className="flex items-center justify-between py-1 border-t border-gray-50 pt-3">
               <div>
                 <p className="text-xs font-bold text-gray-800">AI Tutor Reminders</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">Get nudges when you have scheduled study goals.</p>
               </div>
               <Switch
-                checked={preferences.studyReminders}
-                onCheckedChange={() => handleToggle("studyReminders")}
+                checked={prefs.study_reminders}
+                onCheckedChange={() => handleToggle("study_reminders")}
               />
             </div>
 
-            {/* Weekly digest Toggle */}
             <div className="flex items-center justify-between py-1 border-t border-gray-50 pt-3">
               <div>
                 <p className="text-xs font-bold text-gray-800">Weekly Performance Digest</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">Receive weekly course progress and AI analytics review.</p>
               </div>
               <Switch
-                checked={preferences.weeklyDigest}
-                onCheckedChange={() => handleToggle("weeklyDigest")}
+                checked={prefs.weekly_digest}
+                onCheckedChange={() => handleToggle("weekly_digest")}
               />
             </div>
           </div>
+          {loading && <p className="text-[11px] text-gray-400">Loading your preferences…</p>}
         </div>
 
         {/* Theme Settings */}
@@ -110,11 +131,13 @@ export default function PreferencesToggles() {
           <div className="flex items-center justify-between py-1">
             <div>
               <p className="text-xs font-bold text-gray-800">Dark Mode Interface</p>
-              <p className="text-[11px] text-gray-400 mt-0.5">Switch between standard light colors and dark styling.</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                Coming soon.
+              </p>
             </div>
             <Switch
-              checked={preferences.darkMode}
-              onCheckedChange={() => handleToggle("darkMode")}
+              checked={darkMode}
+              onCheckedChange={setDarkMode}
             />
           </div>
         </div>

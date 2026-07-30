@@ -1,15 +1,74 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, Menu, Search, Bell, Sparkles, X } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Menu, Search, Bell, Sparkles, X } from "lucide-react";
 import CourseCard from "@/components/dashboard/courses/CourseCard";
 import AiTutorBanner from "@/components/dashboard/courses/AiTutorBanner";
 import CourseFilters from "@/components/dashboard/courses/CourseFilters";
-import { RECOMMENDED_COURSES, POPULAR_COURSES } from "@/data/courses";
+import STUDENT from "@/services/student.service";
+import type { CourseListItem } from "@/types/api.types";
 
-export default function CoursesPage() {
+function CourseCardSkeleton() {
+  return (
+    <div className="animate-pulse rounded-xl border border-gray-100 bg-white p-4">
+      <div className="aspect-16/10 w-full rounded-lg bg-gray-100" />
+      <div className="mt-3 h-4 w-3/4 rounded bg-gray-100" />
+      <div className="mt-2 h-3 w-1/2 rounded bg-gray-100" />
+    </div>
+  );
+}
+
+function CoursesPageContent() {
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category") ?? "";
+  const contentTypes = searchParams.getAll("content_type");
+  const contentTypesKey = contentTypes.join(",");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
+
+  const [recommended, setRecommended] = useState<CourseListItem[]>([]);
+  const [recommendedLoading, setRecommendedLoading] = useState(true);
+  const [interests, setInterests] = useState<string[]>([]);
+
+  const [browseResults, setBrowseResults] = useState<CourseListItem[]>([]);
+  const [browseLoading, setBrowseLoading] = useState(true);
+  const [browseError, setBrowseError] = useState<string | null>(null);
+
+  useEffect(() => {
+    STUDENT.getRecommendedCourses()
+      .then((data) => setRecommended(data.items))
+      .catch(() => null)
+      .finally(() => setRecommendedLoading(false));
+    STUDENT.getProfile()
+      .then((profile) => setInterests(profile.interests))
+      .catch(() => null);
+  }, []);
+
+  useEffect(() => {
+    setBrowseLoading(true);
+    const timeout = setTimeout(() => {
+      STUDENT.browseCourses({
+        search: search || undefined,
+        category: category || undefined,
+        contentTypes: contentTypes.length > 0 ? contentTypes : undefined,
+      })
+        .then((data) => {
+          setBrowseResults(data.items);
+          setBrowseError(null);
+        })
+        .catch((e) => setBrowseError(e.message))
+        .finally(() => setBrowseLoading(false));
+    }, 300);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, category, contentTypesKey]);
+
+  const recommendedSubtitle = interests.length > 0
+    ? `Based on your interest in ${interests.slice(0, 2).join(" and ")}`
+    : "Based on your interests and study history";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,12 +90,12 @@ export default function CoursesPage() {
             className="rounded-full p-2 text-gray-500 hover:bg-gray-100">
             <Search className="size-5" />
           </button>
-          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100">
+          <Link href="/notifications" className="rounded-full p-2 text-gray-500 hover:bg-gray-100">
             <Bell className="size-5" />
-          </button>
-          <button className="rounded-full p-2 text-violet-500 hover:bg-gray-100">
+          </Link>
+          <Link href="/dashboard/ai-tutor" className="rounded-full p-2 text-violet-500 hover:bg-gray-100">
             <Sparkles className="size-5" />
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -44,8 +103,13 @@ export default function CoursesPage() {
       {searchOpen && (
         <div className="flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-2 lg:hidden">
           <Search className="size-4 shrink-0 text-gray-400" />
-          <input autoFocus placeholder="Search for courses..."
-            className="flex-1 bg-transparent text-sm outline-none" />
+          <input
+            autoFocus
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search for courses..."
+            className="flex-1 bg-transparent text-sm outline-none"
+          />
           <button onClick={() => setSearchOpen(false)}>
             <X className="size-4 text-gray-400" />
           </button>
@@ -76,12 +140,14 @@ export default function CoursesPage() {
         <div className="relative mx-auto w-full max-w-2xl flex-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
           <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search for engineering or design courses..."
             className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
           />
         </div>
-        <button className="rounded-full p-2 text-gray-500 hover:bg-gray-50"><Bell className="size-5" /></button>
-        <button className="rounded-full p-2 text-violet-500 hover:bg-gray-50"><Sparkles className="size-5" /></button>
+        <Link href="/notifications" className="rounded-full p-2 text-gray-500 hover:bg-gray-50"><Bell className="size-5" /></Link>
+        <Link href="/dashboard/ai-tutor" className="rounded-full p-2 text-violet-500 hover:bg-gray-50"><Sparkles className="size-5" /></Link>
       </header>
 
       {/* Content only — no sidebar here, layout handles it */}
@@ -89,28 +155,41 @@ export default function CoursesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Recommended for You</h1>
-            <p className="mt-1 text-sm text-gray-500">Based on your interest in Engineering &amp; Design</p>
+            <p className="mt-1 text-sm text-gray-500">{recommendedSubtitle}</p>
           </div>
-          <button className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            Sort by: Most Relevant <ChevronDown className="size-4" />
-          </button>
         </div>
 
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {RECOMMENDED_COURSES.map(course => (
-            <CourseCard key={course.id} course={course} />
-          ))}
+          {recommendedLoading
+            ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)
+            : recommended.length === 0
+            ? <p className="text-sm text-gray-500">No recommendations yet.</p>
+            : recommended.map(course => (
+                <CourseCard key={course.id} course={course} />
+              ))}
         </div>
 
         <div className="mt-10">
-          <h2 className="text-2xl font-bold text-gray-900">Popular This Week</h2>
-          <p className="mt-1 text-sm text-gray-500">Trending topics in your community</p>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {search ? `Results for "${search}"` : "Browse All Courses"}
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            {category || contentTypes.length > 0
+              ? "Filtered results"
+              : "All published courses on the platform"}
+          </p>
         </div>
 
+        {browseError && <p className="mt-4 text-sm text-red-500">{browseError}</p>}
+
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {POPULAR_COURSES.map(course => (
-            <CourseCard key={course.id} course={course} />
-          ))}
+          {browseLoading
+            ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)
+            : browseResults.length === 0
+            ? <p className="text-sm text-gray-500">No courses found.</p>
+            : browseResults.map(course => (
+                <CourseCard key={course.id} course={course} />
+              ))}
         </div>
 
         <div className="mt-10">
@@ -118,5 +197,13 @@ export default function CoursesPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function CoursesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <CoursesPageContent />
+    </Suspense>
   );
 }

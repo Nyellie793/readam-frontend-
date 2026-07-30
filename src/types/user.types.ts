@@ -24,12 +24,20 @@ export interface RefreshPayload {
   refresh_token: string;
 }
 
+export interface TokenPair {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
+
 export interface User {
   id: string;
   full_name: string;
   email: string;
   role?: string;
-  avatar?: string;
+  avatar_url?: string | null;
+  phone?: string | null;
+  has_password?: boolean;
 }
 
 export interface AuthResponse {

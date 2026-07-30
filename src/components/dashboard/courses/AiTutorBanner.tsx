@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,12 +50,12 @@ export default function AiTutorBanner({ variant = "wide" }: AiTutorBannerProps) 
           </div>
         </div>
 
-        <button
-          type="button"
+        <Link
+          href="/dashboard/ai-tutor"
           className="shrink-0 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition-colors hover:bg-white/90"
         >
           Ask ReadAm AI
-        </button>
+        </Link>
       </div>
     </div>
   );

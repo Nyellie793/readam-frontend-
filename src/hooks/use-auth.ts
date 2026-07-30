@@ -18,6 +18,7 @@ export function useAuth() {
     try {
       const data = await AUTH.login(payload);
       saveSession(data); // data.tokens.access_token is read inside saveSession
+      sessionStorage.setItem("login_type", "login");
 
       toast.success(`Welcome back, ${data.user.full_name.split(" ")[0]}!`);
 
@@ -54,7 +55,7 @@ export function useAuth() {
       // Step 1: create the account
       const data = await AUTH.register(registerPayload);
       saveSession(data);
-      localStorage.setItem("user_name", data.user.full_name);
+      sessionStorage.setItem("login_type", "signup");
 
       // Step 2: set the role selected on /select-role page
       const assignableRole = role === "tutor" ? "tutor" : "student";
@@ -74,11 +75,52 @@ export function useAuth() {
     }
   }, [router]);
 
+  /**
+   * Google Sign-In (matches actual API):
+   * POST /v1/auth/google finds-or-creates the account in one call. `role` is
+   * only used the first time this Google account signs in (role comes back
+   * null) — pass the role chosen on /select-role when called from signup,
+   * omit it from login (defaults to student).
+   */
+  const googleAuth = useCallback(async (idToken: string, role?: "student" | "tutor") => {
+    setLoading(true);
+    try {
+      const data = await AUTH.google(idToken);
+      saveSession(data);
+
+      if (!data.user.role) {
+        // Brand new account — finish role selection, then onboarding.
+        const roleData = await AUTH.setRole({ role: role ?? "student" });
+        saveSession(roleData);
+        sessionStorage.setItem("login_type", "signup");
+        toast.success("Account created! Let's personalise your experience.");
+        router.push(ROUTES.onboarding1);
+        return;
+      }
+
+      sessionStorage.setItem("login_type", "login");
+      toast.success(`Welcome back, ${data.user.full_name.split(" ")[0]}!`);
+      if (isAdmin(data.user)) {
+        router.push(ROUTES.admin);
+      } else {
+        router.push(ROUTES.welcomeBack);
+      }
+    } catch (err) {
+      toast.error(
+        err instanceof ApiRequestError
+          ? err.detail
+          : "Google sign-in failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
   // No logout endpoint in the API — just clear local session
   const logout = useCallback(() => {
     clearSession();
     router.push(ROUTES.login);
   }, [router]);
 
-  return { login, register, logout, loading, user: getStoredUser() };
+  return { login, register, googleAuth, logout, loading, user: getStoredUser() };
 }

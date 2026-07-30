@@ -17,7 +17,7 @@ export default function Welcome({ interests, userName, onBack }: Props) {
 
     const [loginType] = useState<string>(() => {
         if (typeof window === "undefined") return "signup";
-        return localStorage.getItem("login_type") || "signup";
+        return sessionStorage.getItem("login_type") || "signup";
       });
       
       const greeting = loginType === "login" ? "Welcome Back," : "Welcome to ReadAm,";

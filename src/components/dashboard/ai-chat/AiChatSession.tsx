@@ -104,7 +104,7 @@ function MessageBubble({
         </div>
       ) : (
         <Avatar className="size-9 shrink-0 shadow">
-          <AvatarImage src={user?.avatar ?? ""} />
+          <AvatarImage src={user?.avatar_url ?? ""} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
       )}

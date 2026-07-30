@@ -1,12 +1,13 @@
 "use client";
 
 import { Bell, Menu, Search, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserDropdown from "@/components/dashboard/UserDropdown";
 import { Input } from "@/components/ui/Input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "./Sidebar";
 import Link from "next/link";
+import STUDENT from "@/services/student.service";
 
 interface TopbarProps {
   searchPlaceholder?: string;
@@ -20,6 +21,13 @@ export default function Topbar({
   searchValue = "",
 }: TopbarProps) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    STUDENT.getNotifications()
+      .then((data) => setHasUnread(data.unread_count > 0))
+      .catch(() => null);
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-100 bg-white/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
@@ -70,7 +78,9 @@ export default function Topbar({
           className="relative rounded-full p-2 text-gray-500 hover:bg-gray-50 transition-colors"
         >
           <Bell className="size-5" />
-          <span className="absolute right-2 top-2 size-2 rounded-full bg-blue-600 ring-2 ring-white" />
+          {hasUnread && (
+            <span className="absolute right-2 top-2 size-2 rounded-full bg-blue-600 ring-2 ring-white" />
+          )}
         </Link>
 
         {/* User Profile Dropdown */}

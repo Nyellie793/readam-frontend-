@@ -16,8 +16,14 @@ export interface CourseListItem {
     status: string;
     created_at: string;
     updated_at: string;
+    is_saved: boolean;
   }
-  
+
+  export interface SavedCourseResponse {
+    course_id: string;
+    is_saved: boolean;
+  }
+
   export interface PaginatedCoursesResponse {
     items: CourseListItem[];
     total: number;
@@ -44,7 +50,29 @@ export interface CourseListItem {
   export interface CourseDetailResponse extends CourseListItem {
     modules: CourseModule[];
   }
-  
+
+  export interface LessonContentResponse {
+    id: string;
+    title: string;
+    type: "video" | "pdf" | "quiz";
+    order: number;
+    duration_seconds: number | null;
+    content_url: string | null;
+    description: string | null;
+    is_preview: boolean;
+    stream_uid: string | null;
+    transcript_status: "none" | "pending" | "ready" | "failed";
+    caption_url_en: string | null;
+    caption_url_fr: string | null;
+  }
+
+  export interface LessonProgressResponse {
+    lesson_id: string;
+    completed: boolean;
+    last_position_seconds: number;
+    completed_at: string | null;
+  }
+
   export interface EnrolledCourseItem {
     id: string;
     course_id: string;
@@ -183,6 +211,105 @@ export interface CourseListItem {
   
   export interface AdminTutorListResponse {
     items: AdminTutorListItem[];
+    total: number;
+    page: number;
+    page_size: number;
+  }
+
+  export interface DailyActivityItem {
+    activity_date: string;
+    weekday: string;
+    xp_earned: number;
+    active: boolean;
+  }
+
+  export interface WeeklyActivityResponse {
+    days: DailyActivityItem[];
+  }
+
+  export interface BadgeItem {
+    id: string;
+    label: string;
+    description: string;
+    achieved: boolean;
+  }
+
+  export interface BadgesResponse {
+    badges: BadgeItem[];
+  }
+
+  export interface RecentlyViewedItem {
+    course_id: string;
+    course_title: string;
+    course_thumbnail: string | null;
+    total_lessons: number;
+    completed_lessons: number;
+    remaining_seconds: number;
+    last_viewed_at: string;
+  }
+
+  export interface RecentlyViewedResponse {
+    items: RecentlyViewedItem[];
+  }
+
+  export interface NotificationPrefsResponse {
+    user_id: string;
+    email_alerts: boolean;
+    study_reminders: boolean;
+    weekly_digest: boolean;
+  }
+
+  export interface NotificationItem {
+    id: string;
+    type: "payment_successful" | "payment_failed";
+    title: string;
+    message: string;
+    related_payment_id: string | null;
+    is_read: boolean;
+    created_at: string;
+  }
+
+  export interface PaginatedNotificationsResponse {
+    items: NotificationItem[];
+    total: number;
+    unread_count: number;
+    page: number;
+    page_size: number;
+  }
+
+  export interface MarkAllReadResponse {
+    marked_read: number;
+  }
+
+  export interface ProductResponse {
+    code: string;
+    name: string;
+    description: string;
+    price_xaf: number;
+    entitlement_type: string;
+    sessions: number | null;
+    duration_days: number | null;
+    daily_session_cap: number | null;
+  }
+
+  export interface PaymentListItem {
+    id: string;
+    course_id: string | null;
+    product_code: string | null;
+    payment_type: "course" | "subscription";
+    fapshi_trans_id: string;
+    amount: number;
+    phone: string | null;
+    medium: string | null;
+    status: "pending" | "successful" | "failed" | "expired";
+    webhook_received_at: string | null;
+    created_at: string;
+    course_title: string | null;
+    product_name: string | null;
+  }
+
+  export interface PaginatedPaymentsResponse {
+    items: PaymentListItem[];
     total: number;
     page: number;
     page_size: number;

@@ -1,30 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import NotificationHeader from "@/components/notifications/NotificationHeader";
 import NotificationGroup from "@/components/notifications/NotificationGroup";
 import NotificationCard from "@/components/notifications/NotificationCard";
-import { INITIAL_NOTIFICATIONS } from "@/data/notifications";
+import STUDENT from "@/services/student.service";
+import type { NotificationItem } from "@/types/api.types";
+
+function isToday(iso: string): boolean {
+  const d = new Date(iso);
+  const now = new Date();
+  return d.toDateString() === now.toDateString();
+}
+
+function isYesterday(iso: string): boolean {
+  const d = new Date(iso);
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return d.toDateString() === yesterday.toDateString();
+}
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    STUDENT.getNotifications()
+      .then((data) => setNotifications(data.items))
+      .catch(() => null)
+      .finally(() => setLoading(false));
+  }, []);
 
   const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    STUDENT.markAllNotificationsRead().catch(() => null);
   };
 
   const toggleRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, unread: false } : n)));
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+    STUDENT.markNotificationRead(id).catch(() => null);
   };
 
-  const todayList = notifications.filter((n) => n.id === "1" || n.id === "2");
-  const yesterdayList = notifications.filter((n) => n.id === "3" || n.id === "4");
-  const olderList = notifications.filter((n) => n.id === "5" || n.id === "6");
+  const todayList = notifications.filter((n) => isToday(n.created_at));
+  const yesterdayList = notifications.filter((n) => isYesterday(n.created_at));
+  const olderList = notifications.filter((n) => !isToday(n.created_at) && !isYesterday(n.created_at));
 
-  const unreadCount = todayList.filter((n) => n.unread).length;
-  const hasUnread = notifications.some((n) => n.unread);
+  const unreadCount = todayList.filter((n) => !n.is_read).length;
+  const hasUnread = notifications.some((n) => !n.is_read);
 
   return (
     <div className="flex min-h-screen bg-gray-50/50">
@@ -38,32 +62,40 @@ export default function NotificationsPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-4xl space-y-6">
           <NotificationHeader onMarkAllRead={markAllRead} hasUnread={hasUnread} />
 
+          {loading && <p className="text-sm text-gray-400">Loading…</p>}
+
+          {!loading && notifications.length === 0 && (
+            <p className="text-sm text-gray-400">
+              Nothing here yet — you'll see updates about your payments here as they happen.
+            </p>
+          )}
+
           <div className="space-y-8">
-            <NotificationGroup title="Today" badgeContent={unreadCount > 0 ? `${unreadCount} NEW` : undefined}>
-              {todayList.map((n) => (
-                <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />
-              ))}
-            </NotificationGroup>
-
-            <NotificationGroup title="Yesterday">
-              {yesterdayList.map((n) => (
-                <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />
-              ))}
-            </NotificationGroup>
-
-            <NotificationGroup title="Older">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {olderList.map((n) => (
+            {todayList.length > 0 && (
+              <NotificationGroup title="Today" badgeContent={unreadCount > 0 ? `${unreadCount} NEW` : undefined}>
+                {todayList.map((n) => (
                   <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />
                 ))}
-              </div>
-            </NotificationGroup>
+              </NotificationGroup>
+            )}
 
-            <div className="flex justify-center pt-4">
-              <button className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1 cursor-pointer">
-                Load more history <span aria-hidden>∨</span>
-              </button>
-            </div>
+            {yesterdayList.length > 0 && (
+              <NotificationGroup title="Yesterday">
+                {yesterdayList.map((n) => (
+                  <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />
+                ))}
+              </NotificationGroup>
+            )}
+
+            {olderList.length > 0 && (
+              <NotificationGroup title="Older">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {olderList.map((n) => (
+                    <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />
+                  ))}
+                </div>
+              </NotificationGroup>
+            )}
           </div>
         </main>
       </div>

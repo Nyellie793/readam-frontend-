@@ -5,11 +5,6 @@ import { useRouter } from "next/navigation";
 import Interests from "@/components/onboarding/Interests";
 import OnboardingShell from "@/components/onboarding/OnboardingShell";
 
-function getStoredName(): string {
-  if (typeof window === "undefined") return "user";
-  return localStorage.getItem("user_name") || "user";
-}
-
 export default function OnboardingOne() {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
@@ -21,8 +16,7 @@ export default function OnboardingOne() {
         setSelected={setSelected}
         onBack={() => router.back()}
         onContinue={() => {
-          const name = getStoredName();
-          localStorage.setItem(`${name}_interests`, JSON.stringify(selected));
+          sessionStorage.setItem("onboarding_interests", JSON.stringify(selected));
           router.push("/onboarding-2");
         }}
       />

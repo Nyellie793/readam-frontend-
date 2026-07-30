@@ -5,12 +5,15 @@ import { getStoredUser, updateStoredUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Save } from "lucide-react";
 import { toast } from "sonner";
+import AUTH from "@/services/auth.service";
+import { ApiRequestError } from "@/lib/api";
 
 export default function ProfileDetailsCard() {
   const [loading, setLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -22,11 +25,12 @@ export default function ProfileDetailsCard() {
     const user = getStoredUser();
     if (user) {
       setFormData({
-        fullName: user.full_name ?? "Student User",
-        email: user.email ?? "student@readam.com",
-        phone: (user as any).phone ?? "+237 677 889 900",
-        role: user.role ?? "STUDENT",
+        fullName: user.full_name ?? "",
+        email: user.email ?? "",
+        phone: user.phone ?? "",
+        role: user.role ?? "",
       });
+      setAvatarUrl(user.avatar_url ?? null);
     }
   }, []);
 
@@ -38,22 +42,20 @@ export default function ProfileDetailsCard() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API Call
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    
-    const user = getStoredUser();
-    if (user) {
-      updateStoredUser({
-        ...user,
+    try {
+      const updated = await AUTH.updateProfile({
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
-      } as any);
+      });
+      updateStoredUser(updated);
+      setAvatarUrl(updated.avatar_url ?? null);
+      toast.success("Profile updated successfully!");
+    } catch (err) {
+      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't update your profile.");
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
-    toast.success("Profile updated successfully!");
   };
 
   const initials = formData.fullName
@@ -77,13 +79,16 @@ export default function ProfileDetailsCard() {
           <div className="flex items-center gap-6">
             <div className="relative group">
               <Avatar className="size-20 border-2 border-blue-100 ring-4 ring-blue-50/50">
+                <AvatarImage src={avatarUrl ?? ""} />
                 <AvatarFallback className="text-xl font-bold bg-blue-50 text-blue-600">
                   {initials || "ST"}
                 </AvatarFallback>
               </Avatar>
               <button
                 type="button"
-                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-md hover:bg-blue-700 transition-colors"
+                disabled
+                title="Photo upload isn't available yet"
+                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-md opacity-50 cursor-not-allowed"
                 aria-label="Upload photo"
               >
                 <Camera className="size-4" />
@@ -91,7 +96,9 @@ export default function ProfileDetailsCard() {
             </div>
             <div>
               <h4 className="text-sm font-bold text-gray-800">Profile Picture</h4>
-              <p className="text-xs text-gray-500 mt-1">PNG, JPG or WEBP. Max 2MB.</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {avatarUrl ? "Synced from your Google account." : "Photo upload isn't available yet."}
+              </p>
             </div>
           </div>
 
@@ -146,7 +153,7 @@ export default function ProfileDetailsCard() {
                 id="role"
                 type="text"
                 value={formData.role}
-                className="h-10 rounded-xl bg-gray-50 text-gray-500 border-gray-100"
+                className="h-10 rounded-xl bg-gray-50 text-gray-500 border-gray-100 capitalize"
                 disabled
               />
             </div>

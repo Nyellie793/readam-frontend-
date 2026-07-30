@@ -3,20 +3,17 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getStoredUser } from "@/lib/auth";
+import type { User } from "@/types/user.types";
 import { useEffect, useState } from "react";
 
 export default function DashboardGreeting() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     setUser(getStoredUser());
   }, []);
 
-  const name =
-    user?.full_name ??
-    user?.name ??
-    user?.username ??
-    "Student";
+  const name = user?.full_name ?? "Student";
 
   const initials = name
     .split(" ")
@@ -41,7 +38,7 @@ export default function DashboardGreeting() {
   return (
     <div className="flex items-center gap-3">
       <Avatar className="size-11">
-        <AvatarImage src={user?.avatar ?? ""} />
+        <AvatarImage src={user?.avatar_url ?? ""} />
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
 

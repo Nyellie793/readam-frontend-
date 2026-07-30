@@ -1,12 +1,27 @@
-import { Sparkles } from "lucide-react";
+"use client";
 
-const badges = [
+import { useEffect, useState } from "react";
+import { Sparkles } from "lucide-react";
+import STUDENT from "@/services/student.service";
+import type { BadgeItem } from "@/types/api.types";
+
+const COLORS = [
   "bg-violet-100 text-violet-600",
   "bg-blue-100 text-blue-600",
   "bg-orange-100 text-orange-500",
 ];
 
 export default function RecentBadges() {
+  const [badges, setBadges] = useState<BadgeItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    STUDENT.getBadges()
+      .then((data) => setBadges(data.badges.filter((b) => b.achieved)))
+      .catch(() => null)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="rounded-2xl border bg-white p-5 shadow-sm">
 
@@ -23,16 +38,18 @@ export default function RecentBadges() {
       </div>
 
       <div className="mt-4 flex gap-3">
-
-        {badges.map((badge, i) => (
+        {!loading && badges.length === 0 && (
+          <p className="text-xs text-gray-400">Complete a lesson to earn your first badge.</p>
+        )}
+        {badges.slice(0, 3).map((badge, i) => (
           <span
-            key={i}
-            className={`flex size-11 items-center justify-center rounded-full ${badge}`}
+            key={badge.id}
+            title={`${badge.label} — ${badge.description}`}
+            className={`flex size-11 items-center justify-center rounded-full ${COLORS[i % COLORS.length]}`}
           >
             <Sparkles className="size-5" />
           </span>
         ))}
-
       </div>
 
     </div>

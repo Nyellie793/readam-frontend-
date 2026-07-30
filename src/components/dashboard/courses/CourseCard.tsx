@@ -1,20 +1,54 @@
-"use client"
+"use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Bookmark, Play, Star } from "lucide-react";
-import type { Course } from "@/types/course.types";
+import { Star, Play, FileText, Loader2, Bookmark } from "lucide-react";
+import { toast } from "sonner";
+import type { CourseListItem } from "@/types/api.types";
+import STUDENT from "@/services/student.service";
+import { ApiRequestError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-const TAG_TONE: Record<NonNullable<Course["tags"][number]["tone"]>, string> = {
-  default: "bg-blue-600 text-white",
-  dark: "bg-gray-900/85 text-white backdrop-blur-sm",
-  success: "bg-emerald-600 text-white",
-  premium: "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white",
-};
+export default function CourseCard({ course }: { course: CourseListItem }) {
+  const isVideo = !course.tags.includes("pdf");
+  const isFree = course.price === 0 && !course.is_premium;
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrolled, setEnrolled] = useState(false);
+  const [saved, setSaved] = useState(course.is_saved);
+  const [savingBusy, setSavingBusy] = useState(false);
 
-export default function CourseCard({ course }: { course: Course }) {
-  const isVideo = course.format === "Video" || course.format === "Interactive";
+  async function handleEnroll(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (enrolling || enrolled) return;
+    setEnrolling(true);
+    try {
+      await STUDENT.enroll(course.id);
+      setEnrolled(true);
+      toast.success(`Enrolled in ${course.title}`);
+    } catch (err) {
+      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't enroll. Try again.");
+    } finally {
+      setEnrolling(false);
+    }
+  }
+
+  async function handleToggleSave(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (savingBusy) return;
+    setSavingBusy(true);
+    const next = !saved;
+    try {
+      await (next ? STUDENT.saveCourse(course.id) : STUDENT.unsaveCourse(course.id));
+      setSaved(next);
+    } catch (err) {
+      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't update saved courses.");
+    } finally {
+      setSavingBusy(false);
+    }
+  }
 
   return (
     <Link
@@ -22,23 +56,26 @@ export default function CourseCard({ course }: { course: Course }) {
       className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-16/10 w-full overflow-hidden bg-gray-100">
-        <Image
-          src={course.image}
-          alt={course.title}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {course.thumbnail_url ? (
+          <Image
+            src={course.thumbnail_url}
+            alt={course.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-blue-50">
+            {isVideo ? <Play className="size-10 text-blue-300" /> : <FileText className="size-10 text-blue-300" />}
+          </div>
+        )}
         <div className="absolute left-3 top-3 flex gap-1.5">
-          {course.tags.map((tag) => (
+          {course.tags.slice(0, 2).map((tag) => (
             <span
-              key={tag.label}
-              className={cn(
-                "rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                TAG_TONE[tag.tone ?? "dark"]
-              )}
+              key={tag}
+              className="rounded-md bg-gray-900/85 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm"
             >
-              {tag.label}
+              {tag}
             </span>
           ))}
         </div>
@@ -57,43 +94,65 @@ export default function CourseCard({ course }: { course: Course }) {
             {course.title}
           </h3>
           <button
-            aria-label="Save course"
-            onClick={(e) => e.preventDefault()}
+            type="button"
+            aria-label={saved ? "Remove from saved courses" : "Save course"}
+            onClick={handleToggleSave}
+            disabled={savingBusy}
             className="shrink-0 text-gray-400 transition-colors hover:text-gray-700"
           >
-            <Bookmark className="size-[18px]" />
+            <Bookmark className={cn("size-[18px]", saved && "fill-blue-600 text-blue-600")} />
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span className="flex size-6 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold text-gray-700">
-            {course.instructor
-              .split(" ")
-              .map((n) => n[0])
-              .slice(-2)
-              .join("")}
-          </span>
-          {course.instructor}
-        </div>
+        {course.tutor_name && (
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span className="flex size-6 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold text-gray-700">
+              {course.tutor_name
+                .split(" ")
+                .map((n) => n[0])
+                .slice(-2)
+                .join("")}
+            </span>
+            {course.tutor_name}
+          </div>
+        )}
 
-        <div className="flex items-center gap-1 text-sm">
-          <Star className="size-4 fill-amber-400 text-amber-400" />
-          <span className="font-semibold text-gray-900">{course.rating.toFixed(1)}</span>
-          <span className="text-gray-400">({course.reviews} reviews)</span>
-        </div>
+        {course.avg_rating != null && (
+          <div className="flex items-center gap-1 text-sm">
+            <Star className="size-4 fill-amber-400 text-amber-400" />
+            <span className="font-semibold text-gray-900">{course.avg_rating.toFixed(1)}</span>
+            <span className="text-gray-400">({course.review_count} reviews)</span>
+          </div>
+        )}
 
         <div className="mt-1 flex items-center justify-between border-t border-gray-100 pt-3">
-          <span className="text-sm font-semibold text-gray-900">{course.price}</span>
-          <span
-            className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-semibold",
-              course.cta === "Upgrade to Premium"
-                ? "bg-gray-100 text-gray-900"
-                : "bg-blue-600 text-white"
-            )}
-          >
-            {course.cta}
+          <span className="text-sm font-semibold text-gray-900">
+            {course.price === 0 ? "Free" : `${course.price.toLocaleString()} XAF`}
           </span>
+
+          {isFree ? (
+            <button
+              type="button"
+              onClick={handleEnroll}
+              disabled={enrolling || enrolled}
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors",
+                enrolled ? "bg-emerald-600" : "bg-blue-600 hover:bg-blue-700"
+              )}
+            >
+              {enrolling && <Loader2 className="size-3.5 animate-spin" />}
+              {enrolled ? "Enrolled" : enrolling ? "Enrolling…" : "Enroll Now"}
+            </button>
+          ) : (
+            <span
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-xs font-semibold",
+                course.is_premium ? "bg-gray-100 text-gray-900" : "bg-blue-600 text-white"
+              )}
+            >
+              {course.is_premium ? "Premium" : "View Course"}
+            </span>
+          )}
         </div>
       </div>
     </Link>

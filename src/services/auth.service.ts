@@ -5,6 +5,7 @@ import type {
   RegisterPayload,
   SetRolePayload,
   RefreshPayload,
+  TokenPair,
   User,
 } from "@/types/user.types";
 
@@ -28,13 +29,24 @@ const AUTH = {
   /** GET /v1/auth/me */
   me: () => api.get<User>("/v1/auth/me", true),
 
-  /** POST /v1/auth/refresh */
+  /** POST /v1/auth/refresh — returns a bare token pair, not a full AuthResponse */
   refresh: (p: RefreshPayload) =>
-    api.post<AuthResponse>("/v1/auth/refresh", p),
+    api.post<TokenPair>("/v1/auth/refresh", p),
 
   /** POST /v1/auth/google — sign in with Google ID token */
   google: (google_id_token: string) =>
     api.post<AuthResponse>("/v1/auth/google", { google_id_token }),
+
+  /** PATCH /v1/auth/me — update name/email/phone. Send only fields you want to change. */
+  updateProfile: (body: { full_name?: string; email?: string; phone?: string }) =>
+    api.patch<User>("/v1/auth/me", body, true),
+
+  /**
+   * POST /v1/auth/change-password — omit current_password for a Google-only
+   * account with no password yet (has_password === false on the stored user).
+   */
+  changePassword: (body: { current_password?: string; new_password: string }) =>
+    api.post<AuthResponse>("/v1/auth/change-password", body, true),
 };
 
 export default AUTH;

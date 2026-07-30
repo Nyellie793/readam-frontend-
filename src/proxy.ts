@@ -8,7 +8,8 @@
  * Rules
  * ─────
  *   /admin/*    → must be authenticated AND have role admin|super_admin
- *   /onboarding-* /welcome-back → must be authenticated
+ *   /onboarding-* /welcome-back /dashboard/* /notifications /settings
+ *   /checkout /payment/* → must be authenticated
  *   /login /signup → redirect to home if already authenticated
  */
 import { NextResponse } from "next/server";
@@ -16,7 +17,8 @@ import type { NextRequest } from "next/server";
 import { ADMIN_ROLES } from "@/lib/constants";
 
 const ADMIN_ROUTES = /^\/admin(\/|$)/;
-const AUTH_REQUIRED = /^\/(onboarding-\d|welcome-back)/;
+const AUTH_REQUIRED =
+  /^\/(onboarding-\d|welcome-back|dashboard|notifications|settings|checkout|payment)(\/|$)/;
 const GUEST_ONLY = /^\/(login|signup)(\/|$)/;
 
 export function proxy(req: NextRequest) {
@@ -59,5 +61,10 @@ export const config = {
     "/welcome-back",
     "/login",
     "/signup",
+    "/dashboard/:path*",
+    "/notifications/:path*",
+    "/settings/:path*",
+    "/checkout/:path*",
+    "/payment/:path*",
   ],
 };
