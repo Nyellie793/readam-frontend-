@@ -131,41 +131,6 @@ export const COURSES: CourseRow[] = [
   { id: "c5", title: "Modern Cybersecurity Foundations", category: "Technology", tutor: "Tabi Samuel", updated: "Sep 12, 2025", status: "Published" },
 ];
 
-export interface TutorRow {
-  id: string;
-  name: string;
-  subject: string;
-  email: string;
-  students: number;
-  rating: number;
-  status: "Verified" | "Pending" | "Suspended" | "Active";
-}
-
-export const TUTORS: TutorRow[] = [
-  { id: "t1", name: "Dr. Ana Thome", subject: "Quantum Physics", email: "ana.thome@example.com", students: 142, rating: 4.9, status: "Verified" },
-  { id: "t2", name: "Sarah Jenkins", subject: "Organic Chemistry", email: "sarah.jenkins@example.com", students: 0, rating: 0, status: "Pending" },
-  { id: "t3", name: "Michael Vanhart", subject: "Advanced Calculus", email: "michael.v@example.com", students: 88, rating: 4.2, status: "Suspended" },
-  { id: "t4", name: "Matt Tomson", subject: "Programming Pro", email: "matt.tomson@example.com", students: 0, rating: 0, status: "Pending" },
-  { id: "t5", name: "Elena Rodriguez", subject: "Literature", email: "elena.r@example.com", students: 215, rating: 4.8, status: "Active" },
-];
-
-export interface StudentRow {
-  id: string;
-  name: string;
-  email: string;
-  courses: number;
-  joined: string;
-  status: "Active" | "Suspended";
-}
-
-export const STUDENTS: StudentRow[] = [
-  { id: "s1", name: "Marcus Holloway", email: "marcus.holloway@example.com", courses: 12, joined: "Jan 14, 2025", status: "Active" },
-  { id: "s2", name: "Sarah Jenkins", email: "sarah.jenkins@example.com", courses: 4, joined: "Dec 30, 2025", status: "Active" },
-  { id: "s3", name: "Elena Rodriguez", email: "elena.rodriguez@example.com", courses: 7, joined: "Nov 22, 2025", status: "Active" },
-  { id: "s4", name: "Sophia Chen", email: "sophia.chen@example.com", courses: 20, joined: "Nov 02, 2025", status: "Active" },
-  { id: "s5", name: "Matt Tomson", email: "matt.tomson@example.com", courses: 1, joined: "Oct 19, 2025", status: "Suspended" },
-];
-
 export interface TransactionRow {
   id: string;
   party: string;

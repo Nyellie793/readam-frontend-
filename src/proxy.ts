@@ -28,6 +28,14 @@ export function proxy(req: NextRequest) {
   const role = req.cookies.get("readam_role")?.value ?? "";
   const isAdminRole = (ADMIN_ROLES as readonly string[]).includes(role);
 
+  /* ── Admin login page — guest-only, never gated by its own rule below ──── */
+  if (pathname === "/admin/login") {
+    if (isAuth && isAdminRole) {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
+    return NextResponse.next();
+  }
+
   /* ── Admin routes ───────────────────────────────────────── */
   if (ADMIN_ROUTES.test(pathname)) {
     // Not logged in at all → go to admin login page
