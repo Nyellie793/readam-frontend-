@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Bell, Sparkles } from "lucide-react";
+import UserDropdown from "@/components/dashboard/UserDropdown";
 
 export default function DashboardActions() {
   return (
@@ -35,6 +36,8 @@ export default function DashboardActions() {
         <Sparkles className="size-4" />
         AI Assistant
       </Link>
+
+      <UserDropdown />
 
     </div>
   );

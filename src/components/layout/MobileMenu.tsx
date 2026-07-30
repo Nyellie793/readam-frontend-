@@ -66,11 +66,11 @@ export default function MobileMenu() {
                   className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
                   <LayoutDashboard className="size-4 text-gray-400" /> Dashboard
                 </Link>
-                <Link href="/settings/profile"
+                <Link href="/settings"
                   className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
                   <User className="size-4 text-gray-400" /> Profile
                 </Link>
-                <Link href="/payments"
+                <Link href="/settings"
                   className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
                   <CreditCard className="size-4 text-gray-400" /> Subscription
                 </Link>

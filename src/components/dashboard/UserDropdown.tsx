@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   LogOut,
   User,
@@ -19,11 +20,16 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-import { getStoredUser } from "@/lib/auth";
+import { getStoredUser, clearSession } from "@/lib/auth";
 
 export default function UserDropdown() {
-
+  const router = useRouter();
   const user = getStoredUser();
+
+  function handleLogout() {
+    clearSession();
+    router.push("/login");
+  }
 
   const name =
     user?.full_name ??
@@ -81,7 +87,7 @@ export default function UserDropdown() {
 
         <DropdownMenuSeparator/>
 
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/settings")}>
 
           <User className="mr-2 h-4 w-4"/>
 
@@ -89,7 +95,7 @@ export default function UserDropdown() {
 
         </DropdownMenuItem>
 
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/settings")}>
 
           <CreditCard className="mr-2 h-4 w-4"/>
 
@@ -97,7 +103,7 @@ export default function UserDropdown() {
 
         </DropdownMenuItem>
 
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/settings")}>
 
           <Settings className="mr-2 h-4 w-4"/>
 
@@ -107,7 +113,7 @@ export default function UserDropdown() {
 
         <DropdownMenuSeparator/>
 
-        <DropdownMenuItem className="text-red-600">
+        <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
 
           <LogOut className="mr-2 h-4 w-4"/>
 
