@@ -47,6 +47,17 @@ const AUTH = {
    */
   changePassword: (body: { current_password?: string; new_password: string }) =>
     api.post<AuthResponse>("/v1/auth/change-password", body, true),
+
+  /**
+   * POST /v1/auth/forgot-password — always returns the same generic message,
+   * whether or not the email is registered (prevents account enumeration).
+   */
+  forgotPassword: (email: string) =>
+    api.post<{ message: string }>("/v1/auth/forgot-password", { email }),
+
+  /** POST /v1/auth/reset-password — consumes a reset token from the emailed link. */
+  resetPassword: (body: { token: string; new_password: string }) =>
+    api.post<{ message: string }>("/v1/auth/reset-password", body),
 };
 
 export default AUTH;

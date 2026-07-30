@@ -22,11 +22,13 @@ export function useAuth() {
 
       toast.success(`Welcome back, ${data.user.full_name.split(" ")[0]}!`);
 
-      // Role-based redirect
+      // Role-based redirect — a returning user goes straight to their dashboard.
+      // /welcome-back reuses the onboarding stepper shell, so it's reserved for
+      // the moment right after finishing onboarding, not every login.
       if (isAdmin(data.user)) {
         router.push(ROUTES.admin);
       } else {
-        router.push(ROUTES.welcomeBack);
+        router.push("/dashboard");
       }
     } catch (err) {
       toast.error(
@@ -103,7 +105,7 @@ export function useAuth() {
       if (isAdmin(data.user)) {
         router.push(ROUTES.admin);
       } else {
-        router.push(ROUTES.welcomeBack);
+        router.push("/dashboard");
       }
     } catch (err) {
       toast.error(
