@@ -12,6 +12,18 @@ export class ApiRequestError extends Error {
   }
 }
 
+// Some backend error details end with an API-consumer instruction, e.g.
+// "... at POST /v1/subscriptions/purchase" — meant for developers reading the
+// API docs, not for a student reading a toast. Strip that trailing clause.
+function sanitizeDetail(detail: string): string {
+  return detail.replace(/\s*at (GET|POST|PATCH|DELETE)\s+\/\S+\.?\s*$/i, "").trim();
+}
+
+export function errorMessage(err: unknown, fallback: string): string {
+  if (!(err instanceof ApiRequestError)) return fallback;
+  return sanitizeDetail(err.detail) || fallback;
+}
+
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);

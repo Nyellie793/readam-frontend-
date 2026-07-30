@@ -26,7 +26,7 @@ export default function AiHubBanner() {
           Physics, Math, or Biology.
         </p>
         <Link
-          href="/dashboard/ai-chat"
+          href="/dashboard/ai-tutor/ai-chat"
           className="mt-5 inline-block rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 shadow transition-colors hover:bg-blue-50"
         >
           Start AI Session

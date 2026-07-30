@@ -1,18 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Bell, User } from "lucide-react";
+import Link from "next/link";
+import { Sparkles, Bell } from "lucide-react";
 import { getStoredUser } from "@/lib/auth";
+import STUDENT from "@/services/student.service";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+function useGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
+}
 
 export default function AiHubHeader() {
   const [name, setName] = useState("Student");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [hasUnread, setHasUnread] = useState(false);
+  const greeting = useGreeting();
 
   useEffect(() => {
     const user = getStoredUser();
-    if (user) setName(user.full_name ?? "Student");
+    if (user) {
+      setName(user.full_name ?? "Student");
+      setAvatarUrl(user.avatar_url ?? null);
+    }
+    STUDENT.getNotifications()
+      .then((data) => setHasUnread(data.unread_count > 0))
+      .catch(() => null);
   }, []);
 
   const firstName = name.split(" ")[0];
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
@@ -33,35 +58,32 @@ export default function AiHubHeader() {
         </p>
 
         <p className="mt-4 text-base font-semibold text-gray-800">
-          Good Afternoon,{" "}
-          <span className="text-blue-600">{firstName}</span>{" "}
+          {greeting}, <span className="text-blue-600">{firstName}</span>{" "}
           <span aria-hidden>👋</span>
-        </p>
-        <p className="text-sm text-gray-500">
-          You&apos;re 3 lessons away from completing Mathematics.
         </p>
       </div>
 
       <div className="flex items-center gap-2">
-        <button
+        <Link
+          href="/notifications"
           aria-label="Notifications"
           className="relative rounded-full p-2 text-gray-500 hover:bg-white hover:shadow-sm"
         >
           <Bell className="size-5" />
-          <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-orange-400" />
-        </button>
-        <button
-          aria-label="AI Assistant"
-          className="rounded-full p-2 text-blue-600 hover:bg-white hover:shadow-sm"
+          {hasUnread && (
+            <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-orange-400" />
+          )}
+        </Link>
+        <Link
+          href="/settings"
+          aria-label="Settings"
+          className="rounded-full hover:bg-white hover:shadow-sm"
         >
-          <Sparkles className="size-5" />
-        </button>
-        <button
-          aria-label="Profile"
-          className="rounded-full p-2 text-gray-500 hover:bg-white hover:shadow-sm"
-        >
-          <User className="size-5" />
-        </button>
+          <Avatar className="size-9">
+            <AvatarImage src={avatarUrl ?? ""} />
+            <AvatarFallback>{initials || "S"}</AvatarFallback>
+          </Avatar>
+        </Link>
       </div>
     </div>
   );

@@ -314,3 +314,140 @@ export interface CourseListItem {
     page: number;
     page_size: number;
   }
+
+  // ── AI Tutor ──────────────────────────────────────────────────────────────
+
+  export interface AISessionResponse {
+    id: string;
+    lesson_id: string | null;
+    session_type: "lesson" | "general";
+    status: "active" | "expired";
+    started_at: string;
+    expires_at: string;
+    message_count: number;
+    created_at: string;
+  }
+
+  export type AISessionListItem = AISessionResponse;
+
+  export interface AIAttachmentResponse {
+    id: string;
+    filename: string;
+    content_type: string;
+    file_url: string;
+    created_at: string;
+  }
+
+  export interface AIMessageResponse {
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+    model_used: string | null;
+    input_tokens: number | null;
+    output_tokens: number | null;
+    attachments: AIAttachmentResponse[];
+    created_at: string;
+  }
+
+  export interface SendMessageResponse {
+    user_message: AIMessageResponse;
+    assistant_message: AIMessageResponse;
+  }
+
+  export interface AISessionDetailResponse extends AISessionResponse {
+    messages: AIMessageResponse[];
+  }
+
+  export interface AttachmentUploadResponse {
+    attachment_id: string;
+    upload_url: string;
+    file_url: string;
+  }
+
+  export interface RevisionResponse {
+    id: string;
+    content: string;
+    model_used: string;
+    created_at: string;
+  }
+
+  export interface QuizQuestionPublic {
+    question_id: string;
+    order: number;
+    prompt: string;
+    options: string[];
+  }
+
+  export interface QuizResponse {
+    quiz_id: string;
+    num_questions: number;
+    questions: QuizQuestionPublic[];
+  }
+
+  export interface QuizAnswerItem {
+    question_id: string;
+    selected_index: number;
+  }
+
+  export interface QuizGradedQuestion {
+    question_id: string;
+    selected_index: number;
+    correct_index: number;
+    is_correct: boolean;
+    explanation: string;
+  }
+
+  export interface QuizAttemptResponse {
+    attempt_id: string;
+    score: number;
+    total: number;
+    results: QuizGradedQuestion[];
+  }
+
+  export interface StudyPlanResponse {
+    id: string;
+    content: string;
+    model_used: string;
+    created_at: string;
+  }
+
+  export interface SuggestedTopicsResponse {
+    topics: string[];
+  }
+
+  export interface SessionSummaryRevision {
+    id: string;
+    content: string;
+    created_at: string;
+  }
+
+  export interface SessionSummaryQuiz {
+    quiz_id: string;
+    num_questions: number;
+    created_at: string;
+    taken: boolean;
+    best_score: number | null;
+    best_total: number | null;
+    attempt_count: number;
+    latest_attempt_at: string | null;
+  }
+
+  export interface SessionSummaryStudyPlan {
+    id: string;
+    created_at: string;
+  }
+
+  export interface SessionSummaryResponse {
+    session_id: string;
+    session_type: "lesson" | "general";
+    status: "active" | "expired";
+    lesson_id: string | null;
+    lesson_title: string | null;
+    started_at: string;
+    expires_at: string;
+    message_count: number;
+    revisions: SessionSummaryRevision[];
+    quizzes: SessionSummaryQuiz[];
+    study_plans: SessionSummaryStudyPlan[];
+    xp_earned: number;
+  }

@@ -1,29 +1,47 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import AI from "@/services/ai.service";
 
-const SUGGESTIONS = [
+const FALLBACK_SUGGESTIONS = [
   "Revise Integration by Parts",
   "Attempt a Physics Quiz",
   "Solve 5 WAEC Mathematics Questions",
 ];
 
 export default function AiHubSuggestions() {
+  const [topics, setTopics] = useState<string[]>(FALLBACK_SUGGESTIONS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    AI.getSuggestedTopics()
+      .then((data) => {
+        if (data.topics.length > 0) setTopics(data.topics);
+      })
+      .catch(() => null)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div>
       <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
         Suggested for you
       </p>
       <div className="flex flex-wrap gap-2">
-        {SUGGESTIONS.map((text) => (
-          <Link
-            key={text}
-            href={`/dashboard/ai-chat?q=${encodeURIComponent(text)}`}
-            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-          >
-            {text}
-          </Link>
-        ))}
+        {loading
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-9 w-40 animate-pulse rounded-lg bg-gray-100" />
+            ))
+          : topics.map((text) => (
+              <Link
+                key={text}
+                href={`/dashboard/ai-tutor/ai-chat?topic=${encodeURIComponent(text)}`}
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+              >
+                {text}
+              </Link>
+            ))}
       </div>
     </div>
   );
