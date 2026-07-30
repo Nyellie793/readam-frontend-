@@ -116,12 +116,12 @@ export default function LessonPage() {
             {!lessonLoading && lessonDenied && (
               <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-2xl bg-gray-950 text-white/80">
                 <Lock className="size-8" />
-                <p className="text-sm">Purchase this course or subscribe to access this lesson.</p>
+                <p className="text-sm">Purchase this course to access this lesson.</p>
                 <Link
-                  href="/payment"
+                  href={`/checkout?course=${courseId}`}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                 >
-                  View Plans
+                  Buy Course — {course.price.toLocaleString()} XAF
                 </Link>
               </div>
             )}

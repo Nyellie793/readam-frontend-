@@ -25,6 +25,7 @@ function CoursesPageContent() {
   const category = searchParams.get("category") ?? "";
   const contentTypes = searchParams.getAll("content_type");
   const contentTypesKey = contentTypes.join(",");
+  const officialOnly = searchParams.get("official_only") === "true";
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
@@ -54,6 +55,7 @@ function CoursesPageContent() {
         search: search || undefined,
         category: category || undefined,
         contentTypes: contentTypes.length > 0 ? contentTypes : undefined,
+        officialOnly: officialOnly || undefined,
       })
         .then((data) => {
           setBrowseResults(data.items);
@@ -64,7 +66,7 @@ function CoursesPageContent() {
     }, 300);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, contentTypesKey]);
+  }, [search, category, contentTypesKey, officialOnly]);
 
   const recommendedSubtitle = interests.length > 0
     ? `Based on your interest in ${interests.slice(0, 2).join(" and ")}`
@@ -174,7 +176,7 @@ function CoursesPageContent() {
             {search ? `Results for "${search}"` : "Browse All Courses"}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
-            {category || contentTypes.length > 0
+            {category || contentTypes.length > 0 || officialOnly
               ? "Filtered results"
               : "All published courses on the platform"}
           </p>

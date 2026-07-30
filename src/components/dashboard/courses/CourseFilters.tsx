@@ -51,6 +51,7 @@ export default function CourseFilters({
 
   const category = searchParams.get("category") ?? "";
   const checkedTypes = searchParams.getAll("content_type");
+  const officialOnly = searchParams.get("official_only") === "true";
 
   const [streakDays, setStreakDays] = useState<number | null>(null);
 
@@ -73,6 +74,13 @@ export default function CourseFilters({
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set("category", value);
     else params.delete("category");
+    router.push(`/dashboard/courses?${params.toString()}`);
+  }
+
+  function toggleOfficialOnly() {
+    const params = new URLSearchParams(searchParams.toString());
+    if (officialOnly) params.delete("official_only");
+    else params.set("official_only", "true");
     router.push(`/dashboard/courses?${params.toString()}`);
   }
 
@@ -125,6 +133,18 @@ export default function CourseFilters({
             </label>
           ))}
         </div>
+      </div>
+
+      <div className="mt-6 border-t border-gray-100 px-6 pt-6">
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={officialOnly}
+            onChange={toggleOfficialOnly}
+            className="size-4 rounded border-gray-300 accent-blue-600"
+          />
+          <span className="font-bold text-gray-900">Official Past Questions Only</span>
+        </label>
       </div>
 
       <div className="mt-6 border-t border-gray-100 px-6 pt-6">

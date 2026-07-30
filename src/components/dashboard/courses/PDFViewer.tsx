@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileWarning, BookOpen } from "lucide-react";
+import { FileWarning, BookOpen } from "lucide-react";
 
 interface PdfViewerProps {
   title: string;
@@ -18,17 +18,6 @@ export default function PdfViewer({ title, fileUrl }: PdfViewerProps) {
           </div>
           <span className="truncate text-sm font-semibold text-gray-900">{title}</span>
         </div>
-
-        <a
-          href={fileUrl ?? undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Download"
-          aria-disabled={!fileUrl}
-          className="ml-auto rounded-lg p-2 hover:bg-gray-100 aria-disabled:pointer-events-none aria-disabled:opacity-40"
-        >
-          <Download className="size-4 text-gray-500" />
-        </a>
       </div>
 
       {/* Real PDF, rendered by the browser's own PDF viewer */}

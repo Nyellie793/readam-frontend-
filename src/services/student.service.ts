@@ -19,6 +19,9 @@ import type {
   PaginatedNotificationsResponse,
   MarkAllReadResponse,
   NotificationItem,
+  SubscriptionPaymentResponse,
+  PaymentResponse,
+  PastQuestionsProductResponse,
 } from "@/types/api.types";
 
 const STUDENT = {
@@ -31,12 +34,14 @@ const STUDENT = {
     search?: string;
     category?: string;
     contentTypes?: string[];
+    officialOnly?: boolean;
     page?: number;
   }) => {
     const q = new URLSearchParams();
     if (params?.search) q.set("search", params.search);
     if (params?.category) q.set("category", params.category);
     for (const t of params?.contentTypes ?? []) q.append("content_type", t);
+    if (params?.officialOnly) q.set("official_only", "true");
     if (params?.page) q.set("page", String(params.page));
     return api.get<PaginatedCoursesResponse>(`/v1/courses?${q.toString()}`);
   },
@@ -68,6 +73,29 @@ const STUDENT = {
   // POST /v1/enrollments
   enroll: (courseId: string) =>
     api.post<EnrollmentResponse>("/v1/enrollments", { course_id: courseId }, true),
+
+  // POST /v1/payments/initiate — buy a paid course via MTN MoMo / Orange Money
+  initiatePayment: (body: {
+    course_id: string;
+    phone: string;
+    medium?: "mobile money" | "orange money";
+  }) => api.post<PaymentResponse>("/v1/payments/initiate", body, true),
+
+  // GET /v1/payments/past-questions-products
+  getPastQuestionsProducts: () =>
+    api.get<PastQuestionsProductResponse[]>("/v1/payments/past-questions-products"),
+
+  // POST /v1/payments/initiate-past-questions — buy a Past Questions subject bundle
+  initiatePastQuestionsPayment: (body: {
+    product_code: string;
+    course_ids: string[];
+    phone: string;
+    medium?: "mobile money" | "orange money";
+  }) => api.post<PaymentResponse>("/v1/payments/initiate-past-questions", body, true),
+
+  // GET /v1/courses?official_only=true — browse admin-authored Past Questions subjects
+  getPastQuestionsCourses: (page = 1) =>
+    api.get<PaginatedCoursesResponse>(`/v1/courses?official_only=true&page=${page}&page_size=100`),
 
   // POST /v1/courses/:courseId/save — bookmark a course
   saveCourse: (courseId: string) =>
@@ -127,6 +155,16 @@ const STUDENT = {
   // GET /v1/payments — billing history
   getPayments: (page = 1) =>
     api.get<PaginatedPaymentsResponse>(`/v1/payments?page=${page}`),
+
+  // GET /v1/payments/:id — poll while waiting for the Fapshi webhook to land
+  getPayment: (id: string) => api.get<PaymentResponse>(`/v1/payments/${id}`),
+
+  // POST /v1/subscriptions/purchase — buy an AI session product via MTN MoMo / Orange Money
+  purchaseSubscription: (body: {
+    product_code: string;
+    phone: string;
+    medium?: "mobile money" | "orange money";
+  }) => api.post<SubscriptionPaymentResponse>("/v1/subscriptions/purchase", body, true),
 
   // GET /v1/notifications — the in-app notification feed
   getNotifications: (page = 1) =>

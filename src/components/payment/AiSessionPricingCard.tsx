@@ -1,123 +1,85 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Check, Star } from "lucide-react";
 import Link from "next/link";
-
-export interface AiSessionPlan {
-  id: string;
-  title: string;
-  price: string;
-  period?: string;
-  description?: string;
-  features: string[];
-  badge?: string;
-  subBadge?: string;
-  color: "blue" | "purple" | "pink" | "orange" | "green";
-  popular?: boolean;
-}
+import type { ProductResponse } from "@/types/api.types";
 
 interface AiSessionPricingCardProps {
-  plan: AiSessionPlan;
+  product: ProductResponse;
+  highlight?: boolean;
 }
 
-export default function AiSessionPricingCard({ plan }: AiSessionPricingCardProps) {
-  const { id, title, price, period, description, features, badge, subBadge, color, popular } = plan;
+function featuresFor(product: ProductResponse): string[] {
+  const features: string[] = [];
+  if (product.sessions) {
+    features.push(`${product.sessions} session${product.sessions > 1 ? "s" : ""} (45 minutes each)`);
+  }
+  if (product.duration_days) {
+    features.push(`Unlimited sessions for ${product.duration_days} days`);
+    features.push(
+      product.daily_session_cap
+        ? `Up to ${product.daily_session_cap} sessions per day`
+        : "24/7 AI tutor access, no daily limit"
+    );
+  }
+  return features;
+}
 
-  const colorClasses = {
-    blue: {
-      border: "border-blue-200 hover:shadow-blue-50/50",
-      titleColor: "text-blue-600",
-      iconBg: "bg-blue-50 text-blue-600",
-      icon: Check,
-      btn: "border-blue-600 text-blue-600 hover:bg-blue-50",
-    },
-    purple: {
-      border: "border-purple-200 hover:shadow-purple-50/50",
-      titleColor: "text-purple-600",
-      iconBg: "bg-purple-50 text-purple-600",
-      icon: Check,
-      btn: "border-purple-600 text-purple-600 hover:bg-purple-50",
-    },
-    pink: {
-      border: "border-pink-200 hover:shadow-pink-50/50",
-      titleColor: "text-pink-600",
-      iconBg: "bg-pink-50 text-pink-600",
-      icon: Check,
-      btn: "border-pink-600 text-pink-600 hover:bg-pink-50",
-    },
-    orange: {
-      border: "border-orange-500 shadow-lg ring-1 ring-orange-500 hover:shadow-orange-100",
-      titleColor: "text-orange-600",
-      iconBg: "bg-orange-50 text-orange-600",
-      icon: Star,
-      btn: "bg-orange-600 hover:bg-orange-700 text-white border-orange-600 shadow-md shadow-orange-600/20",
-    },
-    green: {
-      border: "border-emerald-200 hover:shadow-emerald-50/50",
-      titleColor: "text-emerald-600",
-      iconBg: "bg-emerald-50 text-emerald-600",
-      icon: Check,
-      btn: "border-emerald-600 text-emerald-600 hover:bg-emerald-50",
-    },
-  }[color];
-
-  const ActionIcon = colorClasses.icon;
+export default function AiSessionPricingCard({ product, highlight }: AiSessionPricingCardProps) {
+  const features = featuresFor(product);
+  const Icon = highlight ? Star : Check;
 
   return (
     <Card
-      className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition-all hover:shadow-md ${colorClasses.border}`}
+      className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition-all hover:shadow-md ${
+        highlight ? "border-orange-500 shadow-lg ring-1 ring-orange-500 hover:shadow-orange-100" : "border-blue-200"
+      }`}
     >
-      {badge && (
+      {highlight && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <Badge className="bg-orange-500 text-white hover:bg-orange-500 font-extrabold text-[10px] tracking-wider uppercase px-3.5 py-1 rounded-full border-none shadow-sm">
-            {badge}
+          <Badge className="rounded-full border-none bg-orange-500 px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm hover:bg-orange-500">
+            Best Value
           </Badge>
         </div>
       )}
 
-      <div className="space-y-1 mt-2">
-        <h3 className={`text-sm font-extrabold tracking-wide ${colorClasses.titleColor}`}>
-          {title}
+      <div className="mt-2 space-y-1">
+        <h3 className={`text-sm font-extrabold tracking-wide ${highlight ? "text-orange-600" : "text-blue-600"}`}>
+          {product.name}
         </h3>
-        <div className="flex items-baseline gap-1 mt-3">
-          <span className="text-2xl font-black text-gray-900">{price}</span>
-          {period && <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider"> {period}</span>}
+        <div className="mt-3 flex items-baseline gap-1">
+          <span className="text-2xl font-black text-gray-900">{product.price_xaf.toLocaleString()} XAF</span>
         </div>
-        
-        {subBadge && (
-          <div className="mt-1">
-            <span className="inline-block bg-purple-100/70 text-purple-700 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-              {subBadge}
-            </span>
-          </div>
-        )}
-
-        {description && (
-          <p className="text-[11px] font-bold text-orange-500 uppercase tracking-widest mt-2">
-            {description}
-          </p>
-        )}
+        <p className="mt-2 text-xs text-gray-500">{product.description}</p>
       </div>
 
-      <div className="flex-1 space-y-3.5 my-6 pt-5 border-t border-gray-100">
+      <div className="my-6 flex-1 space-y-3.5 border-t border-gray-100 pt-5">
         {features.map((feat, idx) => (
           <div key={idx} className="flex items-start gap-2.5 text-xs text-gray-600">
-            <div className={`flex size-4.5 shrink-0 items-center justify-center rounded-full ${colorClasses.iconBg}`}>
-              <ActionIcon className="size-3" />
+            <div
+              className={`flex size-4.5 shrink-0 items-center justify-center rounded-full ${
+                highlight ? "bg-orange-50 text-orange-600" : "bg-blue-50 text-blue-600"
+              }`}
+            >
+              <Icon className="size-3" />
             </div>
             <span className="leading-tight">{feat}</span>
           </div>
         ))}
       </div>
 
-      <Link href={`/checkout?plan=${id}`} className="mt-auto block">
+      <Link href={`/checkout?product=${product.code}`} className="mt-auto block">
         <button
           type="button"
-          className={`w-full rounded-xl py-2.5 text-xs font-bold text-center border transition-colors cursor-pointer ${colorClasses.btn}`}
+          className={`w-full cursor-pointer rounded-xl border py-2.5 text-center text-xs font-bold transition-colors ${
+            highlight
+              ? "border-orange-600 bg-orange-600 text-white shadow-md shadow-orange-600/20 hover:bg-orange-700"
+              : "border-blue-600 text-blue-600 hover:bg-blue-50"
+          }`}
         >
-          {color === "orange" ? "Subscribe Now" : "Subscribe"}
+          {highlight ? "Subscribe Now" : "Buy Now"}
         </button>
       </Link>
     </Card>

@@ -17,6 +17,7 @@ export interface CourseListItem {
     created_at: string;
     updated_at: string;
     is_saved: boolean;
+    has_video: boolean;
   }
 
   export interface SavedCourseResponse {
@@ -435,6 +436,38 @@ export interface CourseListItem {
   export interface SessionSummaryStudyPlan {
     id: string;
     created_at: string;
+  }
+
+  export interface SubscriptionPaymentResponse {
+    id: string;
+    product_code: string | null;
+    fapshi_trans_id: string;
+    amount: number;
+    status: "pending" | "successful" | "failed" | "expired";
+    created_at: string;
+  }
+
+  export interface PaymentResponse {
+    id: string;
+    course_id: string | null;
+    product_code: string | null;
+    payment_type: "course" | "subscription" | "past_questions_bundle";
+    fapshi_trans_id: string;
+    amount: number;
+    phone: string | null;
+    medium: string | null;
+    status: "pending" | "successful" | "failed" | "expired";
+    bundle_course_ids: string[] | null;
+    webhook_received_at: string | null;
+    created_at: string;
+  }
+
+  export interface PastQuestionsProductResponse {
+    code: string;
+    name: string;
+    description: string;
+    price_xaf: number;
+    subject_count: number | null;
   }
 
   export interface SessionSummaryResponse {

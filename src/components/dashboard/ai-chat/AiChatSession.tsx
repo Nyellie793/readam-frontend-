@@ -33,6 +33,26 @@ import type { User } from "@/types/user.types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// Remembers the last active session so navigating away and back (e.g. via the
+// sidebar) resumes it instead of silently starting a new one and burning
+// another AI credit.
+const ACTIVE_SESSION_KEY = "readam_active_ai_session";
+
+function readActiveSessionId(): string | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
+    if (!raw) return null;
+    const stored = JSON.parse(raw) as { id: string; expiresAt: string };
+    return new Date(stored.expiresAt).getTime() > Date.now() ? stored.id : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeActiveSession(id: string, expiresAt: string) {
+  localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ id, expiresAt }));
+}
+
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const diffHours = diffMs / (1000 * 60 * 60);
@@ -211,16 +231,27 @@ export default function AiChatSession() {
 
     (async () => {
       try {
-        if (existingSessionId) {
-          const detail = await AI.getSession(existingSessionId);
+        // A plain nav (no explicit new-session intent) resumes the last active
+        // session instead of silently starting — and paying for — a new one.
+        const resumeId =
+          existingSessionId ??
+          (!lessonId && !intent && !topic ? readActiveSessionId() : null);
+
+        if (resumeId) {
+          const detail = await AI.getSession(resumeId);
           setSession(detail);
           setMessages(detail.messages);
+          storeActiveSession(detail.id, detail.expires_at);
+          if (!existingSessionId) {
+            router.replace(`/dashboard/ai-tutor/ai-chat?session=${detail.id}`);
+          }
           await refreshSummary(detail.id);
           return;
         }
 
         const started = await AI.startSession(lessonId ?? undefined);
         setSession(started);
+        storeActiveSession(started.id, started.expires_at);
         router.replace(`/dashboard/ai-tutor/ai-chat?session=${started.id}`);
         await refreshSummary(started.id);
 

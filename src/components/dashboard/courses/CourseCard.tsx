@@ -11,7 +11,7 @@ import { ApiRequestError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export default function CourseCard({ course }: { course: CourseListItem }) {
-  const isVideo = !course.tags.includes("pdf");
+  const isVideo = course.has_video;
   const isFree = course.price === 0 && !course.is_premium;
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
@@ -143,14 +143,17 @@ export default function CourseCard({ course }: { course: CourseListItem }) {
               {enrolling && <Loader2 className="size-3.5 animate-spin" />}
               {enrolled ? "Enrolled" : enrolling ? "Enrolling…" : "Enroll Now"}
             </button>
-          ) : (
-            <span
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-xs font-semibold",
-                course.is_premium ? "bg-gray-100 text-gray-900" : "bg-blue-600 text-white"
-              )}
+          ) : course.is_premium ? (
+            <Link
+              href={`/checkout?course=${course.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"
             >
-              {course.is_premium ? "Premium" : "View Course"}
+              Buy Now
+            </Link>
+          ) : (
+            <span className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white">
+              View Course
             </span>
           )}
         </div>
