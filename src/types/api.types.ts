@@ -520,3 +520,171 @@ export interface CourseListItem {
     study_plans: SessionSummaryStudyPlan[];
     xp_earned: number;
   }
+
+  // ── Tutor ─────────────────────────────────────────────────────────────────
+
+  export type ExperienceYears = "1-3" | "4-7" | "8+";
+
+  export interface TutorProfileResponse {
+    id: string;
+    user_id: string;
+    display_name: string | null;
+    title: string | null;
+    phone: string | null;
+    city: string | null;
+    subject: string | null;
+    teaching_level: string | null;
+    experience_years: ExperienceYears | null;
+    bio: string | null;
+    is_verified: boolean;
+    profile_completed: boolean;
+    avatar_url: string | null;
+    updated_at: string;
+  }
+
+  export interface UpdateTutorProfileRequest {
+    display_name?: string;
+    title?: string;
+    phone?: string;
+    city?: string;
+    subject?: string;
+    teaching_level?: string;
+    experience_years?: ExperienceYears;
+    bio?: string;
+    profile_completed?: boolean;
+    avatar_url?: string;
+  }
+
+  export interface PublicTutorResponse {
+    user_id: string;
+    display_name: string | null;
+    title: string | null;
+    subject: string | null;
+    teaching_level: string | null;
+    experience_years: ExperienceYears | null;
+    bio: string | null;
+    is_verified: boolean;
+    avatar_url: string | null;
+  }
+
+  export interface PayoutDetailsResponse {
+    user_id: string;
+    mtn_number: string | null;
+    orange_money_number: string | null;
+    updated_at: string;
+  }
+
+  export interface TutorNotificationPrefsResponse {
+    user_id: string;
+    email_notifications: boolean;
+    push_alerts: boolean;
+    marketing_tips: boolean;
+  }
+
+  export interface CreateCourseRequest {
+    title: string;
+    description?: string | null;
+    category: string;
+    price: number;
+    is_premium?: boolean;
+    thumbnail_url?: string | null;
+    tags?: string[];
+  }
+
+  export interface UpdateCourseRequest {
+    title?: string;
+    description?: string | null;
+    category?: string;
+    price?: number;
+    is_premium?: boolean;
+    thumbnail_url?: string | null;
+    tags?: string[];
+  }
+
+  export interface CreateModuleRequest {
+    title: string;
+    order: number;
+  }
+
+  export interface CreateLessonRequest {
+    title: string;
+    type: "video" | "pdf" | "quiz";
+    order: number;
+    duration_seconds?: number | null;
+    content_url?: string | null;
+    description?: string | null;
+    is_preview?: boolean;
+    stream_uid?: string | null;
+  }
+
+  export interface UpdateLessonRequest {
+    title?: string;
+    type?: "video" | "pdf" | "quiz";
+    order?: number;
+    duration_seconds?: number | null;
+    content_url?: string | null;
+    description?: string | null;
+    is_preview?: boolean;
+    stream_uid?: string | null;
+  }
+
+  export interface EarningItem {
+    id: string;
+    course_id: string;
+    payment_id: string;
+    gross_amount: number;
+    platform_fee: number;
+    net_amount: number;
+    status: "pending" | "paid_out";
+    created_at: string;
+  }
+
+  export interface PaginatedEarningsResponse {
+    items: EarningItem[];
+    total: number;
+    page: number;
+    page_size: number;
+  }
+
+  export interface EarningsSummaryResponse {
+    total_earned: number;
+    pending_balance: number;
+    total_paid_out: number;
+  }
+
+  export interface PayoutItem {
+    id: string;
+    fapshi_trans_id: string;
+    amount: number;
+    phone: string;
+    medium: string | null;
+    status: "pending" | "successful" | "failed";
+    created_at: string;
+    updated_at: string;
+  }
+
+  export interface PaginatedPayoutsResponse {
+    items: PayoutItem[];
+    total: number;
+    page: number;
+    page_size: number;
+  }
+
+  export interface VideoUploadResponse {
+    upload_url: string;
+    stream_uid: string;
+    hls_url: string;
+    thumbnail_url: string | null;
+  }
+
+  export interface VideoStatusResponse {
+    stream_uid: string;
+    state: string;
+    duration_seconds: number | null;
+    thumbnail_url: string | null;
+  }
+
+  export interface AssetUploadResponse {
+    upload_url: string;
+    file_url: string;
+  }

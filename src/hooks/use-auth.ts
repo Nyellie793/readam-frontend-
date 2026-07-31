@@ -27,6 +27,8 @@ export function useAuth() {
       // the moment right after finishing onboarding, not every login.
       if (isAdmin(data.user)) {
         router.push(ROUTES.admin);
+      } else if (data.user.role === "tutor") {
+        router.push("/tutor");
       } else {
         router.push("/dashboard");
       }
@@ -65,7 +67,7 @@ export function useAuth() {
       saveSession(roleData); // update stored user with role now set
 
       toast.success("Account created! Let's personalise your experience.");
-      router.push(ROUTES.onboarding1);
+      router.push(assignableRole === "tutor" ? "/tutor/onboarding" : ROUTES.onboarding1);
     } catch (err) {
       toast.error(
         err instanceof ApiRequestError
@@ -92,11 +94,12 @@ export function useAuth() {
 
       if (!data.user.role) {
         // Brand new account — finish role selection, then onboarding.
-        const roleData = await AUTH.setRole({ role: role ?? "student" });
+        const assignedRole = role ?? "student";
+        const roleData = await AUTH.setRole({ role: assignedRole });
         saveSession(roleData);
         sessionStorage.setItem("login_type", "signup");
         toast.success("Account created! Let's personalise your experience.");
-        router.push(ROUTES.onboarding1);
+        router.push(assignedRole === "tutor" ? "/tutor/onboarding" : ROUTES.onboarding1);
         return;
       }
 
@@ -104,6 +107,8 @@ export function useAuth() {
       toast.success(`Welcome back, ${data.user.full_name.split(" ")[0]}!`);
       if (isAdmin(data.user)) {
         router.push(ROUTES.admin);
+      } else if (data.user.role === "tutor") {
+        router.push("/tutor");
       } else {
         router.push("/dashboard");
       }

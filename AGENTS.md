@@ -35,7 +35,7 @@ The frontend is a **Next.js 15 App Router** application written in **TypeScript*
 | Auth | `localStorage` + cookies — see `@/lib/auth.ts` |
 | State | Local `useState`/`useEffect` — no Redux, no Zustand, no Context |
 | i18n | `@/i18n/` — English/French toggle |
-| Backend | FastAPI on Railway: `https://web-production-0dce.up.railway.app` |
+| Backend | FastAPI on Railway: `https://readam-api-production.up.railway.app` |
 
 ---
 
@@ -271,7 +271,7 @@ api.patch<T>(path, body, auth?)   // auth defaults true
 api.delete<T>(path, auth?)        // auth defaults true
 ```
 
-Base URL: `https://web-production-0dce.up.railway.app` (override with `NEXT_PUBLIC_API_URL`)
+Base URL: `https://readam-api-production.up.railway.app` (override with `NEXT_PUBLIC_API_URL`)
 
 Throws `ApiRequestError` with `.status` and `.detail` on non-2xx responses.
 
@@ -533,7 +533,7 @@ Example: building **Payments** at `/dashboard/payments`.
 ## 14. Environment Variables
 
 ```bash
-NEXT_PUBLIC_API_URL=https://web-production-0dce.up.railway.app
+NEXT_PUBLIC_API_URL=https://readam-api-production.up.railway.app
 ```
 
 Set in `.env.local` for local dev. The `src/lib/constants.ts` fallback points to the live Railway URL so the app works without a local env file.

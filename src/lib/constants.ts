@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://web-production-0dce.up.railway.app";
+  process.env.NEXT_PUBLIC_API_URL ?? "https://readam-api-production.up.railway.app";
 
 export const TOKEN_KEY         = "readam_access_token";
 export const REFRESH_TOKEN_KEY = "readam_refresh_token";

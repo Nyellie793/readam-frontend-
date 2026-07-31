@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Flame } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import { STUDENT_NAV } from "@/constants/student-nav";
+import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import STUDENT from "@/services/student.service";
 import { cn } from "@/lib/utils";
 
@@ -17,23 +18,7 @@ const CONTENT_TYPES = [
   { id: "quiz", label: "Practice Tests" },
 ];
 
-// Real backend CourseCategory values (readam.db.models.course.CourseCategory) — not
-// a display-only guess, so the filter below actually narrows results.
-const CATEGORIES = [
-  { value: "", label: "All Categories" },
-  { value: "science_and_tech", label: "Science & Tech" },
-  { value: "finance", label: "Finance" },
-  { value: "arts", label: "Arts" },
-  { value: "languages", label: "Languages" },
-  { value: "health", label: "Health" },
-  { value: "exams", label: "Exam Prep" },
-  { value: "career", label: "Career" },
-  { value: "law", label: "Law" },
-  { value: "engineering", label: "Engineering" },
-  { value: "design", label: "Design" },
-  { value: "personal", label: "Personal Development" },
-  { value: "other", label: "Other" },
-];
+const CATEGORIES = [{ value: "", label: "All Categories" }, ...COURSE_CATEGORIES];
 
 interface CourseFiltersProps {
   onNavigate?: () => void;

@@ -17,6 +17,7 @@ import type { NextRequest } from "next/server";
 import { ADMIN_ROLES } from "@/lib/constants";
 
 const ADMIN_ROUTES = /^\/admin(\/|$)/;
+const TUTOR_ROUTES = /^\/tutor(\/|$)/;
 const AUTH_REQUIRED =
   /^\/(onboarding-\d|welcome-back|dashboard|notifications|settings|checkout|payment)(\/|$)/;
 const GUEST_ONLY = /^\/(login|signup)(\/|$)/;
@@ -48,6 +49,16 @@ export function proxy(req: NextRequest) {
     }
   }
 
+  /* ── Tutor routes ───────────────────────────────────────── */
+  if (TUTOR_ROUTES.test(pathname)) {
+    if (!isAuth) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    if (role !== "tutor") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+  }
+
   /* ── Auth-required routes (onboarding, welcome-back) ───── */
   if (AUTH_REQUIRED.test(pathname) && !isAuth) {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -65,6 +76,7 @@ export function proxy(req: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/tutor/:path*",
     "/onboarding-:path*",
     "/welcome-back",
     "/login",
