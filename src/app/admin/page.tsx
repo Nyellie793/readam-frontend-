@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Topbar from "@/components/admin/Topbar";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
@@ -67,9 +68,12 @@ export default function AdminDashboardPage() {
         <div className="rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-100 p-5">
             <h3 className="text-sm font-bold text-gray-900">Pending Course Approvals</h3>
-            <button className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline">
+            <Link
+              href="/admin/courses"
+              className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
+            >
               View All <ArrowRight className="h-3 w-3" />
-            </button>
+            </Link>
           </div>
           <div className="divide-y divide-gray-50">
             {pendingCourses.map(course => (

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ShieldCheck, LogOut } from "lucide-react";
 import { ADMIN_NAV } from "@/constants/admin-nav";
 import { cn } from "@/lib/utils";
+import { clearSession } from "@/lib/auth";
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -17,6 +18,12 @@ interface SidebarProps {
  */
 export default function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  function handleLogout() {
+    clearSession();
+    router.push("/admin/login");
+  }
 
   return (
     <div className="flex h-full flex-col bg-[#0B1437] text-white">
@@ -62,6 +69,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
         <button
           type="button"
+          onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
         >
           <LogOut className="h-4.5 w-4.5" />
