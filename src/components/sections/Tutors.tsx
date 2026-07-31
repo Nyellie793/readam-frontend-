@@ -86,6 +86,17 @@ export default function Tutors() {
           </div>
         ))}
       </div>
+
+      <div className="mt-10 flex justify-center">
+        <Link href="/tutors">
+          <Button
+            size="lg"
+            className="rounded-xl bg-blue-600 px-6 sm:px-8 text-sm sm:text-base text-white hover:bg-blue-700 shadow-lg"
+          >
+            View All Tutors
+          </Button>
+        </Link>
+      </div>
     </section>
   );
 }
