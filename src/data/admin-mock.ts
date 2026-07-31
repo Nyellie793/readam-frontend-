@@ -5,9 +5,8 @@ import {
   BookOpen,
   CheckCircle2,
   ShieldAlert,
-  CreditCard,
 } from "lucide-react";
-import type { StatCardData, ActivityItem, ChartPoint } from "@/types/dashboard.types";
+import type { StatCardData, ActivityItem } from "@/types/dashboard.types";
 
 /**
  * NOTE: everything in this file is placeholder data (Task 8 — "do NOT
@@ -66,23 +65,6 @@ export const STUDENTS_STATS: StatCardData[] = [
   { id: "flagged", label: "Flagged Accounts", value: "14", icon: ShieldAlert, tone: "dark" },
 ];
 
-export const PAYMENTS_STATS: StatCardData[] = [
-  { id: "monthly", label: "This Month's Payout", value: "4,850,000 FCFA", delta: "+12.5%", trend: "up", icon: Wallet },
-  { id: "platform", label: "Platform Revenue", value: "12,400,000 FCFA", icon: CreditCard, tone: "dark" },
-  { id: "paid", label: "Tutor Payouts Paid", value: "7,550,000 FCFA", icon: CheckCircle2 },
-  { id: "pending", label: "Outstanding", value: "341 Tutors Paid", icon: ShieldAlert, tone: "accent" },
-];
-
-export const REVENUE_TRENDS: ChartPoint[] = [
-  { label: "Mon", value: 32 },
-  { label: "Tue", value: 48 },
-  { label: "Wed", value: 40 },
-  { label: "Thu", value: 62 },
-  { label: "Fri", value: 55 },
-  { label: "Sat", value: 78 },
-  { label: "Sun", value: 70 },
-];
-
 export const RECENT_ACTIVITY: ActivityItem[] = [
   {
     id: "1",
@@ -129,22 +111,6 @@ export const COURSES: CourseRow[] = [
   { id: "c3", title: "Financial Modeling for Startups", category: "Business", tutor: "Eric Zhao", updated: "Oct 21, 2025", status: "Rejected" },
   { id: "c4", title: "Leadership & Team Psychology", category: "Business", tutor: "Dr. Robert Miller", updated: "Sep 18, 2025", status: "Published" },
   { id: "c5", title: "Modern Cybersecurity Foundations", category: "Technology", tutor: "Tabi Samuel", updated: "Sep 12, 2025", status: "Published" },
-];
-
-export interface TransactionRow {
-  id: string;
-  party: string;
-  type: "Revenue" | "Payout" | "Refund";
-  amount: string;
-  status: "Completed" | "Pending" | "Failed";
-  date: string;
-}
-
-export const TRANSACTIONS: TransactionRow[] = [
-  { id: "TRX-0621", party: "John Doe", type: "Revenue", amount: "+45,000 FCFA", status: "Completed", date: "Jun 21, 2026" },
-  { id: "TRX-2204", party: "Marie Lebrand", type: "Payout", amount: "-120,000 FCFA", status: "Pending", date: "Jun 20, 2026" },
-  { id: "TRX-0818", party: "Alain Foka", type: "Revenue", amount: "+72,300 FCFA", status: "Completed", date: "Jun 19, 2026" },
-  { id: "TRX-0703", party: "Sara Manzouri", type: "Refund", amount: "-22,000 FCFA", status: "Failed", date: "Jun 18, 2026" },
 ];
 
 export const TOP_QUESTIONS = [

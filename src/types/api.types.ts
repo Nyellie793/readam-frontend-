@@ -196,6 +196,42 @@ export interface CourseListItem {
     page: number;
     page_size: number;
   }
+
+  export interface AdminPaymentStatsResponse {
+    platform_revenue: number;
+    total_processed: number;
+    pending_payouts: number;
+    paid_out: number;
+    successful_count: number;
+    pending_count: number;
+    failed_count: number;
+  }
+
+  export interface RevenueTrendPoint {
+    label: string;
+    value: number;
+  }
+
+  export interface AdminRevenueTrendResponse {
+    points: RevenueTrendPoint[];
+  }
+
+  export interface AdminTransactionItem {
+    id: string;
+    party: string;
+    type: "revenue" | "payout";
+    description: string;
+    amount: number;
+    status: string;
+    created_at: string;
+  }
+
+  export interface AdminTransactionsResponse {
+    items: AdminTransactionItem[];
+    total: number;
+    page: number;
+    page_size: number;
+  }
   
   export interface AdminTutorListItem {
     id: string;

@@ -44,6 +44,17 @@ const ADMIN = {
   /** GET /v1/admin/students?search=&page=1&page_size=20 */
   getStudents: (page = 1, search = "") =>
     api.get(`/v1/admin/students?page=${page}${search ? `&search=${encodeURIComponent(search)}` : ""}`),
+
+  /* ── Payments ────────────────────────────────────────────────────────────── */
+  /** GET /v1/admin/payments/stats */
+  getPaymentStats: () => api.get("/v1/admin/payments/stats"),
+
+  /** GET /v1/admin/payments/revenue-trend?days=7 */
+  getRevenueTrend: (days = 7) => api.get(`/v1/admin/payments/revenue-trend?days=${days}`),
+
+  /** GET /v1/admin/payments?page=1 */
+  getTransactions: (page = 1, pageSize = 20) =>
+    api.get(`/v1/admin/payments?page=${page}&page_size=${pageSize}`),
 };
 
 export default ADMIN;
