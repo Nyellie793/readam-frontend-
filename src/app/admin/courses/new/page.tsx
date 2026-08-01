@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
     ArrowLeft,
     ArrowRight,
@@ -17,11 +18,13 @@ import StepThumbnail from "@/components/admin/course/StepThumbnail";
 import StepModules from "@/components/admin/course/StepModules";
 import StepReview from "@/components/admin/course/StepReview";
 
-import {
+import type {
     CourseForm,
-    CourseStatus,
+    Lesson,
     Module,
 } from "@/components/admin/course/course.types";
+import TUTOR from "@/services/tutor.service";
+import { errorMessage } from "@/lib/api";
 
 const STEPS = [
     "Course Info",
@@ -115,17 +118,121 @@ export default function NewCoursePage() {
         return true;
     }
 
+    async function uploadThumbnail(): Promise<string | undefined> {
+        if (!thumbnail) return undefined;
+        const presigned = await TUTOR.requestAssetUpload(thumbnail.name, thumbnail.type);
+        await fetch(presigned.upload_url, {
+            method: "PUT",
+            headers: { "Content-Type": thumbnail.type },
+            body: thumbnail,
+        });
+        return presigned.file_url;
+    }
+
+    async function pollVideoReady(streamUid: string, lessonTitle: string): Promise<number | null> {
+        for (let attempt = 0; attempt < 100; attempt++) {
+            await new Promise((r) => setTimeout(r, 3000));
+            const status = await TUTOR.getVideoStatus(streamUid);
+            if (status.state === "ready") return status.duration_seconds;
+            if (status.state === "error") {
+                throw new Error(`Video processing failed for "${lessonTitle}"`);
+            }
+        }
+        throw new Error(`Video for "${lessonTitle}" is taking too long to process`);
+    }
+
+    async function uploadLessonFile(
+        lesson: Lesson
+    ): Promise<{ content_url?: string | null; duration_seconds?: number | null; stream_uid?: string | null }> {
+        if (lesson.type === "quiz" || !lesson.file) return {};
+
+        if (lesson.type === "pdf") {
+            const presigned = await TUTOR.requestAssetUpload(lesson.file.name, lesson.file.type);
+            await fetch(presigned.upload_url, {
+                method: "PUT",
+                headers: { "Content-Type": lesson.file.type },
+                body: lesson.file,
+            });
+            return { content_url: presigned.file_url };
+        }
+
+        // video
+        const presigned = await TUTOR.requestVideoUpload(lesson.file.name, lesson.file.size);
+        const file = lesson.file;
+        await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", presigned.upload_url);
+            xhr.onload = () =>
+                xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error("Upload failed"));
+            xhr.onerror = () => reject(new Error("Upload failed"));
+            const formData = new FormData();
+            formData.append("file", file);
+            xhr.send(formData);
+        });
+        const durationSeconds = await pollVideoReady(presigned.stream_uid, lesson.title || "lesson");
+        return { content_url: presigned.hls_url, duration_seconds: durationSeconds, stream_uid: presigned.stream_uid };
+    }
+
     async function handleSubmit() {
+        for (const courseModule of modules) {
+            for (const lesson of courseModule.lessons) {
+                if (!lesson.title.trim()) {
+                    toast.error(`Every lesson needs a title (missing in "${courseModule.title || "a module"}").`);
+                    return;
+                }
+                if (lesson.type !== "quiz" && !lesson.file) {
+                    toast.error(`"${lesson.title}" needs a file uploaded before you can publish.`);
+                    return;
+                }
+            }
+        }
+
         setSubmitting(true);
-
         try {
-            // Backend integration goes here
+            const thumbnailUrl = await uploadThumbnail();
 
-            await new Promise((resolve) =>
-                setTimeout(resolve, 1500)
-            );
+            const course = await TUTOR.createCourse({
+                title: form.title.trim(),
+                description: form.description.trim() || undefined,
+                category: form.category,
+                price: Number(form.price) || 0,
+                is_premium: form.is_premium,
+                thumbnail_url: thumbnailUrl,
+                tags: form.tags
+                    .split(",")
+                    .map((t) => t.trim())
+                    .filter(Boolean),
+            });
+
+            for (let mIndex = 0; mIndex < modules.length; mIndex++) {
+                const courseModule = modules[mIndex];
+                const createdModule = await TUTOR.addModule(course.id, {
+                    title: courseModule.title.trim(),
+                    order: mIndex,
+                });
+
+                for (let lIndex = 0; lIndex < courseModule.lessons.length; lIndex++) {
+                    const lesson = courseModule.lessons[lIndex];
+                    const uploaded = await uploadLessonFile(lesson);
+                    await TUTOR.addLesson(course.id, createdModule.id, {
+                        title: lesson.title.trim(),
+                        type: lesson.type,
+                        order: lIndex,
+                        duration_seconds: uploaded.duration_seconds ?? null,
+                        content_url: uploaded.content_url ?? null,
+                        is_preview: lesson.isPreview,
+                        stream_uid: uploaded.stream_uid ?? null,
+                    });
+                }
+            }
+
+            if (form.status === "published") {
+                await TUTOR.submitCourse(course.id);
+            }
 
             setSubmitted(true);
+        } catch (err) {
+            toast.error(errorMessage(err, "Couldn't create this course."));
         } finally {
             setSubmitting(false);
         }
@@ -152,7 +259,19 @@ export default function NewCoursePage() {
                     </p>
 
                     <div className="mt-8 flex gap-3">
-                        {/* buttons */}
+                        <Link
+                            href="/admin/courses"
+                            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                            View All Courses
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={() => window.location.reload()}
+                            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                        >
+                            Create Another
+                        </button>
                     </div>
                 </div>
             </>
@@ -221,7 +340,37 @@ export default function NewCoursePage() {
                     </div>
 
                     <div className="mt-5 flex items-center justify-between">
-                        {/* Back / Continue / Submit buttons */}
+                        <button
+                            type="button"
+                            onClick={() => setStep((s) => Math.max(0, s - 1))}
+                            disabled={step === 0}
+                            className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Back
+                        </button>
+
+                        {step < STEPS.length - 1 ? (
+                            <button
+                                type="button"
+                                onClick={() => canAdvance() && setStep((s) => s + 1)}
+                                disabled={!canAdvance()}
+                                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                                Continue
+                                <ArrowRight className="h-4 w-4" />
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                            >
+                                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                                {form.status === "published" ? "Publish Course" : "Save as Draft"}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

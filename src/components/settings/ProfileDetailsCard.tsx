@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getStoredUser, updateStoredUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Save } from "lucide-react";
+import { Camera, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import AUTH from "@/services/auth.service";
-import { ApiRequestError } from "@/lib/api";
+import { ApiRequestError, errorMessage } from "@/lib/api";
 
 export default function ProfileDetailsCard() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -47,6 +49,7 @@ export default function ProfileDetailsCard() {
         full_name: formData.fullName,
         email: formData.email,
         phone: formData.phone,
+        avatar_url: avatarUrl ?? undefined,
       });
       updateStoredUser(updated);
       setAvatarUrl(updated.avatar_url ?? null);
@@ -57,6 +60,32 @@ export default function ProfileDetailsCard() {
       setLoading(false);
     }
   };
+
+  async function handlePhotoSelected(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Photo must be under 5MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const presigned = await AUTH.requestAssetUpload(file.name, file.type);
+      await fetch(presigned.upload_url, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      setAvatarUrl(presigned.file_url);
+      toast.success("Photo uploaded — click Save Changes to apply it.");
+    } catch (err) {
+      toast.error(errorMessage(err, "Couldn't upload that photo."));
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const initials = formData.fullName
     .split(" ")
@@ -86,19 +115,27 @@ export default function ProfileDetailsCard() {
               </Avatar>
               <button
                 type="button"
-                disabled
-                title="Photo upload isn't available yet"
-                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-md opacity-50 cursor-not-allowed"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-md hover:bg-blue-700"
                 aria-label="Upload photo"
               >
-                <Camera className="size-4" />
+                {uploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) handlePhotoSelected(file);
+                }}
+              />
             </div>
             <div>
               <h4 className="text-sm font-bold text-gray-800">Profile Picture</h4>
-              <p className="text-xs text-gray-500 mt-1">
-                {avatarUrl ? "Synced from your Google account." : "Photo upload isn't available yet."}
-              </p>
+              <p className="text-xs text-gray-500 mt-1">JPG, PNG or WebP. Max 5MB.</p>
             </div>
           </div>
 

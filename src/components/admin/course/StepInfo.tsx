@@ -4,23 +4,7 @@ import type {
     CourseForm,
     CourseLevel,
 } from "./course.types";
-
-const CATEGORIES = [
-    "Mathematics",
-    "English",
-    "Science",
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "History",
-    "Geography",
-    "Technology",
-    "Design",
-    "Economics",
-    "Philosophy",
-    "French",
-    "Literature",
-];
+import { COURSE_CATEGORIES } from "@/constants/course-categories";
 
 function FieldLabel({
     children,
@@ -148,12 +132,12 @@ export default function StepInfo({
                         Select a category
                     </option>
 
-                    {CATEGORIES.map((category) => (
+                    {COURSE_CATEGORIES.map((category) => (
                         <option
-                            key={category}
-                            value={category}
+                            key={category.value}
+                            value={category.value}
                         >
-                            {category}
+                            {category.label}
                         </option>
                     ))}
                 </SelectField>

@@ -8,6 +8,7 @@ import type {
   TokenPair,
   User,
 } from "@/types/user.types";
+import type { AssetUploadResponse } from "@/types/api.types";
 
 const AUTH = {
   /** POST /v1/auth/register — creates account, role is null until setRole is called */
@@ -37,9 +38,17 @@ const AUTH = {
   google: (google_id_token: string) =>
     api.post<AuthResponse>("/v1/auth/google", { google_id_token }),
 
-  /** PATCH /v1/auth/me — update name/email/phone. Send only fields you want to change. */
-  updateProfile: (body: { full_name?: string; email?: string; phone?: string }) =>
+  /** PATCH /v1/auth/me — update name/email/phone/avatar. Send only fields you want to change. */
+  updateProfile: (body: { full_name?: string; email?: string; phone?: string; avatar_url?: string }) =>
     api.patch<User>("/v1/auth/me", body, true),
+
+  /** POST /v1/tutor/upload/asset — presigned R2 upload URL, open to any authenticated user. */
+  requestAssetUpload: (filename: string, contentType: string) =>
+    api.post<AssetUploadResponse>(
+      "/v1/tutor/upload/asset",
+      { filename, content_type: contentType },
+      true
+    ),
 
   /**
    * POST /v1/auth/change-password — omit current_password for a Google-only

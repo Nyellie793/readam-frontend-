@@ -11,6 +11,7 @@ import type {
     CourseStatus,
     Module,
 } from "./course.types";
+import { COURSE_CATEGORIES } from "@/constants/course-categories";
 
 interface StepReviewProps {
     form: CourseForm;
@@ -94,7 +95,7 @@ export default function StepReview({
 
                             {form.category && (
                                 <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-600">
-                                    {form.category}
+                                    {COURSE_CATEGORIES.find((c) => c.value === form.category)?.label ?? form.category}
                                 </span>
                             )}
 
