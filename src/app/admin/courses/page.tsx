@@ -5,6 +5,9 @@ import Topbar from "@/components/admin/Topbar";
 import ADMIN from "@/services/admin.service";
 import { Badge } from "@/components/ui/Badge";
 import type { AdminCourseListItem, AdminCoursesResponse } from "@/types/api.types";
+// Add this import at the top
+import Link from "next/link";
+import { Plus } from "lucide-react";
 
 const STATUS_TABS = ["all", "pending_review", "published", "draft", "rejected"] as const;
 
@@ -43,7 +46,15 @@ export default function CoursesPage() {
               {t.replace("_", " ")}
             </button>
           ))}
-          <span className="ml-auto text-xs text-gray-400 self-center">{total} courses</span>
+          <div className="ml-auto flex items-center gap-3">
+            <span className="text-xs text-gray-400 self-center">{total} courses</span>
+            <Link
+              href="/admin/courses/new"
+              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition"
+            >
+              <Plus className="h-3.5 w-3.5" /> Upload Course
+            </Link>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
@@ -59,40 +70,40 @@ export default function CoursesPage() {
             <tbody className="divide-y divide-gray-50">
               {loading
                 ? Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}><td colSpan={4} className="px-5 py-4"><div className="h-4 animate-pulse rounded bg-gray-100" /></td></tr>
-                  ))
+                  <tr key={i}><td colSpan={4} className="px-5 py-4"><div className="h-4 animate-pulse rounded bg-gray-100" /></td></tr>
+                ))
                 : courses.map(c => (
-                    <tr key={c.id} className="hover:bg-gray-50">
-                      <td className="px-5 py-4">
-                        <p className="font-medium text-gray-900 line-clamp-1">{c.title}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{c.category} · {c.total_lessons} lessons</p>
-                      </td>
-                      <td className="hidden px-5 py-4 text-gray-600 sm:table-cell">{c.tutor_name ?? "—"}</td>
-                      <td className="px-5 py-4">
-                        <Badge variant={
-                          c.status === "published" ? "success" :
+                  <tr key={c.id} className="hover:bg-gray-50">
+                    <td className="px-5 py-4">
+                      <p className="font-medium text-gray-900 line-clamp-1">{c.title}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{c.category} · {c.total_lessons} lessons</p>
+                    </td>
+                    <td className="hidden px-5 py-4 text-gray-600 sm:table-cell">{c.tutor_name ?? "—"}</td>
+                    <td className="px-5 py-4">
+                      <Badge variant={
+                        c.status === "published" ? "success" :
                           c.status === "pending_review" ? "warning" :
-                          c.status === "rejected" ? "destructive" : "default"
-                        }>
-                          {c.status.replace("_", " ")}
-                        </Badge>
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        {c.status === "pending_review" && (
-                          <div className="flex justify-end gap-2">
-                            <button onClick={() => handleApprove(c.id)}
-                              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">
-                              Approve
-                            </button>
-                            <button onClick={() => handleReject(c.id)}
-                              className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100">
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                            c.status === "rejected" ? "destructive" : "default"
+                      }>
+                        {c.status.replace("_", " ")}
+                      </Badge>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      {c.status === "pending_review" && (
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => handleApprove(c.id)}
+                            className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">
+                            Approve
+                          </button>
+                          <button onClick={() => handleReject(c.id)}
+                            className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100">
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
               }
             </tbody>
           </table>
