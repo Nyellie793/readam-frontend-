@@ -1,11 +1,12 @@
 import { ImageResponse } from "next/og";
+import { BRAND_MARK_PATH, BRAND_MARK_VIEWBOX } from "@/lib/brand-mark";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
 /**
  * Browser tab and link-preview icon. Replaces the default create-next-app
- * favicon. Generated so there is no binary to keep in sync with the brand.
+ * favicon, and uses the same graduation-cap mark the UI draws via react-icons.
  */
 export default function Icon() {
   return new ImageResponse(
@@ -19,14 +20,11 @@ export default function Icon() {
           justifyContent: "center",
           background: "#2563EB",
           borderRadius: 7,
-          color: "#FFFFFF",
-          fontSize: 20,
-          fontWeight: 700,
-          fontFamily: "sans-serif",
-          letterSpacing: -1,
         }}
       >
-        R
+        <svg width="19" height="15" viewBox={BRAND_MARK_VIEWBOX} fill="#FFFFFF">
+          <path d={BRAND_MARK_PATH} />
+        </svg>
       </div>
     ),
     size

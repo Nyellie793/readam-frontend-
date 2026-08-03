@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { BRAND_MARK_PATH, BRAND_MARK_VIEWBOX } from "@/lib/brand-mark";
 
 export const alt = "ReadAM — AI-powered exam prep for Cameroonian students";
 export const size = { width: 1200, height: 630 };
@@ -35,12 +36,11 @@ export default function OpengraphImage() {
               height: 68,
               borderRadius: 20,
               background: "#2563EB",
-              fontSize: 40,
-              color: "#FFFFFF",
-              letterSpacing: -2,
             }}
           >
-            R
+            <svg width="40" height="32" viewBox={BRAND_MARK_VIEWBOX} fill="#FFFFFF">
+              <path d={BRAND_MARK_PATH} />
+            </svg>
           </div>
           <div style={{ display: "flex", fontSize: 46, letterSpacing: -1 }}>
             <span style={{ color: "#FFFFFF" }}>READ</span>
