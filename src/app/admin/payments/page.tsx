@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Topbar from "@/components/admin/Topbar";
 import StatCards from "@/components/admin/StatCards";
-import Chart from "@/components/admin/Chart";
+import Chart from "@/components/shared/Chart";
 import { Badge } from "@/components/ui/Badge";
 import { Wallet, CreditCard, CheckCircle2, ShieldAlert } from "lucide-react";
 import ADMIN from "@/services/admin.service";

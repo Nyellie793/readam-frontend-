@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import Image from "next/image";
 
 export type PaymentMethod = "mtn" | "orange";
 

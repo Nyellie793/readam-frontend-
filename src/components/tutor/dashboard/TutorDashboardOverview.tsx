@@ -79,7 +79,7 @@ export default function TutorDashboardOverview() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500">Here's how your courses and earnings are doing.</p>
+          <p className="text-sm text-gray-500">Here&apos;s how your courses and earnings are doing.</p>
         </div>
         <Link
           href="/tutor/courses"
@@ -143,7 +143,7 @@ export default function TutorDashboardOverview() {
           {recent.length === 0 ? (
             <div className="mt-6 flex flex-col items-center gap-2 py-6 text-center">
               <BookOpen className="size-8 text-gray-300" />
-              <p className="text-sm text-gray-500">You haven't created any courses yet.</p>
+              <p className="text-sm text-gray-500">You haven&apos;t created any courses yet.</p>
               <Link href="/tutor/courses" className="text-sm font-semibold text-blue-600 hover:underline">
                 Create your first course
               </Link>

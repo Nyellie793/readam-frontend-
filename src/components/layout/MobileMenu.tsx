@@ -1,31 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, LayoutDashboard, LogIn, UserPlus, LogOut, Settings, User, CreditCard } from "lucide-react";
 import { NAV_LINKS } from "@/constants/navigation";
 import LanguageToggle from "../shared/LanguageToggle";
 import ThemeToggle from "../shared/ThemeToggle";
 import Logo from "../shared/Logo";
-import { getStoredUser, clearSession } from "@/lib/auth";
+import { clearSession } from "@/lib/auth";
+import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
 import { useRouter } from "next/navigation";
 
 export default function MobileMenu() {
-  const [user, setUser] = useState<any>(null);
-  const [initials, setInitials] = useState("--");
+  const user = useStoredUser();
+  const initials = initialsOf(user?.full_name, "--");
   const router = useRouter();
-
-  useEffect(() => {
-    const stored = getStoredUser();
-    if (stored) {
-      setUser(stored);
-      const fullName = stored.full_name ?? "Student";
-      setInitials(
-        fullName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
-      );
-    }
-  }, []);
 
   function handleLogout() {
     clearSession();

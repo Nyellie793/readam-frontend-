@@ -51,9 +51,9 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
     if (!newModuleTitle.trim()) return;
     setAddingModule(true);
     try {
-      const module = await TUTOR.addModule(courseId, { title: newModuleTitle.trim(), order: modules.length });
+      const created = await TUTOR.addModule(courseId, { title: newModuleTitle.trim(), order: modules.length });
       setNewModuleTitle("");
-      setExpanded((prev) => new Set(prev).add(module.id));
+      setExpanded((prev) => new Set(prev).add(created.id));
       onChanged();
     } catch (err) {
       toast.error(errorMessage(err, "Couldn't add module."));

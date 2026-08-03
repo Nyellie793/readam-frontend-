@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, Bell } from "lucide-react";
-import { getStoredUser } from "@/lib/auth";
+import { useStoredUser } from "@/hooks/useStoredUser";
 import STUDENT from "@/services/student.service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -15,17 +15,13 @@ function useGreeting(): string {
 }
 
 export default function AiHubHeader() {
-  const [name, setName] = useState("Student");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const user = useStoredUser();
+  const name = user?.full_name ?? "Student";
+  const avatarUrl = user?.avatar_url ?? null;
   const [hasUnread, setHasUnread] = useState(false);
   const greeting = useGreeting();
 
   useEffect(() => {
-    const user = getStoredUser();
-    if (user) {
-      setName(user.full_name ?? "Student");
-      setAvatarUrl(user.avatar_url ?? null);
-    }
     STUDENT.getNotifications()
       .then((data) => setHasUnread(data.unread_count > 0))
       .catch(() => null);

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, Menu, Search, Sparkles, X } from "lucide-react";
+import { Bell, Search, Sparkles, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import CourseFilters from "@/components/dashboard/courses/CourseFilters";
 

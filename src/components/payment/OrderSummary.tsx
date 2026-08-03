@@ -1,7 +1,6 @@
 "use client";
 
-import { CheckCircle2, ShieldCheck } from "lucide-react";
-import Image from "next/image";
+import { CheckCircle2 } from "lucide-react";
 
 export interface OrderItem {
   name: string;

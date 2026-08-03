@@ -52,7 +52,7 @@ export default function TutorCoursesContent() {
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white py-16 text-center shadow-sm">
           <BookOpen className="size-10 text-gray-300" />
           <div>
-            <p className="text-sm font-semibold text-gray-700">You haven't created any courses yet.</p>
+            <p className="text-sm font-semibold text-gray-700">You haven&apos;t created any courses yet.</p>
             <p className="text-xs text-gray-400">Start building your first course to reach students.</p>
           </div>
           <CreateCourseDialog />

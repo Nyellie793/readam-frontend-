@@ -334,7 +334,7 @@ export default function LessonEditorDialog({
               onChange={(e) => setIsPreview(e.target.checked)}
               className="size-4 rounded border-gray-300 accent-blue-600"
             />
-            Free preview (visible to students who haven't enrolled)
+            Free preview (visible to students who haven&apos;t enrolled)
           </label>
         </div>
 

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Info, Lock, ShieldCheck } from "lucide-react";
-import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
 
 interface PaymentDetailsFormProps {
