@@ -6,7 +6,7 @@ import { Loader2, UploadCloud, CheckCircle2, FileText, Video, HelpCircle } from 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import TUTOR from "@/services/tutor.service";
-import { errorMessage } from "@/lib/api";
+import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import type { CreateLessonRequest, ModuleLesson } from "@/types/api.types";
 
 type LessonType = "video" | "pdf" | "quiz";
@@ -123,12 +123,9 @@ export default function LessonEditorDialog({
     setUploadState("uploading");
     setUploadProgress(0);
     try {
+      assertUploadable(file, "document");
       const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
-      await fetch(presigned.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      await putToPresigned(presigned.upload_url, file);
       setContentUrl(presigned.file_url);
       setContentChanged(true);
       setUploadState("ready");

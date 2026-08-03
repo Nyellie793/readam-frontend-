@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import TUTOR from "@/services/tutor.service";
 import { getStoredUser, updateStoredUser } from "@/lib/auth";
-import { errorMessage } from "@/lib/api";
+import { errorMessage, putToPresigned } from "@/lib/api";
 import type { ExperienceYears, TutorProfileResponse } from "@/types/api.types";
 
 const TEACHING_LEVELS = [
@@ -69,11 +69,7 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
     setUploading(true);
     try {
       const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
-      await fetch(presigned.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      await putToPresigned(presigned.upload_url, file);
       setAvatarUrl(presigned.file_url);
     } catch (err) {
       toast.error(errorMessage(err, "Couldn't upload that photo."));

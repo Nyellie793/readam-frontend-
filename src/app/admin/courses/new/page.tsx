@@ -24,7 +24,7 @@ import type {
     Module,
 } from "@/components/admin/course/course.types";
 import TUTOR from "@/services/tutor.service";
-import { errorMessage } from "@/lib/api";
+import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 
 const STEPS = [
     "Course Info",
@@ -120,12 +120,9 @@ export default function NewCoursePage() {
 
     async function uploadThumbnail(): Promise<string | undefined> {
         if (!thumbnail) return undefined;
+        assertUploadable(thumbnail, "image");
         const presigned = await TUTOR.requestAssetUpload(thumbnail.name, thumbnail.type);
-        await fetch(presigned.upload_url, {
-            method: "PUT",
-            headers: { "Content-Type": thumbnail.type },
-            body: thumbnail,
-        });
+        await putToPresigned(presigned.upload_url, thumbnail);
         return presigned.file_url;
     }
 
@@ -147,12 +144,9 @@ export default function NewCoursePage() {
         if (lesson.type === "quiz" || !lesson.file) return {};
 
         if (lesson.type === "pdf") {
+            assertUploadable(lesson.file, "document");
             const presigned = await TUTOR.requestAssetUpload(lesson.file.name, lesson.file.type);
-            await fetch(presigned.upload_url, {
-                method: "PUT",
-                headers: { "Content-Type": lesson.file.type },
-                body: lesson.file,
-            });
+            await putToPresigned(presigned.upload_url, lesson.file);
             return { content_url: presigned.file_url };
         }
 

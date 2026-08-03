@@ -2,8 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getPublicTutors } from "@/lib/public-api";
 
-const tutors = [
+const FALLBACK_TUTORS = [
   {
     id: "sarah-jenkins",
     name: "Sarah Jenkins",
@@ -30,7 +31,48 @@ const tutors = [
   },
 ];
 
-export default function Tutors() {
+interface TutorCard {
+  id: string;
+  name: string;
+  specialty: string;
+  image: string;
+  rating: number;
+  experience: string;
+}
+
+/** Photos for the carried-over profiles, keyed by name. */
+const KNOWN_PHOTOS: Record<string, string> = Object.fromEntries(
+  FALLBACK_TUTORS.map((t) => [t.name, t.image])
+);
+
+const EXPERIENCE_LABEL: Record<string, string> = {
+  less_than_1: "New",
+  one_to_three: "1-3 Years",
+  three_to_five: "3-5 Years",
+  five_to_ten: "5-10 Years",
+  ten_plus: "10+ Years",
+};
+
+export default async function Tutors() {
+  // Live verified tutors when the API has them, otherwise the existing cards,
+  // so this section never renders empty at launch.
+  const { items } = await getPublicTutors({ pageSize: 3 });
+
+  const tutors: TutorCard[] =
+    items.length > 0
+      ? items.map((t, i) => ({
+          id: t.user_id,
+          name: t.display_name ?? "ReadAM Tutor",
+          specialty: t.title ?? t.subject ?? "Tutor",
+          image:
+            t.avatar_url ||
+            KNOWN_PHOTOS[t.display_name ?? ""] ||
+            FALLBACK_TUTORS[i % FALLBACK_TUTORS.length].image,
+          rating: 0,
+          experience: t.experience_years ? EXPERIENCE_LABEL[t.experience_years] ?? "" : "",
+        }))
+      : FALLBACK_TUTORS;
+
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 bg-[#F8F9FC]">
       <div className="mb-8 sm:mb-10 text-center">
@@ -62,15 +104,19 @@ export default function Tutors() {
 
               <div className="mt-3 sm:mt-4 flex items-center justify-between gap-2">
                 {/* Rating */}
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-orange-400 text-orange-400" />
-                  <span className="text-[11px] sm:text-xs font-semibold text-gray-700">{tutor.rating}</span>
-                </div>
+                {tutor.rating > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-orange-400 text-orange-400" />
+                    <span className="text-[11px] sm:text-xs font-semibold text-gray-700">{tutor.rating}</span>
+                  </div>
+                )}
 
                 {/* Experience */}
-                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] sm:text-xs text-gray-500">
-                  {tutor.experience}
-                </span>
+                {tutor.experience && (
+                  <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] sm:text-xs text-gray-500">
+                    {tutor.experience}
+                  </span>
+                )}
 
                 {/* Follow */}
                 <Link href={`/tutors/${tutor.id}`}>
@@ -78,7 +124,7 @@ export default function Tutors() {
                     size="sm"
                     className="rounded-lg sm:rounded-xl bg-blue-600 px-3 sm:px-4 text-white hover:bg-blue-700 text-xs h-7 sm:h-8"
                   >
-                    Follow
+                    View profile
                   </Button>
                 </Link>
               </div>

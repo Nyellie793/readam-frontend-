@@ -1,314 +1,194 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Star, BookOpen, ChevronDown } from "lucide-react";
+import { Star, BookOpen, GraduationCap, Search } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { getPublicTutors } from "@/lib/public-api";
 
-type BadgeType = "TOP RATED" | "POPULAR" | "NEW";
+/**
+ * Public tutor directory, rendered from GET /v1/tutors (verified profiles
+ * only). A server component, so the content is in the HTML that crawlers and
+ * link-preview scrapers receive.
+ *
+ * This page previously listed eight hardcoded people with invented review
+ * counts, ratings and years of experience.
+ */
 
-interface Tutor {
-    id: string;
-    name: string;
-    specialty: string;
-    rating: number;
-    reviews: number;
-    courses: number;
-    image: string;
-    badge: BadgeType;
-    category: string;
+const EXPERIENCE_LABEL: Record<string, string> = {
+  less_than_1: "New tutor",
+  one_to_three: "1-3 years",
+  three_to_five: "3-5 years",
+  five_to_ten: "5-10 years",
+  ten_plus: "10+ years",
+};
+
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
 
-const FEATURED_TUTORS: Tutor[] = [
-    {
-        id: "sarah-jenkins",
-        name: "Sarah Jenkins",
-        specialty: "English & Literature",
-        rating: 4.9,
-        reviews: 248,
-        courses: 124,
-        image: "/Tutor.png",
-        badge: "TOP RATED",
-        category: "English",
-    },
-    {
-        id: "mike-davis",
-        name: "Mike Davis",
-        specialty: "Physics & Mathematics",
-        rating: 4.9,
-        reviews: 190,
-        courses: 156,
-        image: "/Tutor 2.png",
-        badge: "TOP RATED",
-        category: "Mathematics",
-    },
-    {
-        id: "linda-carter",
-        name: "Linda Carter",
-        specialty: "Biology & Life Sciences",
-        rating: 4.8,
-        reviews: 312,
-        courses: 98,
-        image: "/Tutor 3.png",
-        badge: "TOP RATED",
-        category: "Science",
-    },
-];
+export default async function TutorsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const { items, total } = await getPublicTutors({ search: q, pageSize: 48 });
 
-const POPULAR_TUTORS: Tutor[] = [
-    {
-        id: "david-kim",
-        name: "David Kim",
-        specialty: "Software Engineering",
-        rating: 5.0,
-        reviews: 85,
-        courses: 62,
-        image: "/pic(1).png",
-        badge: "POPULAR",
-        category: "Technology",
-    },
-    {
-        id: "grace-lee",
-        name: "Grace Lee",
-        specialty: "Modern History",
-        rating: 4.7,
-        reviews: 210,
-        courses: 112,
-        image: "/pic 2.png",
-        badge: "POPULAR",
-        category: "English",
-    },
-    {
-        id: "robert-chen",
-        name: "Robert Chen",
-        specialty: "Advanced Chemistry",
-        rating: 4.9,
-        reviews: 156,
-        courses: 78,
-        image: "/Tutor 2.png",
-        badge: "POPULAR",
-        category: "Science",
-    },
-];
+  return (
+    <div className="relative min-h-screen bg-white">
+      <div className="pointer-events-none absolute right-0 top-0 z-0 h-[50vh] w-[55vw] rounded-full bg-blue-100/40 blur-[120px]" />
 
-const BROWSE_TUTORS: Tutor[] = [
-    {
-        id: "alice-parker",
-        name: "Alice Parker",
-        specialty: "Sociology",
-        rating: 5.0,
-        reviews: 12,
-        courses: 24,
-        image: "/Tutor 3.png",
-        badge: "NEW",
-        category: "English",
-    },
-    {
-        id: "marcus-thorne",
-        name: "Marcus Thorne",
-        specialty: "Data Science",
-        rating: 4.9,
-        reviews: 56,
-        courses: 42,
-        image: "/Tutor.png",
-        badge: "NEW",
-        category: "Technology",
-    },
-    {
-        id: "alice-parker-2",
-        name: "Alice Parker",
-        specialty: "Sociology",
-        rating: 5.0,
-        reviews: 12,
-        courses: 24,
-        image: "/pic(1).png",
-        badge: "NEW",
-        category: "Design",
-    },
-];
+      <div className="relative z-10">
+        <Navbar />
 
-const CATEGORIES = ["All", "Mathematics", "English", "Science", "Design", "Technology"];
-const SORT_OPTIONS = ["Top Rated", "Most Popular", "Newest", "Most Courses"];
+        <main>
+          <section className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-20">
+            <span className="inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-orange-500">
+              Our Tutors
+            </span>
+            <h1 className="mt-5 text-4xl font-black leading-tight text-gray-900 sm:text-5xl">
+              Learn from <span className="text-blue-600">verified Cameroonian teachers</span>
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-gray-500">
+              Every tutor listed here has had their identity and teaching
+              background checked before being allowed to publish a course.
+            </p>
 
-function Badge({ type }: { type: BadgeType }) {
-    const styles: Record<BadgeType, string> = {
-        "TOP RATED": "bg-blue-600 text-white",
-        "POPULAR": "bg-orange-500 text-white",
-        "NEW": "bg-green-500 text-white",
-    };
-    return (
-        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${styles[type]}`}>
-            {(type === "TOP RATED" || type === "POPULAR") && <Star className="h-2.5 w-2.5 fill-white" />}
-            {type}
-        </span>
-    );
-}
+            {/* Plain GET form, so search works without JavaScript */}
+            <form action="/tutors" className="mt-8 flex max-w-md items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  name="q"
+                  defaultValue={q ?? ""}
+                  placeholder="Search by name or subject"
+                  aria-label="Search tutors"
+                  className="h-11 w-full rounded-full border border-gray-200 bg-white pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+              <button
+                type="submit"
+                className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+              >
+                Search
+              </button>
+            </form>
+          </section>
 
-function TutorCard({ tutor }: { tutor: Tutor }) {
-    return (
-        <div className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div className="relative h-52 w-full overflow-hidden bg-gray-100">
-                <Image src={tutor.image} alt={tutor.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute left-3 top-3">
-                    <Badge type={tutor.badge} />
-                </div>
-            </div>
-            <div className="p-5">
-                <h3 className="text-lg font-bold text-gray-900">{tutor.name}</h3>
-                <p className="mt-0.5 text-sm text-gray-400">{tutor.specialty}</p>
-                <div className="mt-3 space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 shrink-0" />
-                        <span className="font-semibold">{tutor.rating.toFixed(1)}</span>
-                        <span className="text-gray-400">({tutor.reviews} reviews)</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                        <BookOpen className="h-4 w-4 shrink-0 text-gray-400" />
-                        <span>{tutor.courses} Courses</span>
-                    </div>
-                </div>
-                <Link
-                    href={`/tutors/${tutor.id}`}
-                    className="mt-5 block w-full rounded-xl bg-blue-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700 active:scale-95 transition-all duration-200"
-                >
-                    View Profile
-                </Link>
-            </div>
-        </div>
-    );
-}
+          <section className="mx-auto max-w-7xl px-6 pb-20">
+            {items.length > 0 ? (
+              <>
+                <p className="mb-6 text-sm text-gray-400">
+                  {total} verified {total === 1 ? "tutor" : "tutors"}
+                  {q ? ` matching “${q}”` : ""}
+                </p>
 
-function SectionHeader({ title, subtitle, href }: { title: string; subtitle: string; href: string }) {
-    return (
-        <div className="mb-6 flex items-end justify-between">
-            <div>
-                <h2 className="text-2xl font-black text-gray-900">{title}</h2>
-                <p className="mt-0.5 text-sm text-gray-400">{subtitle}</p>
-            </div>
-            <Link
-                href={href} className="whitespace-nowrap text-sm font-semibold text-blue-600 hover:text-blue-700">
-                See All →
-            </Link>
-        </div>
-    );
-}
-
-export default function TutorsPage() {
-    const [activeCategory, setActiveCategory] = useState("All");
-    const [query, setQuery] = useState("");
-    const [sortOpen, setSortOpen] = useState(false);
-    const [sortLabel, setSortLabel] = useState("Top Rated");
-
-    function filterTutors(tutors: Tutor[]) {
-        return tutors.filter((t) => {
-            const matchCat = activeCategory === "All" || t.category === activeCategory;
-            const matchQ = !query || t.name.toLowerCase().includes(query.toLowerCase()) || t.specialty.toLowerCase().includes(query.toLowerCase());
-            return matchCat && matchQ;
-        });
-    }
-
-    return (
-        <div className="relative min-h-screen bg-white">
-            <div className="pointer-events-none absolute right-0 top-0 z-0 h-[50vh] w-[60vw] rounded-full bg-blue-100/40 blur-[120px]" />
-            <div className="relative z-10">
-                <Navbar />
-                <main className="mx-auto max-w-7xl px-6 py-10">
-
-                    <div className="mx-auto mb-6 max-w-2xl">
-                        <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-3.5 shadow-sm focus-within:border-blue-400 focus-within:shadow-md transition-all">
-                            <Search className="h-4 w-4 shrink-0 text-gray-400" />
-                            <input
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search tutors or subjects..."
-                                className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((t) => {
+                    const name = t.display_name ?? "ReadAM Tutor";
+                    return (
+                      <Link
+                        key={t.user_id}
+                        href={`/tutors/${t.user_id}`}
+                        className="group flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                      >
+                        <div className="flex items-center gap-4">
+                          {t.avatar_url ? (
+                            <Image
+                              src={t.avatar_url}
+                              alt=""
+                              width={56}
+                              height={56}
+                              className="size-14 rounded-full object-cover"
                             />
+                          ) : (
+                            <span className="flex size-14 items-center justify-center rounded-full bg-blue-50 text-lg font-bold text-blue-600">
+                              {initials(name)}
+                            </span>
+                          )}
+                          <div className="min-w-0">
+                            <h2 className="truncate text-base font-bold text-gray-900">{name}</h2>
+                            <p className="truncate text-xs text-gray-400">
+                              {t.title ?? t.subject ?? "Tutor"}
+                            </p>
+                          </div>
                         </div>
-                    </div>
 
-                    <div className="mb-12 flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex flex-wrap gap-2">
-                            {CATEGORIES.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${activeCategory === cat
-                                            ? "bg-blue-600 text-white shadow-sm"
-                                            : "border border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
+                        {t.bio && (
+                          <p className="mt-4 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-500">
+                            {t.bio}
+                          </p>
+                        )}
+
+                        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-50 pt-4">
+                          {t.subject && (
+                            <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
+                              {t.subject}
+                            </span>
+                          )}
+                          {t.experience_years && EXPERIENCE_LABEL[t.experience_years] && (
+                            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500">
+                              {EXPERIENCE_LABEL[t.experience_years]}
+                            </span>
+                          )}
                         </div>
-                        <div className="relative flex items-center gap-2">
-                            <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">SORT BY:</span>
-                            <button
-                                onClick={() => setSortOpen((o) => !o)}
-                                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-blue-600 hover:border-gray-300 transition"
-                            >
-                                {sortLabel}
-                                <ChevronDown className={`h-4 w-4 transition-transform ${sortOpen ? "rotate-180" : ""}`} />
-                            </button>
-                            {sortOpen && (
-                                <div className="absolute right-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg">
-                                    {SORT_OPTIONS.map((opt) => (
-                                        <button
-                                            key={opt}
-                                            onClick={() => { setSortLabel(opt); setSortOpen(false); }}
-                                            className={`block w-full px-4 py-2.5 text-left text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors ${sortLabel === opt ? "font-semibold text-blue-600" : "text-gray-600"}`}
-                                        >
-                                            {opt}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              /* Launch-time empty state, rather than invented placeholder people */
+              <div className="mx-auto max-w-xl rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
+                <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                  <GraduationCap className="size-6" />
+                </span>
+                <h2 className="mt-5 text-xl font-black text-gray-900">
+                  {q ? "No tutors match that search" : "We are onboarding our first tutors"}
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-500">
+                  {q
+                    ? "Try a different name or subject, or browse everyone verified so far."
+                    : "Tutor profiles appear here once their identity and teaching background have been verified. In the meantime, the course library and the AI tutor are ready to use."}
+                </p>
+                <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+                  {q ? (
+                    <Link
+                      href="/tutors"
+                      className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                    >
+                      Show all tutors
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/signup?role=tutor"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                    >
+                      <Star className="size-4" />
+                      Become a tutor
+                    </Link>
+                  )}
+                  <Link
+                    href="/courses"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    <BookOpen className="size-4" />
+                    Browse courses
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
+        </main>
 
-                    <section className="mb-16">
-                        <SectionHeader title="Featured Tutors" subtitle="Meet some of our most experienced educators." href="/tutors" />
-                        {filterTutors(FEATURED_TUTORS).length > 0 ? (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                {filterTutors(FEATURED_TUTORS).map((tutor) => <TutorCard key={tutor.id + "-featured"} tutor={tutor} />)}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-gray-400">No tutors match your filters.</p>
-                        )}
-                    </section>
-
-                    <section className="mb-16">
-                        <SectionHeader title="Popular This Week" subtitle="Tutors learners are engaging with most this week." href="/tutors" />
-                        {filterTutors(POPULAR_TUTORS).length > 0 ? (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                {filterTutors(POPULAR_TUTORS).map((tutor) => <TutorCard key={tutor.id + "-popular"} tutor={tutor} />)}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-gray-400">No tutors match your filters.</p>
-                        )}
-                    </section>
-
-                    <section>
-                        <SectionHeader title="Browse All Tutors" subtitle="Explore tutors across different subjects." href="/tutors" />
-                        {filterTutors(BROWSE_TUTORS).length > 0 ? (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                {filterTutors(BROWSE_TUTORS).map((tutor) => <TutorCard key={tutor.id + "-browse"} tutor={tutor} />)}
-                            </div>
-                        ) : (
-                            <div className="py-20 text-center">
-                                <p className="text-gray-400">No tutors match your search.</p>
-                                <button onClick={() => { setQuery(""); setActiveCategory("All"); }} className="mt-4 text-sm font-medium text-blue-600 hover:underline">
-                                    Clear filters
-                                </button>
-                            </div>
-                        )}
-                    </section>
-
-                </main>
-                <Footer />
-            </div>
-        </div>
-    );
+        <Footer />
+      </div>
+    </div>
+  );
 }

@@ -1,323 +1,212 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Star, ChevronDown } from "lucide-react";
+import { Search, BookOpen, Star, PlayCircle, FileText } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { getPublicCourses } from "@/lib/public-api";
+import { COURSE_CATEGORIES } from "@/constants/course-categories";
+import type { CourseListItem } from "@/types/api.types";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+/**
+ * Public course catalogue, rendered from GET /v1/courses. A server component,
+ * so crawlers and link-preview scrapers receive the real listings.
+ *
+ * This page previously rendered a hardcoded array of courses with invented
+ * instructors ("Dr. Alan Turing") and ratings, and its cards linked to
+ * /courses/{id}, a route that did not exist.
+ */
 
-type CourseType = "VIDEO" | "PDF";
-type Level = "Beginner" | "Intermediate" | "Advanced";
-type Category = "Mathematics" | "English" | "Science" | "Design" | "Technology" | "Chemistry";
-
-interface Course {
-    id: string;
-    title: string;
-    instructor: string;
-    rating: number;
-    lessons: number;
-    level: Level;
-    type: CourseType;
-    image: string;
-    category: Category;
+function priceLabel(course: CourseListItem): string {
+  return course.price === 0 ? "Free" : `${course.price.toLocaleString()} XAF`;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const COURSES: Course[] = [
-    {
-        id: "intro-data-science",
-        title: "Introduction to Data Science",
-        instructor: "Dr. Alan Turing",
-        rating: 4.8,
-        lessons: 28,
-        level: "Beginner",
-        type: "VIDEO",
-        image: "/Rectangle 12.png",
-        category: "Technology",
-    },
-    {
-        id: "modern-psychology",
-        title: "Exploring Modern Psychology",
-        instructor: "Dr. Sofia Reed",
-        rating: 4.9,
-        lessons: 22,
-        level: "Intermediate",
-        type: "PDF",
-        image: "/Rectangle 13.png",
-        category: "Science",
-    },
-    {
-        id: "art-of-storytelling",
-        title: "The Art of Storytelling",
-        instructor: "Julianne Moore",
-        rating: 5.0,
-        lessons: 12,
-        level: "Beginner",
-        type: "VIDEO",
-        image: "/Rectangle 14.png",
-        category: "English",
-    },
-    {
-        id: "organic-chemistry",
-        title: "Fundamentals of Organic Chemistry",
-        instructor: "Dr. Aris V.",
-        rating: 4.9,
-        lessons: 30,
-        level: "Intermediate",
-        type: "VIDEO",
-        image: "/Rectangle 12.png",
-        category: "Chemistry",
-    },
-    {
-        id: "advanced-game-dev",
-        title: "Advanced Game Development",
-        instructor: "Sam Rivers",
-        rating: 4.8,
-        lessons: 55,
-        level: "Advanced",
-        type: "VIDEO",
-        image: "/Rectangle 13.png",
-        category: "Technology",
-    },
-    {
-        id: "macroeconomics",
-        title: "Macroeconomics: Global Markets",
-        instructor: "Prof. Yanis K.",
-        rating: 4.7,
-        lessons: 22,
-        level: "Intermediate",
-        type: "VIDEO",
-        image: "/Rectangle 14.png",
-        category: "Mathematics",
-    },
-];
-
-const CATEGORIES = ["All", "Mathematics", "English", "Science", "Design", "Technology"];
-const SORT_OPTIONS = ["Most Popular", "Newest", "Highest Rated", "Beginner Friendly"];
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function TypeBadge({ type }: { type: CourseType }) {
-    return (
-        <span className="inline-block rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-600">
-            {type}
+function CourseCard({ course }: { course: CourseListItem }) {
+  return (
+    <Link
+      href={`/courses/${course.id}`}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+    >
+      <div className="relative aspect-16/10 w-full overflow-hidden bg-gray-100">
+        {course.thumbnail_url ? (
+          <Image
+            src={course.thumbnail_url}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-gray-300">
+            <BookOpen className="size-8" />
+          </div>
+        )}
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-700 shadow-sm">
+          {course.has_video ? <PlayCircle className="size-3" /> : <FileText className="size-3" />}
+          {course.has_video ? "Video" : "PDF"}
         </span>
-    );
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="line-clamp-2 text-sm font-bold text-gray-900">{course.title}</h3>
+        {course.tutor_name && (
+          <p className="mt-1 text-xs text-gray-400">{course.tutor_name}</p>
+        )}
+
+        <div className="mt-auto flex items-center justify-between gap-2 pt-4">
+          <span className="text-sm font-black text-blue-600">{priceLabel(course)}</span>
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            {course.avg_rating !== null && course.review_count > 0 && (
+              <span className="flex items-center gap-1">
+                <Star className="size-3 fill-orange-400 text-orange-400" />
+                {course.avg_rating.toFixed(1)}
+              </span>
+            )}
+            <span>{course.total_lessons} lessons</span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
 }
 
-function CourseCard({ course }: { course: Course }) {
-    return (
-        <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            {/* Thumbnail */}
-            <div className="relative h-44 w-full overflow-hidden bg-gray-100">
-                <Image
-                    src={course.image}
-                    alt={course.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+export default async function CoursesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; category?: string }>;
+}) {
+  const { q, category } = await searchParams;
+  const { items, total } = await getPublicCourses({
+    search: q,
+    category,
+    pageSize: 48,
+  });
+
+  const filtered = !!(q || category);
+
+  return (
+    <div className="relative min-h-screen bg-white">
+      <div className="pointer-events-none absolute right-0 top-0 z-0 h-[50vh] w-[55vw] rounded-full bg-blue-100/40 blur-[120px]" />
+
+      <div className="relative z-10">
+        <Navbar />
+
+        <main>
+          <section className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-20">
+            <span className="inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-orange-500">
+              Course Library
+            </span>
+            <h1 className="mt-5 text-4xl font-black leading-tight text-gray-900 sm:text-5xl">
+              Everything you need for <span className="text-blue-600">the GCE and Bac</span>
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-gray-500">
+              Video lessons, PDF material and past questions, mapped to the
+              Cameroonian syllabus and taught by verified tutors.
+            </p>
+
+            {/* Plain GET form, so search works without JavaScript */}
+            <form action="/courses" className="mt-8 flex max-w-md items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  name="q"
+                  defaultValue={q ?? ""}
+                  placeholder="Search courses"
+                  aria-label="Search courses"
+                  className="h-11 w-full rounded-full border border-gray-200 bg-white pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
+              </div>
+              <button
+                type="submit"
+                className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+              >
+                Search
+              </button>
+            </form>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link
+                href="/courses"
+                className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  !category
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                }`}
+              >
+                All
+              </Link>
+              {COURSE_CATEGORIES.map((c) => (
+                <Link
+                  key={c.value}
+                  href={`/courses?category=${encodeURIComponent(c.value)}`}
+                  className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                    category === c.value
+                      ? "border-blue-600 bg-blue-600 text-white"
+                      : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                  }`}
+                >
+                  {c.label}
+                </Link>
+              ))}
             </div>
+          </section>
 
-            {/* Body */}
-            <div className="flex flex-1 flex-col p-5">
-                <TypeBadge type={course.type} />
-
-                <h3 className="mt-3 text-base font-bold leading-snug text-gray-900 group-hover:text-blue-600 transition-colors">
-                    {course.title}
-                </h3>
-
-                <p className="mt-1 text-xs text-gray-400">{course.instructor}</p>
-
-                <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
-                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-gray-700">{course.rating.toFixed(1)}</span>
-                    <span>•</span>
-                    <span>{course.lessons} Lessons</span>
+          <section className="mx-auto max-w-7xl px-6 pb-20">
+            {items.length > 0 ? (
+              <>
+                <p className="mb-6 text-sm text-gray-400">
+                  {total} {total === 1 ? "course" : "courses"}
+                  {q ? ` matching “${q}”` : ""}
+                </p>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((course) => (
+                    <CourseCard key={course.id} course={course} />
+                  ))}
                 </div>
-
-                {course.level && (
-                    <p className="mt-1 text-xs text-gray-400">{course.level}</p>
-                )}
-
-                <div className="mt-auto pt-4">
+              </>
+            ) : (
+              /* Launch-time empty state, rather than invented placeholder courses */
+              <div className="mx-auto max-w-xl rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
+                <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                  <BookOpen className="size-6" />
+                </span>
+                <h2 className="mt-5 text-xl font-black text-gray-900">
+                  {filtered ? "No courses match that search" : "The first courses are on their way"}
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-gray-500">
+                  {filtered
+                    ? "Try a different search or category, or browse the full library."
+                    : "Our tutors are building the first set of courses now. The AI tutor is already available and can help you with any subject in the meantime."}
+                </p>
+                <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+                  {filtered ? (
                     <Link
-                        href={`/courses/${course.id}`}
-                        className="block w-full rounded-xl bg-blue-600 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700 active:scale-95 transition-all duration-200"
+                      href="/courses"
+                      className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
                     >
-                        View Course
+                      Show all courses
                     </Link>
+                  ) : (
+                    <Link
+                      href="/signup"
+                      className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                    >
+                      Try the AI tutor
+                    </Link>
+                  )}
+                  <Link
+                    href="/features"
+                    className="inline-flex items-center justify-center rounded-xl border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    See what is included
+                  </Link>
                 </div>
-            </div>
-        </div>
-    );
-}
+              </div>
+            )}
+          </section>
+        </main>
 
-function SectionHeader({ title, subtitle, href }: { title: string; subtitle: string; href: string }) {
-    return (
-        <div className="mb-6 flex items-end justify-between">
-            <div>
-                <h2 className="text-2xl font-black text-gray-900">{title}</h2>
-                <p className="mt-0.5 text-sm text-gray-400">{subtitle}</p>
-            </div>
-            <Link
-                href={href}
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-0.5 whitespace-nowrap"
-            >
-                View All →
-            </Link>
-        </div>
-    );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-export default function CoursesPage() {
-    const [activeCategory, setActiveCategory] = useState("All");
-    const [query, setQuery] = useState("");
-    const [sortOpen, setSortOpen] = useState(false);
-    const [sortLabel, setSortLabel] = useState("Most Popular");
-
-    const filtered = COURSES.filter((c) => {
-        const matchCat = activeCategory === "All" || c.category === activeCategory;
-        const matchQ =
-            !query ||
-            c.title.toLowerCase().includes(query.toLowerCase()) ||
-            c.instructor.toLowerCase().includes(query.toLowerCase());
-        return matchCat && matchQ;
-    });
-
-    const popular = filtered.slice(0, 3);
-    const newThisWeek = filtered.slice(0, 3);
-    const browseAll = filtered;
-
-    return (
-        <div className="relative min-h-screen bg-white">
-            {/* Subtle hero glow */}
-            <div className="pointer-events-none absolute right-0 top-0 z-0 h-[50vh] w-[60vw] rounded-full bg-blue-100/40 blur-[120px]" />
-
-            <div className="relative z-10">
-                <Navbar />
-
-                <main className="mx-auto max-w-7xl px-6 py-12">
-
-                    {/* ── Search bar ── */}
-                    <div className="mx-auto mb-8 max-w-2xl">
-                        <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-3.5 shadow-sm focus-within:border-blue-400 focus-within:shadow-md transition-all">
-                            <Search className="h-4 w-4 shrink-0 text-gray-400" />
-                            <input
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search courses, subjects, or topics..."
-                                className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    {/* ── Filters row ── */}
-                    <div className="mb-12 flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex flex-wrap gap-2">
-                            {CATEGORIES.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${activeCategory === cat
-                                            ? "bg-blue-600 text-white shadow-sm"
-                                            : "border border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Sort dropdown */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setSortOpen((o) => !o)}
-                                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:border-gray-300 transition"
-                            >
-                                {sortLabel}
-                                <ChevronDown className={`h-4 w-4 transition-transform ${sortOpen ? "rotate-180" : ""}`} />
-                            </button>
-
-                            {sortOpen && (
-                                <div className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg">
-                                    {SORT_OPTIONS.map((opt) => (
-                                        <button
-                                            key={opt}
-                                            onClick={() => { setSortLabel(opt); setSortOpen(false); }}
-                                            className={`block w-full px-4 py-2.5 text-left text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors ${sortLabel === opt ? "font-semibold text-blue-600" : "text-gray-600"
-                                                }`}
-                                        >
-                                            {opt}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* ── Popular Courses ── */}
-                    <section className="mb-16">
-                        <SectionHeader
-                            title="Popular Courses"
-                            subtitle="Trending among ReadAm learners."
-                            href="/dashboard/courses"
-                        />
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {popular.map((course) => (
-                                <CourseCard key={course.id + "-popular"} course={course} />
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* ── New This Week ── */}
-                    <section className="mb-16">
-                        <SectionHeader
-                            title="New This Week"
-                            subtitle="Recently added lessons and courses."
-                            href="/dashboard/courses"
-                        />
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {newThisWeek.map((course) => (
-                                <CourseCard key={course.id + "-new"} course={course} />
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* ── Browse All Courses ── */}
-                    <section>
-                        <SectionHeader
-                            title="Browse All Courses"
-                            subtitle="Explore our complete course library."
-                            href="/dashboard/courses"
-                        />
-                        {browseAll.length > 0 ? (
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                {browseAll.map((course) => (
-                                    <CourseCard key={course.id + "-browse"} course={course} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="py-20 text-center">
-                                <p className="text-gray-400">No courses match your search.</p>
-                                <button
-                                    onClick={() => { setQuery(""); setActiveCategory("All"); }}
-                                    className="mt-4 text-sm font-medium text-blue-600 hover:underline"
-                                >
-                                    Clear filters
-                                </button>
-                            </div>
-                        )}
-                    </section>
-                </main>
-
-                <Footer />
-            </div>
-        </div>
-    );
+        <Footer />
+      </div>
+    </div>
+  );
 }

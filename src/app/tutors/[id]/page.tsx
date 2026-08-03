@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getPublicTutor, isUuid } from "@/lib/public-api";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, BookOpen, BadgeCheck, ArrowLeft } from "lucide-react";
@@ -150,9 +151,51 @@ const LEVEL_STYLES: Record<string, string> = {
     Advanced: "text-purple-600 bg-purple-50",
 };
 
+const EXPERIENCE_YEARS: Record<string, number> = {
+    less_than_1: 0,
+    one_to_three: 2,
+    three_to_five: 4,
+    five_to_ten: 7,
+    ten_plus: 10,
+};
+
+type Tutor = (typeof ALL_TUTORS)[number];
+
+/**
+ * Real tutors are addressed by UUID and come from GET /v1/tutors/{id}. The
+ * profiles carried over from the Edugo era keep their existing slugs so their
+ * links stay valid.
+ */
+async function loadTutor(id: string): Promise<Tutor | null> {
+    if (!isUuid(id)) {
+        return ALL_TUTORS.find((t) => t.id === id) ?? null;
+    }
+
+    const profile = await getPublicTutor(id);
+    if (!profile) return null;
+
+    const years = profile.experience_years ? EXPERIENCE_YEARS[profile.experience_years] ?? 0 : 0;
+
+    return {
+        id: profile.user_id,
+        name: profile.display_name ?? "ReadAM Tutor",
+        title: profile.title ?? profile.subject ?? "Tutor",
+        rating: 0,
+        reviews: 0,
+        courseCount: 0,
+        image: profile.avatar_url || "/Tutor.png",
+        verified: profile.is_verified,
+        bio: profile.bio ?? "",
+        expertise: [profile.subject, profile.teaching_level, years ? `${years}+ years` : null].filter(
+            Boolean
+        ) as string[],
+        courses: [],
+    };
+}
+
 export default async function TutorProfilePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const tutor = ALL_TUTORS.find((t) => t.id === id);
+    const tutor = await loadTutor(id);
     if (!tutor) notFound();
 
     return (
@@ -273,6 +316,9 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
         </div>
     );
 }
+
+// Slug profiles prerender; real UUID profiles are rendered on demand.
+export const dynamicParams = true;
 
 export function generateStaticParams() {
     return ALL_TUTORS.map((t) => ({ id: t.id }));
