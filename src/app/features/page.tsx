@@ -30,6 +30,7 @@ const CORE_FEATURES = [
         icon: Sparkles,
         color: "bg-orange-100 text-orange-500",
         dark: false,
+        id: "ai-tutor",
         title: "AI Tutor — Available 24/7",
         description:
             "Ask anything, get step-by-step explanations in English or French. The AI Tutor adapts to your level and builds personalised study plans around your weak areas.",
@@ -41,6 +42,7 @@ const CORE_FEATURES = [
         icon: BookOpen,
         color: "bg-blue-100 text-blue-500",
         dark: false,
+        id: "pdf-library",
         title: "PDF Library",
         description:
             "Thousands of curriculum-aligned notes from top schools across Cameroon. Download and study offline anytime.",
@@ -52,6 +54,7 @@ const CORE_FEATURES = [
         icon: Clock,
         color: "bg-white/20 text-white",
         dark: true,
+        id: "past-questions",
         title: "Past Questions Bank",
         description:
             "10 years of real GCE Ordinary & Advanced Level and Baccalauréat exam papers with worked solutions.",
@@ -63,6 +66,7 @@ const CORE_FEATURES = [
         icon: Video,
         color: "bg-orange-100 text-orange-400",
         dark: false,
+        id: "video-courses",
         title: "Video Courses",
         description:
             "High-quality lessons from the most requested tutors in Cameroon, on demand.",
@@ -74,6 +78,7 @@ const CORE_FEATURES = [
         icon: BarChart2,
         color: "bg-teal-100 text-teal-500",
         dark: false,
+        id: "progress-tracking",
         title: "Progress Tracking",
         description:
             "Visualise your mastery per subject with XP points, daily streaks, and weekly charts.",
@@ -192,7 +197,8 @@ export default function FeaturesPage() {
                                     return (
                                         <div
                                             key={f.title}
-                                            className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 ${f.span} ${f.darkBg
+                                            id={f.id}
+                                            className={`group relative scroll-mt-24 overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 ${f.span} ${f.darkBg
                                                     ? "bg-[#0f1b35] hover:shadow-xl hover:shadow-blue-900/30"
                                                     : "border border-gray-200 bg-white hover:shadow-lg"
                                                 }`}

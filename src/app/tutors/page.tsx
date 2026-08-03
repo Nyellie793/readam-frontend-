@@ -180,14 +180,15 @@ function TutorCard({ tutor }: { tutor: Tutor }) {
     );
 }
 
-function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+function SectionHeader({ title, subtitle, href }: { title: string; subtitle: string; href: string }) {
     return (
         <div className="mb-6 flex items-end justify-between">
             <div>
                 <h2 className="text-2xl font-black text-gray-900">{title}</h2>
                 <p className="mt-0.5 text-sm text-gray-400">{subtitle}</p>
             </div>
-            <Link href="#" className="whitespace-nowrap text-sm font-semibold text-blue-600 hover:text-blue-700">
+            <Link
+                href={href} className="whitespace-nowrap text-sm font-semibold text-blue-600 hover:text-blue-700">
                 See All →
             </Link>
         </div>
@@ -268,7 +269,7 @@ export default function TutorsPage() {
                     </div>
 
                     <section className="mb-16">
-                        <SectionHeader title="Featured Tutors" subtitle="Meet some of our most experienced educators." />
+                        <SectionHeader title="Featured Tutors" subtitle="Meet some of our most experienced educators." href="/tutors" />
                         {filterTutors(FEATURED_TUTORS).length > 0 ? (
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {filterTutors(FEATURED_TUTORS).map((tutor) => <TutorCard key={tutor.id + "-featured"} tutor={tutor} />)}
@@ -279,7 +280,7 @@ export default function TutorsPage() {
                     </section>
 
                     <section className="mb-16">
-                        <SectionHeader title="Popular This Week" subtitle="Tutors learners are engaging with most this week." />
+                        <SectionHeader title="Popular This Week" subtitle="Tutors learners are engaging with most this week." href="/tutors" />
                         {filterTutors(POPULAR_TUTORS).length > 0 ? (
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {filterTutors(POPULAR_TUTORS).map((tutor) => <TutorCard key={tutor.id + "-popular"} tutor={tutor} />)}
@@ -290,7 +291,7 @@ export default function TutorsPage() {
                     </section>
 
                     <section>
-                        <SectionHeader title="Browse All Tutors" subtitle="Explore tutors across different subjects." />
+                        <SectionHeader title="Browse All Tutors" subtitle="Explore tutors across different subjects." href="/tutors" />
                         {filterTutors(BROWSE_TUTORS).length > 0 ? (
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {filterTutors(BROWSE_TUTORS).map((tutor) => <TutorCard key={tutor.id + "-browse"} tutor={tutor} />)}
