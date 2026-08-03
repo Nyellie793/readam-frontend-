@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
     BookOpen,
@@ -128,6 +129,13 @@ const MORE_FEATURES = [
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+
+export const metadata: Metadata = {
+  title: "Features",
+  description:
+    "An AI tutor available around the clock, a past questions bank, a PDF library, video courses and progress tracking.",
+  alternates: { canonical: "/features" },
+};
 
 export default function FeaturesPage() {
     return (

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -71,6 +72,13 @@ const TEAM = [
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Why ReadAM exists, what we believe about learning in Cameroon, and the team building it.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
