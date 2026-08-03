@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Play, FileText, ArrowRight } from "lucide-react";
+import { CheckCircle2, Play, FileText } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -92,9 +92,9 @@ export default function PaymentSuccessCard({
       {/* Footer Support */}
       <p className="text-[10px] text-gray-400">
         Need help with your purchase?{" "}
-        <a href="#" className="text-blue-600 hover:underline font-bold">Contact Support</a>
+        <Link href="/contact" className="text-blue-600 hover:underline font-bold">Contact Support</Link>
         {" "}or visit our{" "}
-        <a href="#" className="text-blue-600 hover:underline font-bold">Help Center</a>.
+        <Link href="/help" className="text-blue-600 hover:underline font-bold">Help Center</Link>.
       </p>
     </div>
   );

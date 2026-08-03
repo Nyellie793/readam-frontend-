@@ -156,7 +156,7 @@ function CourseCard({ course }: { course: Course }) {
     );
 }
 
-function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+function SectionHeader({ title, subtitle, href }: { title: string; subtitle: string; href: string }) {
     return (
         <div className="mb-6 flex items-end justify-between">
             <div>
@@ -164,7 +164,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
                 <p className="mt-0.5 text-sm text-gray-400">{subtitle}</p>
             </div>
             <Link
-                href="#"
+                href={href}
                 className="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-0.5 whitespace-nowrap"
             >
                 View All →
@@ -266,6 +266,7 @@ export default function CoursesPage() {
                         <SectionHeader
                             title="Popular Courses"
                             subtitle="Trending among ReadAm learners."
+                            href="/dashboard/courses"
                         />
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {popular.map((course) => (
@@ -279,6 +280,7 @@ export default function CoursesPage() {
                         <SectionHeader
                             title="New This Week"
                             subtitle="Recently added lessons and courses."
+                            href="/dashboard/courses"
                         />
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {newThisWeek.map((course) => (
@@ -292,6 +294,7 @@ export default function CoursesPage() {
                         <SectionHeader
                             title="Browse All Courses"
                             subtitle="Explore our complete course library."
+                            href="/dashboard/courses"
                         />
                         {browseAll.length > 0 ? (
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
