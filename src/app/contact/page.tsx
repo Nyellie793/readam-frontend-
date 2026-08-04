@@ -64,7 +64,7 @@ export default async function ContactPage() {
   return (
     <PageShell
       eyebrow={t("eyebrow")}
-      title={<>Talk to <span className="text-blue-600">{t("titleAccent")}</span></>}
+      title={<>{t("titleLead")} <span className="text-blue-600">{t("titleAccent")}</span></>}
       intro={t("intro")}
     >
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

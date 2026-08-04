@@ -28,7 +28,7 @@ export default async function BlogPage() {
   return (
     <PageShell
       eyebrow={t("eyebrow")}
-      title={<>Study guides and <span className="text-blue-600">{t("titleAccent")}</span></>}
+      title={<>{t("titleLead")} <span className="text-blue-600">{t("titleAccent")}</span></>}
       intro={t("intro")}
     >
       <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm sm:p-12">
