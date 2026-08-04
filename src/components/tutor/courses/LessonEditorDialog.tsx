@@ -79,7 +79,12 @@ export default function LessonEditorDialog({
       try {
         const status = await TUTOR.getVideoStatus(uid);
         if (status.state === "ready") {
-          setDurationSeconds(status.duration_seconds);
+          // Cloudflare returns a float (e.g. 144.8s) — the backend's
+          // duration_seconds column is an integer and rejects fractional
+          // values with a 422, which silently failed the whole save.
+          setDurationSeconds(
+            status.duration_seconds != null ? Math.round(status.duration_seconds) : null
+          );
           setUploadState("ready");
           return;
         }

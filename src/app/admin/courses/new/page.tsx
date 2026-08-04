@@ -130,7 +130,11 @@ export default function NewCoursePage() {
         for (let attempt = 0; attempt < 100; attempt++) {
             await new Promise((r) => setTimeout(r, 3000));
             const status = await TUTOR.getVideoStatus(streamUid);
-            if (status.state === "ready") return status.duration_seconds;
+            // Cloudflare returns a float (e.g. 144.8s) — the backend column is
+            // an integer and rejects fractional values with a 422.
+            if (status.state === "ready") {
+                return status.duration_seconds != null ? Math.round(status.duration_seconds) : null;
+            }
             if (status.state === "error") {
                 throw new Error(`Video processing failed for "${lessonTitle}"`);
             }
