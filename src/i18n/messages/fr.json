@@ -173,5 +173,46 @@
     "physicsTag": "Physique",
     "philosophyTag": "Philosophie",
     "moreTag": "+12 autres"
+  },
+  "testimonials": {
+    "heading": "Ce que disent nos utilisateurs",
+    "q1": "Les résumés générés par l'IA de ReadAM ont divisé mon temps de révision par deux. La précision des explications est tout simplement bluffante !",
+    "r1": "Étudiant à l'université",
+    "q2": "Les tutoriels vidéo combinés au chat IA instantané rendent l'apprentissage bien plus interactif que la simple lecture d'un manuel.",
+    "r2": "Étudiant en filière scientifique",
+    "q3": "En tant que tuteur, je recommande ReadAM à tous mes élèves. C'est le compagnon idéal pour réviser à son propre rythme.",
+    "r3": "Tuteur indépendant"
+  },
+  "features": {
+    "subtitle": "Conçu spécialement pour le système éducatif camerounais.",
+    "pdfTitle": "Bibliothèque PDF",
+    "pdfDesc": "Des milliers de fiches alignées sur le programme, issues des meilleurs établissements du Cameroun. À télécharger pour réviser hors ligne.",
+    "aiTitle": "Assistant d'étude IA",
+    "aiDesc": "Obtenez des explications instantanées et bilingues sur n'importe quel sujet, 24h/24 et 7j/7.",
+    "aiExample": "« Explique le cycle de Krebs en français... »",
+    "pastTitle": "Anciens sujets",
+    "pastDesc": "Entraînez-vous sur 10 années de vraies épreuves du GCE et du Baccalauréat.",
+    "videoTitle": "Cours vidéo",
+    "videoDesc": "Suivez des cours de qualité donnés par les tuteurs les plus demandés du pays.",
+    "progressTitle": "Suivi des progrès",
+    "progressDesc": "Visualisez votre maîtrise de chaque matière et anticipez vos résultats d'examen."
+  },
+  "pricing": {
+    "perYear": "XAF/an",
+    "mostPopular": "LE PLUS POPULAIRE",
+    "p1": "Matière unique",
+    "p1f1": "Anciens sujets et corrigés pour 1 matière",
+    "p1f2": "Explications détaillées",
+    "p2": "Petit pack",
+    "p2f1": "Anciens sujets et corrigés pour 3 matières",
+    "p2f2": "Accès aux fiches essentielles",
+    "p3": "Pack intermédiaire",
+    "p3f1": "Anciens sujets et corrigés pour 5 matières",
+    "p3f2": "Assistant d'étude IA (50 requêtes/jour)",
+    "p3f3": "Assistance prioritaire sur le forum",
+    "p4": "Pack accès complet",
+    "p4f1": "Anciens sujets et corrigés pour toutes les matières",
+    "p4f2": "Accès hors ligne à tous les supports",
+    "p4f3": "Accompagnement individuel par un tuteur"
   }
 }

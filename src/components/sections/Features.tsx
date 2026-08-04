@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 export default async function Features() {
   const t = await getTranslations("home");
   const ts = await getTranslations("subjects");
+  const tf = await getTranslations("features");
   return (
     <section className="mx-auto max-w-7xl px-6 py-20 bg-[#F8F9FC]">
 
@@ -11,7 +12,7 @@ export default async function Features() {
       <div className="mb-12 text-center">
         <h2 className="text-3xl font-black text-gray-900">{t("featuresTitle")}</h2>
         <p className="mt-2 text-sm text-gray-500">
-          Built specifically for the Cameroonian educational landscape.
+          {tf("subtitle")}
         </p>
       </div>
 
@@ -29,10 +30,9 @@ export default async function Features() {
             <BookOpen className="h-5 w-5 text-blue-500" />
           </div>
 
-          <h3 className="mt-4 text-lg font-bold text-gray-900">PDF Library</h3>
+          <h3 className="mt-4 text-lg font-bold text-gray-900">{tf("pdfTitle")}</h3>
           <p className="mt-1 max-w-xs text-sm leading-relaxed text-gray-500">
-            Thousands of curriculum-aligned notes from top schools across
-            Cameroon. Download and study offline.
+            {tf("pdfDesc")}
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
@@ -58,14 +58,14 @@ export default async function Features() {
             <Sparkles className="h-5 w-5 text-orange-400" />
           </div>
 
-          <h3 className="mt-4 text-lg font-bold text-white">AI Study Assistant</h3>
+          <h3 className="mt-4 text-lg font-bold text-white">{tf("aiTitle")}</h3>
           <p className="mt-1 text-sm leading-relaxed text-gray-400">
-            Get instant, bilingual explanations for any topic 24/7.
+            {tf("aiDesc")}
           </p>
 
           <div className="mt-6 rounded-xl bg-white/10 px-4 py-3 group-hover:bg-white/15 transition-colors duration-300">
             <p className="text-sm italic text-gray-300">
-              &ldquo;Explain the krebs cycle in French...&rdquo;
+              {tf("aiExample")}
             </p>
           </div>
         </div>
@@ -80,9 +80,9 @@ export default async function Features() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
             <Clock className="h-5 w-5 text-white" />
           </div>
-          <h3 className="mt-16 text-lg font-bold text-white">Past Questions</h3>
+          <h3 className="mt-16 text-lg font-bold text-white">{tf("pastTitle")}</h3>
           <p className="mt-1 text-sm leading-relaxed text-blue-100">
-            Practice with 10 years of real GCE and Baccalauréat exam papers.
+            {tf("pastDesc")}
           </p>
         </div>
 
@@ -91,9 +91,9 @@ export default async function Features() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-300">
             <Video className="h-5 w-5 text-orange-400" />
           </div>
-          <h3 className="mt-16 text-lg font-bold text-gray-900">Video Courses</h3>
+          <h3 className="mt-16 text-lg font-bold text-gray-900">{tf("videoTitle")}</h3>
           <p className="mt-1 text-sm leading-relaxed text-gray-500">
-            Watch high quality lessons from the most requested tutors in the country.
+            {tf("videoDesc")}
           </p>
         </div>
 
@@ -102,9 +102,9 @@ export default async function Features() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 group-hover:bg-teal-200 group-hover:scale-110 transition-all duration-300">
             <BarChart2 className="h-5 w-5 text-teal-500" />
           </div>
-          <h3 className="mt-4 text-lg font-bold text-gray-900">Progress Tracking</h3>
+          <h3 className="mt-4 text-lg font-bold text-gray-900">{tf("progressTitle")}</h3>
           <p className="mt-1 text-sm leading-relaxed text-gray-500">
-            Visualize your mastery of each subject and predict your exam results.
+            {tf("progressDesc")}
           </p>
           {/* Animated progress bar */}
           <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-gray-100">

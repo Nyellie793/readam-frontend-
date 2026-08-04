@@ -173,5 +173,46 @@
     "physicsTag": "Physics",
     "philosophyTag": "Philosophy",
     "moreTag": "+12 more"
+  },
+  "testimonials": {
+    "heading": "Hear What Our Users Have To Say",
+    "q1": "ReadAM's AI-powered summaries have cut my study time in half. The accuracy of the explanations is simply mind blowing!",
+    "r1": "University Student",
+    "q2": "The video tutorials combined with the instant AI chat makes learning so much more interactive than just reading a textbook.",
+    "r2": "STEM Student",
+    "q3": "As a tutor, I recommend ReadAM to all my students. It's the perfect companion for self paced learning and revision.",
+    "r3": "Private Tutor"
+  },
+  "features": {
+    "subtitle": "Built specifically for the Cameroonian educational landscape.",
+    "pdfTitle": "PDF Library",
+    "pdfDesc": "Thousands of curriculum-aligned notes from top schools across Cameroon. Download and study offline.",
+    "aiTitle": "AI Study Assistant",
+    "aiDesc": "Get instant, bilingual explanations for any topic 24/7.",
+    "aiExample": "“Explain the krebs cycle in French...”",
+    "pastTitle": "Past Questions",
+    "pastDesc": "Practice with 10 years of real GCE and Baccalauréat exam papers.",
+    "videoTitle": "Video Courses",
+    "videoDesc": "Watch high quality lessons from the most requested tutors in the country.",
+    "progressTitle": "Progress Tracking",
+    "progressDesc": "Visualize your mastery of each subject and predict your exam results."
+  },
+  "pricing": {
+    "perYear": "XAF/year",
+    "mostPopular": "MOST POPULAR",
+    "p1": "Single Subject",
+    "p1f1": "Past questions & answers for 1 subject",
+    "p1f2": "Detailed study explanations",
+    "p2": "Small Bundle",
+    "p2f1": "Past questions & answers for 3 subjects",
+    "p2f2": "Access to core study notes",
+    "p3": "Medium Bundle",
+    "p3f1": "Past questions & answers for 5 subjects",
+    "p3f2": "AI Study Assistant (50 queries/day)",
+    "p3f3": "Priority forum support",
+    "p4": "Full Access Bundle",
+    "p4f1": "Past questions & answers for all subjects",
+    "p4f2": "Offline access to all materials",
+    "p4f3": "1-on-1 tutor support"
   }
 }

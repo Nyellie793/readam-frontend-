@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Mail, Phone } from "lucide-react";
+import { Mail } from "lucide-react";
 
 import {
   FaFacebook,
@@ -52,14 +52,6 @@ export default async function Footer() {
               >
                 <Mail className="size-4 shrink-0" />
                 {CONTACT.email}
-              </a>
-
-              <a
-                href={`tel:${CONTACT.phoneHref}`}
-                className="flex w-fit items-center gap-3 text-gray-300 transition-colors hover:text-orange-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400"
-              >
-                <Phone className="size-4 shrink-0" />
-                {CONTACT.phone}
               </a>
             </div>
 

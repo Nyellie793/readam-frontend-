@@ -8,54 +8,55 @@ import { useStoredUser } from "@/hooks/useStoredUser";
 
 const plans = [
   {
-    name: "Single Subject",
+    nameKey: "p1",
     price: "3,000",
     color: "blue",
     popular: false,
     features: [
-      "Past questions & answers for 1 subject",
-      "Detailed study explanations",
+      "p1f1",
+      "p1f2",
     ],
   },
 
   {
-    name: "Small Bundle",
+    nameKey: "p2",
     price: "7,500",
     color: "orange",
     popular: false,
     features: [
-      "Past questions & answers for 3 subjects",
-      "Access to core study notes",
+      "p2f1",
+      "p2f2",
     ],
   },
 
   {
-    name: "Medium Bundle",
+    nameKey: "p3",
     price: "11,000",
     color: "purple",
     popular: true,
     features: [
-      "Past questions & answers for 5 subjects",
-      "AI Study Assistant (50 queries/day)",
-      "Priority forum support",
+      "p3f1",
+      "p3f2",
+      "p3f3",
     ],
   },
 
   {
-    name: "Full Access Bundle",
+    nameKey: "p4",
     price: "18,000",
     color: "green",
     popular: false,
     features: [
-      "Past questions & answers for all subjects",
-      "Offline access to all materials",
-      "1-on-1 tutor support",
+      "p4f1",
+      "p4f2",
+      "p4f3",
     ],
   },
 ];
 
 export default function Pricing() {
   const t = useTranslations("home");
+  const tp = useTranslations("pricing");
   const user = useStoredUser();
   // Signed out, send them via login and return them to the purchase flow.
   const target = "/payment/past-questions";
@@ -126,7 +127,7 @@ export default function Pricing() {
 
             return (
               <div
-                key={plan.name}
+                key={tp(plan.nameKey)}
                 className={`
                   relative
                   flex
@@ -192,7 +193,7 @@ export default function Pricing() {
                       ${color.text}
                     `}
                   >
-                    {plan.name}
+                    {tp(plan.nameKey)}
                   </h3>
 
                 </div>
@@ -205,7 +206,7 @@ export default function Pricing() {
                   </span>
 
                   <span className="ml-2 text-sm font-semibold text-gray-500">
-                    XAF/year
+                    {tp("perYear")}
                   </span>
 
                 </div>
@@ -215,7 +216,7 @@ export default function Pricing() {
 
                   {plan.features.map((feature) => (
                     <li
-                      key={feature}
+                      key={tp(feature)}
                       className="flex items-start gap-3"
                     >
 
@@ -230,7 +231,7 @@ export default function Pricing() {
                       />
 
                       <span className="text-gray-600">
-                        {feature}
+                        {tp(feature)}
                       </span>
 
                     </li>

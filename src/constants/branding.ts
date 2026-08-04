@@ -6,7 +6,7 @@ export const BRAND = {
 
 /** Where to reach us. Rendered as real mailto:/tel: links, not plain text. */
 export const CONTACT = {
-  email: "hello@readam.ai",
+  email: "support@readamcm.com",
   phone: "+237 679 545 186",
   /** tel: needs the number with no spaces or separators. */
   phoneHref: "+237679545186",
