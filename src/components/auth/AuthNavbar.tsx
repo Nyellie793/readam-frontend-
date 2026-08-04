@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import Logo from "../shared/Logo";
 import AuthMobileMenu from "./AuthMobileMenu";
 
@@ -15,6 +16,7 @@ export default function AuthNavbar({
   buttonText,
   href,
 }: AuthNavbarProps) {
+  const t = useTranslations("auth");
   return (
     <header className="w-full border-b bg-white/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -27,7 +29,7 @@ export default function AuthNavbar({
 
           {/* Desktop text */}
           <span className="hidden sm:inline text-sm text-gray-600">
-            {text}
+            {t(text)}
           </span>
 
           {/* Desktop button */}
@@ -46,7 +48,7 @@ export default function AuthNavbar({
               transition
             "
           >
-            {buttonText}
+            {t(buttonText)}
           </Link>
 
           {/* Mobile menu (THIS WAS MISSING) */}

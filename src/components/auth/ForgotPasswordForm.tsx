@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MailCheck } from "lucide-react";
@@ -9,14 +10,14 @@ import Link from "next/link";
 import AUTH from "@/services/auth.service";
 import { toast } from "sonner";
 
-const schema = z.object({
-  email: z.email("Enter a valid email address"),
-});
-type FormData = z.infer<typeof schema>;
+type FormData = { email: string };
 
 export default function ForgotPasswordForm() {
+  const t = useTranslations("auth");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  // Defined inside the component so validation messages can be translated.
+  const schema = z.object({ email: z.email(t("errEmail")) });
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -27,7 +28,7 @@ export default function ForgotPasswordForm() {
       await AUTH.forgotPassword(data.email);
       setSent(true);
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("errGeneric"));
     } finally {
       setLoading(false);
     }
@@ -39,7 +40,7 @@ export default function ForgotPasswordForm() {
         <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-blue-50 text-blue-600">
           <MailCheck className="size-7" />
         </div>
-        <h1 className="mt-5 text-2xl font-black text-gray-900">Check your email</h1>
+        <h1 className="mt-5 text-2xl font-black text-gray-900">{t("checkEmail")}</h1>
         <p className="mt-3 text-base text-gray-500">
           If that email is registered, we&apos;ve sent a link to reset your password. It expires in 30 minutes.
         </p>
@@ -56,8 +57,8 @@ export default function ForgotPasswordForm() {
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-gray-100 bg-white px-8 py-10 shadow-sm sm:px-14 sm:py-14">
       <h1 className="text-center text-4xl font-black tracking-tight">
-        <span className="text-blue-600">Forgot</span>{" "}
-        <span className="text-gray-900">Password?</span>
+        <span className="text-blue-600">{t("forgotLead")}</span>{" "}
+        <span className="text-gray-900">{t("forgotAccent")}</span>
       </h1>
       <p className="mt-3 text-center text-base text-gray-500">
         Enter your email and we&apos;ll send you a link to reset your password.
@@ -65,12 +66,12 @@ export default function ForgotPasswordForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
         <div>
-          <label className="text-sm font-semibold text-gray-700">Email Address</label>
+          <label className="text-sm font-semibold text-gray-700">{t("email")}</label>
           <input
             type="email"
             autoComplete="email"
             {...register("email")}
-            placeholder="alex@student.edu"
+            placeholder={t("emailPlaceholder")}
             className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3.5 text-base placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}

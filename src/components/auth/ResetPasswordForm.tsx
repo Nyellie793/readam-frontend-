@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, XCircle } from "lucide-react";
@@ -11,18 +12,20 @@ import AUTH from "@/services/auth.service";
 import { errorMessage } from "@/lib/api";
 import { toast } from "sonner";
 
-const schema = z
-  .object({
-    new_password: z.string().min(8, "Password must be at least 8 characters"),
-    confirm: z.string(),
-  })
-  .refine((data) => data.new_password === data.confirm, {
-    message: "Passwords don't match",
-    path: ["confirm"],
-  });
-type FormData = z.infer<typeof schema>;
+type FormData = { new_password: string; confirm: string };
 
 export default function ResetPasswordForm() {
+  const t = useTranslations("auth");
+  // Defined inside the component so validation messages can be translated.
+  const schema = z
+    .object({
+      new_password: z.string().min(8, t("errPassword")),
+      confirm: z.string(),
+    })
+    .refine((data) => data.new_password === data.confirm, {
+      message: t("errMismatch"),
+      path: ["confirm"],
+    });
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -39,10 +42,10 @@ export default function ResetPasswordForm() {
     setLinkError(null);
     try {
       await AUTH.resetPassword({ token, new_password: data.new_password });
-      toast.success("Password reset. Please log in with your new password.");
+      toast.success(t("resetDone"));
       router.push("/login");
     } catch (err) {
-      setLinkError(errorMessage(err, "Something went wrong. Please try again."));
+      setLinkError(errorMessage(err, t("errGeneric")));
     } finally {
       setLoading(false);
     }
@@ -54,7 +57,7 @@ export default function ResetPasswordForm() {
         <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-red-50 text-red-600">
           <XCircle className="size-7" />
         </div>
-        <h1 className="mt-5 text-2xl font-black text-gray-900">Invalid reset link</h1>
+        <h1 className="mt-5 text-2xl font-black text-gray-900">{t("invalidLink")}</h1>
         <p className="mt-3 text-base text-gray-500">
           This link is missing its reset token. Request a new one below.
         </p>
@@ -72,7 +75,7 @@ export default function ResetPasswordForm() {
     <div className="w-full max-w-2xl rounded-2xl border border-gray-100 bg-white px-8 py-10 shadow-sm sm:px-14 sm:py-14">
       <h1 className="text-center text-4xl font-black tracking-tight">
         <span className="text-blue-600">Reset</span>{" "}
-        <span className="text-gray-900">Password</span>
+        <span className="text-gray-900">{t("password")}</span>
       </h1>
       <p className="mt-3 text-center text-base text-gray-500">
         Choose a new password for your account.
@@ -80,13 +83,13 @@ export default function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
         <div>
-          <label className="text-sm font-semibold text-gray-700">New Password</label>
+          <label className="text-sm font-semibold text-gray-700">{t("newPassword")}</label>
           <div className="relative mt-2">
             <input
               type={showPw ? "text" : "password"}
               autoComplete="new-password"
               {...register("new_password")}
-              placeholder="At least 8 characters"
+              placeholder={t("atLeast8")}
               className="w-full rounded-xl border border-gray-200 px-4 py-3.5 pr-11 text-base placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
             <button
@@ -101,12 +104,12 @@ export default function ResetPasswordForm() {
         </div>
 
         <div>
-          <label className="text-sm font-semibold text-gray-700">Confirm New Password</label>
+          <label className="text-sm font-semibold text-gray-700">{t("confirmPassword")}</label>
           <input
             type={showPw ? "text" : "password"}
             autoComplete="new-password"
             {...register("confirm")}
-            placeholder="Re-enter your new password"
+            placeholder={t("reenter")}
             className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3.5 text-base placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
           {errors.confirm && <p className="mt-1 text-xs text-red-500">{errors.confirm.message}</p>}

@@ -1,17 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { User, Bot } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 
 const ROLES = [
-  { id: "student", title: "Student", description: "Access personalized learning paths, AI tutoring, and track your progress.", Icon: User },
-  { id: "tutor",   title: "Tutor",   description: "Create content, guide students with AI tools, and manage your teaching.",  Icon: Bot  },
+  { id: "student", titleKey: "roleStudent", descKey: "roleStudentDesc", Icon: User },
+  { id: "tutor",   titleKey: "roleTutor",   descKey: "roleTutorDesc",  Icon: Bot  },
 ] as const;
 type Role = (typeof ROLES)[number]["id"];
 
 export default function SelectRolePage() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [selected, setSelected] = useState<Role>("student");
 
@@ -21,12 +23,12 @@ export default function SelectRolePage() {
         <Logo />
       </header>
       <div className="mx-auto flex min-h-[calc(100vh-65px)] max-w-3xl flex-col items-center justify-center px-6 py-14">
-        <h1 className="text-center text-4xl font-black text-gray-900">How will you use ReadAm?</h1>
+        <h1 className="text-center text-4xl font-black text-gray-900">{t("roleTitle")}</h1>
         <p className="mt-3 max-w-md text-center text-base text-gray-500">
-          Choose a role to personalize your learning experience. You can change it anytime.
+          {t("roleSubtitle")}
         </p>
         <div className="mt-10 grid w-full grid-cols-1 gap-5 sm:grid-cols-2">
-          {ROLES.map(({ id, title, description, Icon }) => {
+          {ROLES.map(({ id, titleKey, descKey, Icon }) => {
             const active = selected === id;
             return (
               <button key={id} type="button" onClick={() => setSelected(id)}
@@ -35,8 +37,8 @@ export default function SelectRolePage() {
                   <Icon className="h-8 w-8 text-blue-600" />
                 </span>
                 <div>
-                  <p className="text-xl font-bold text-gray-900">{title}</p>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-500">{description}</p>
+                  <p className="text-xl font-bold text-gray-900">{t(titleKey)}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-500">{t(descKey)}</p>
                 </div>
                 <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors ${active ? "border-blue-600 bg-blue-600" : "border-gray-300 bg-white"}`}>
                   {active && <div className="h-2.5 w-2.5 rounded-full bg-white" />}

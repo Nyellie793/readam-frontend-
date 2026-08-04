@@ -12,7 +12,7 @@ export default async function SignupPage({
 
   return (
     <main className="min-h-screen bg-[#F7F8FC]">
-      <AuthNavbar text="Already have an account?" buttonText="Sign In" href="/login" />
+      <AuthNavbar text="haveAccount" buttonText="signIn" href="/login" />
       <section className="mx-auto flex min-h-[calc(100vh-65px)] max-w-7xl items-center justify-center px-6 py-10">
         <SignupForm role={role === "tutor" ? "tutor" : "student"} />
       </section>
