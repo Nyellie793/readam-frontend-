@@ -5,20 +5,21 @@ import {
   BookOpen, Briefcase, Scale, Wrench, Pen, Star, PlusCircle,
 } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const interests = [
-  { label: "Science & Tech", icon: FlaskConical, color: "text-blue-400 bg-blue-50" },
-  { label: "Finance", icon: Banknote, color: "text-orange-400 bg-orange-50" },
-  { label: "Arts", icon: Palette, color: "text-purple-400 bg-purple-50" },
-  { label: "Languages", icon: Globe, color: "text-blue-400 bg-blue-50" },
-  { label: "Health", icon: HeartPulse, color: "text-orange-400 bg-orange-50" },
-  { label: "Exams", icon: BookOpen, color: "text-orange-400 bg-orange-50" },
-  { label: "Career", icon: Briefcase, color: "text-orange-400 bg-orange-50" },
-  { label: "Law", icon: Scale, color: "text-blue-400 bg-blue-50" },
-  { label: "Engineering", icon: Wrench, color: "text-orange-400 bg-orange-50" },
-  { label: "Design", icon: Pen, color: "text-blue-400 bg-blue-50" },
-  { label: "Personal", icon: Star, color: "text-blue-400 bg-blue-50" },
-  { label: "Other", icon: PlusCircle, color: "text-gray-400 bg-gray-50", dashed: true },
+  { label: "Science & Tech", key: "i_science", icon: FlaskConical, color: "text-blue-400 bg-blue-50" },
+  { label: "Finance", key: "i_finance", icon: Banknote, color: "text-orange-400 bg-orange-50" },
+  { label: "Arts", key: "i_arts", icon: Palette, color: "text-purple-400 bg-purple-50" },
+  { label: "Languages", key: "i_languages", icon: Globe, color: "text-blue-400 bg-blue-50" },
+  { label: "Health", key: "i_health", icon: HeartPulse, color: "text-orange-400 bg-orange-50" },
+  { label: "Exams", key: "i_exams", icon: BookOpen, color: "text-orange-400 bg-orange-50" },
+  { label: "Career", key: "i_career", icon: Briefcase, color: "text-orange-400 bg-orange-50" },
+  { label: "Law", key: "i_law", icon: Scale, color: "text-blue-400 bg-blue-50" },
+  { label: "Engineering", key: "i_engineering", icon: Wrench, color: "text-orange-400 bg-orange-50" },
+  { label: "Design", key: "i_design", icon: Pen, color: "text-blue-400 bg-blue-50" },
+  { label: "Personal", key: "i_personal", icon: Star, color: "text-blue-400 bg-blue-50" },
+  { label: "Other", key: "i_other", icon: PlusCircle, color: "text-gray-400 bg-gray-50", dashed: true },
 ];
 
 type Props = {
@@ -29,6 +30,7 @@ type Props = {
 };
 
 export default function Interests({ selected, setSelected, onBack, onContinue }: Props) {
+  const t = useTranslations("onboarding");
   const toggle = (label: string) => {
     setSelected(
       selected.includes(label)
@@ -41,7 +43,7 @@ export default function Interests({ selected, setSelected, onBack, onContinue }:
     <div className="mx-auto max-w-3xl">
       {/* Heading */}
       <div className="mb-10 text-center">
-        <h1 className="text-3xl font-black text-gray-900">What are your interests?</h1>
+        <h1 className="text-3xl font-black text-gray-900">{t("interestsTitle")}</h1>
         <p className="mt-3 text-sm text-gray-500 max-w-md mx-auto">
           Select the topics you want to focus on. We&apos;ll prioritize these in your
           dashboard and AI recommendations.
@@ -50,7 +52,7 @@ export default function Interests({ selected, setSelected, onBack, onContinue }:
 
       {/* Grid */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {interests.map(({ label, icon: Icon, color, dashed }) => {
+        {interests.map(({ label, key, icon: Icon, color, dashed }) => {
           const active = selected.includes(label);
           return (
             <button
@@ -67,7 +69,7 @@ export default function Interests({ selected, setSelected, onBack, onContinue }:
               <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${active ? "bg-white/20" : color}`}>
                 <Icon className={`h-4 w-4 ${active ? "text-white" : ""}`} />
               </div>
-              {label}
+              {t(key)}
             </button>
           );
         })}

@@ -7,6 +7,7 @@ import Goal from "@/components/onboarding/Goal";
 import OnboardingShell from "@/components/onboarding/OnboardingShell";
 import STUDENT from "@/services/student.service";
 import { getStoredUser } from "@/lib/auth";
+import { useTranslations } from "next-intl";
 
 function getStoredInterests(): string[] {
   if (typeof window === "undefined") return [];
@@ -19,6 +20,7 @@ function getStoredInterests(): string[] {
 }
 
 export default function OnboardingTwo() {
+  const t = useTranslations("onboarding");
   const router = useRouter();
   const [goals, setGoals] = useState<string[]>([]);
 
@@ -30,7 +32,7 @@ export default function OnboardingTwo() {
       try {
         await STUDENT.completeOnboarding({ interests, goals });
       } catch {
-        toast.error("Couldn't save your preferences, but you can update them later in Settings.");
+        toast.error(t("savedFail"));
       }
     }
     router.push("/welcome-back");

@@ -5,19 +5,20 @@ import {
   RefreshCw, Timer, Smile, Languages, Wrench, PlusCircle,
 } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const goals = [
-  { label: "Improve my grades", icon: TrendingUp, color: "text-orange-400" },
-  { label: "Learn New skills", icon: Brain, color: "text-blue-400" },
-  { label: "Learn AI tools", icon: Bot, color: "text-blue-400" },
-  { label: "Get a job", icon: Briefcase, color: "text-orange-400" },
-  { label: "Prepare for exams", icon: ClipboardList, color: "text-blue-400" },
-  { label: "Change careers", icon: RefreshCw, color: "text-orange-400" },
-  { label: "Improve Productivity", icon: Timer, color: "text-gray-500" },
-  { label: "Learn for fun", icon: Smile, color: "text-orange-400" },
-  { label: "Improve English", icon: Languages, color: "text-blue-400" },
-  { label: "Build Projects", icon: Wrench, color: "text-orange-400" },
-  { label: "Other", icon: PlusCircle, color: "text-gray-400" },
+  { label: "Improve my grades", key: "g_grades", icon: TrendingUp, color: "text-orange-400" },
+  { label: "Learn New skills", key: "g_skills", icon: Brain, color: "text-blue-400" },
+  { label: "Learn AI tools", key: "g_ai", icon: Bot, color: "text-blue-400" },
+  { label: "Get a job", key: "g_job", icon: Briefcase, color: "text-orange-400" },
+  { label: "Prepare for exams", key: "g_exams", icon: ClipboardList, color: "text-blue-400" },
+  { label: "Change careers", key: "g_careers", icon: RefreshCw, color: "text-orange-400" },
+  { label: "Improve Productivity", key: "g_productivity", icon: Timer, color: "text-gray-500" },
+  { label: "Learn for fun", key: "g_fun", icon: Smile, color: "text-orange-400" },
+  { label: "Improve English", key: "g_english", icon: Languages, color: "text-blue-400" },
+  { label: "Build Projects", key: "g_projects", icon: Wrench, color: "text-orange-400" },
+  { label: "Other", key: "g_other", icon: PlusCircle, color: "text-gray-400" },
 ];
 
 type Props = {
@@ -28,6 +29,7 @@ type Props = {
 };
 
 export default function Goal({ goals: selected, setGoals, onBack, onContinue }: Props) {
+  const t = useTranslations("onboarding");
   const toggle = (label: string) => {
     setGoals(
       selected.includes(label)
@@ -52,7 +54,7 @@ export default function Goal({ goals: selected, setGoals, onBack, onContinue }: 
 
       {/* Pills — centered flex wrap */}
       <div className="flex flex-wrap justify-center gap-3">
-        {goals.map(({ label, icon: Icon, color }) => {
+        {goals.map(({ label, key, icon: Icon, color }) => {
           const active = selected.includes(label);
           return (
             <button
@@ -65,7 +67,7 @@ export default function Goal({ goals: selected, setGoals, onBack, onContinue }: 
                 }`}
             >
               <Icon className={`h-4 w-4 ${active ? "text-white" : color}`} />
-              {label}
+              {t(key)}
             </button>
           );
         })}

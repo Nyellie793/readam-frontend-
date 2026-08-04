@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, Compass, Bot, BookOpen, ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   interests: string[];
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function Welcome({ interests, userName, onBack }: Props) {
+  const t = useTranslations("onboarding");
   const displayInterests =
     interests.slice(0, 2).join(" and ") || "your selected topics";
 
@@ -20,7 +22,7 @@ export default function Welcome({ interests, userName, onBack }: Props) {
         return sessionStorage.getItem("login_type") || "signup";
       });
       
-      const greeting = loginType === "login" ? "Welcome Back," : "Welcome to ReadAm,";
+      const greeting = loginType === "login" ? t("welcomeBack") : t("welcomeNew");
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -35,7 +37,7 @@ export default function Welcome({ interests, userName, onBack }: Props) {
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">AI Tutor Ready</p>
+              <p className="text-sm font-bold text-gray-900">{t("aiReady")}</p>
               <p className="text-xs text-gray-400">24/7 Academic Support</p>
             </div>
           </div>
@@ -58,7 +60,7 @@ export default function Welcome({ interests, userName, onBack }: Props) {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900">94% Success Rate</p>
-              <p className="text-xs text-gray-400">Among ReadAm students</p>
+              <p className="text-xs text-gray-400">{t("amongStudents")}</p>
             </div>
           </div>
 
