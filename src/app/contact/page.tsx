@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Mail, Phone, MapPin, LifeBuoy, GraduationCap, CreditCard } from "lucide-react";
 import PageShell from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Contact ReadAM",
@@ -10,60 +11,61 @@ export const metadata: Metadata = {
     "Reach the ReadAM team about your account, a payment, becoming a tutor, or anything else. Email and phone support for students across Cameroon.",
 };
 
-const CHANNELS = [
-  {
-    icon: Mail,
-    label: "Email us",
-    value: CONTACT.email,
-    href: `mailto:${CONTACT.email}`,
-    note: "Best for account and payment questions. We reply within one working day.",
-    tone: "bg-blue-50 text-blue-600",
-  },
-  {
-    icon: Phone,
-    label: "Call or WhatsApp",
-    value: CONTACT.phone,
-    href: `tel:${CONTACT.phoneHref}`,
-    note: "Monday to Saturday, 8am – 6pm WAT.",
-    tone: "bg-orange-50 text-orange-500",
-  },
-  {
-    icon: MapPin,
-    label: "Where we are",
-    value: CONTACT.location,
-    href: null,
-    note: "We are online-first, so please email before visiting.",
-    tone: "bg-teal-50 text-teal-600",
-  },
-];
 
-const ROUTES = [
-  {
-    icon: CreditCard,
-    title: "A payment problem",
-    body: "Debited but no access, or charged twice? Email us with your transaction reference and the number you paid from.",
-    action: { label: "Read the refund terms", href: "/terms#refunds" },
-  },
-  {
-    icon: GraduationCap,
-    title: "Teaching on ReadAM",
-    body: "Want to publish courses and earn from your subject expertise? Start by creating a tutor account.",
-    action: { label: "Become a tutor", href: "/signup?role=tutor" },
-  },
-  {
-    icon: LifeBuoy,
-    title: "Using the platform",
-    body: "Most questions about courses, credits and streaks are already answered in our help articles.",
-    action: { label: "Visit the Help Center", href: "/help" },
-  },
-];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = await getTranslations("contact");
+  const CHANNELS = [
+    {
+      icon: Mail,
+      label: t("emailUs"),
+      value: CONTACT.email,
+      href: `mailto:${CONTACT.email}`,
+      note: t("emailNote"),
+      tone: "bg-blue-50 text-blue-600",
+    },
+    {
+      icon: Phone,
+      label: t("callUs"),
+      value: CONTACT.phone,
+      href: `tel:${CONTACT.phoneHref}`,
+      note: t("callNote"),
+      tone: "bg-orange-50 text-orange-500",
+    },
+    {
+      icon: MapPin,
+      label: t("whereWeAre"),
+      value: CONTACT.location,
+      href: null,
+      note: t("whereNote"),
+      tone: "bg-teal-50 text-teal-600",
+    },
+  ];
+  const ROUTES = [
+    {
+      icon: CreditCard,
+      title: t("r1"),
+      body: t("r1b"),
+      action: { label: t("r1c"), href: "/terms#refunds" },
+    },
+    {
+      icon: GraduationCap,
+      title: t("r2"),
+      body: t("r2b"),
+      action: { label: t("r2c"), href: "/signup?role=tutor" },
+    },
+    {
+      icon: LifeBuoy,
+      title: t("r3"),
+      body: t("r3b"),
+      action: { label: t("r3c"), href: "/help" },
+    },
+  ];
   return (
     <PageShell
-      eyebrow="Contact"
-      title={<>Talk to <span className="text-blue-600">a real person</span></>}
-      intro="Whether it is a payment that has not landed, a question about a course, or an idea for the platform, we would like to hear from you."
+      eyebrow={t("eyebrow")}
+      title={<>Talk to <span className="text-blue-600">{t("titleAccent")}</span></>}
+      intro={t("intro")}
     >
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {CHANNELS.map((c) => {
@@ -97,7 +99,7 @@ export default function ContactPage() {
         })}
       </div>
 
-      <h2 className="mt-14 text-2xl font-black text-gray-900">Get to the right place faster</h2>
+      <h2 className="mt-14 text-2xl font-black text-gray-900">{t("fasterTitle")}</h2>
       <div className="mt-5 space-y-4">
         {ROUTES.map((r) => {
           const Icon = r.icon;
@@ -125,7 +127,7 @@ export default function ContactPage() {
       </div>
 
       <div className="mt-12 rounded-2xl border border-blue-100 bg-blue-50/50 p-6">
-        <h3 className="text-sm font-bold text-blue-950">One safety note</h3>
+        <h3 className="text-sm font-bold text-blue-950">{t("safetyTitle")}</h3>
         <p className="mt-1.5 text-sm leading-relaxed text-blue-900/80">
           ReadAM will never ask for your mobile money PIN, your password, or a payment sent to a
           personal number. If someone contacts you claiming to be from ReadAM and asks for any of
