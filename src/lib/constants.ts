@@ -26,5 +26,8 @@ export const ROUTES = {
   onboarding2: "/onboarding-2",
   welcomeBack: "/welcome-back",
   admin:       "/admin",
-  adminLogin:  "/admin/login",
+  // Deliberately not /admin/login: that path is in every scanner wordlist.
+  // Obscurity is a speed bump, not the control — the real protection is the
+  // rate limit on /v1/auth/login. Change this and proxy.ts together.
+  adminLogin:  "/readam-console/sign-in",
 } as const;

@@ -1,6 +1,29 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Sparkles, Paperclip, Mic } from "lucide-react";
+import { useStoredUser } from "@/hooks/useStoredUser";
 
 export default function SearchBar() {
+  const router = useRouter();
+  const user = useStoredUser();
+  const [question, setQuestion] = useState("");
+
+  /**
+   * The input and its button were both inert. A signed-in user is taken
+   * straight into a session with their question as the opening message — the
+   * AI chat already reads `?topic=` and sends it. A signed-out visitor lands
+   * on login, with the question preserved so it is not retyped afterwards.
+   */
+  function ask() {
+    const q = question.trim();
+    if (!q) return;
+
+    const target = `/dashboard/ai-tutor/ai-chat?topic=${encodeURIComponent(q)}`;
+    router.push(user ? target : `/login?next=${encodeURIComponent(target)}`);
+  }
+
   return (
     <div className="relative w-full rounded-[1.5rem] bg-gradient-to-br from-blue-400/50 via-orange-200/40 to-blue-300/40 p-[2px] shadow-[0_20px_45px_-12px_rgba(37,99,235,0.35)]">
       <div className="relative w-full overflow-hidden rounded-[calc(1.5rem-2px)] border border-white/60 bg-white px-5 py-5 sm:px-6 sm:py-6">
@@ -32,6 +55,12 @@ export default function SearchBar() {
 
           <input
             type="text"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") ask();
+            }}
+            aria-label="Ask ReadAM a question"
             placeholder="Explain the theory of relativity..."
             className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none sm:text-base"
           />
@@ -42,7 +71,10 @@ export default function SearchBar() {
           <button
             type="button"
             aria-label="Ask ReadAM"
+            onClick={ask}
+            disabled={!question.trim()}
             className="
+            disabled:cursor-not-allowed disabled:opacity-50
             flex h-10 w-10 shrink-0 items-center justify-center
             rounded-xl
             bg-orange-500

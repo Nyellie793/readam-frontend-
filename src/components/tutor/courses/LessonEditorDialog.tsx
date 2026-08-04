@@ -15,6 +15,8 @@ interface LessonEditorDialogProps {
   courseId: string;
   moduleId: string;
   lesson: ModuleLesson | null;
+  /** True when this will be the very first lesson of the course. */
+  isFirstLessonOfCourse: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
@@ -30,6 +32,7 @@ export default function LessonEditorDialog({
   courseId,
   moduleId,
   lesson,
+  isFirstLessonOfCourse,
   open,
   onOpenChange,
   onSaved,
@@ -37,7 +40,12 @@ export default function LessonEditorDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [type, setType] = useState<LessonType>("video");
-  const [isPreview, setIsPreview] = useState(false);
+  /**
+   * Free preview is automatic rather than a tutor choice: the first lesson of
+   * the course is the free sample, everything after it requires enrolment.
+   * Editing an existing lesson keeps whatever it already had.
+   */
+  const isPreview = lesson ? lesson.is_preview : isFirstLessonOfCourse;
   const [description, setDescription] = useState("");
 
   const [contentUrl, setContentUrl] = useState<string | null>(null);
@@ -56,7 +64,6 @@ export default function LessonEditorDialog({
     if (!open) return;
     setTitle(lesson?.title ?? "");
     setType(lesson?.type ?? "video");
-    setIsPreview(lesson?.is_preview ?? false);
     setDescription("");
     setContentUrl(null);
     setDurationSeconds(lesson?.duration_seconds ?? null);
@@ -327,15 +334,6 @@ export default function LessonEditorDialog({
             />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={isPreview}
-              onChange={(e) => setIsPreview(e.target.checked)}
-              className="size-4 rounded border-gray-300 accent-blue-600"
-            />
-            Free preview (visible to students who haven&apos;t enrolled)
-          </label>
         </div>
 
         <DialogFooter>

@@ -24,7 +24,7 @@ export default function TutorSidebar({ isVerified, onNavigate }: TutorSidebarPro
   }
 
   return (
-    <div className="flex h-full min-h-screen w-64 shrink-0 flex-col border-r border-gray-100 bg-white">
+    <div className="flex h-full w-64 shrink-0 flex-col border-r border-gray-100 bg-white">
       <div className="border-b border-gray-50 px-6 py-6">
         <Logo />
       </div>
@@ -41,7 +41,7 @@ export default function TutorSidebar({ isVerified, onNavigate }: TutorSidebarPro
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1.5 px-3 py-6">
+      <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-6">
         {TUTOR_NAV.map((item) => {
           const Icon = item.icon;
           const active = item.href === "/tutor" ? pathname === "/tutor" : pathname.startsWith(item.href);

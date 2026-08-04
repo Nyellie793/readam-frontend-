@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
@@ -36,23 +36,69 @@ interface GoogleSignInButtonProps {
 
 export default function GoogleSignInButton({ onCredential }: GoogleSignInButtonProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [ready, setReady] = useState(false);
+  const renderedRef = useRef(false);
 
+  /**
+   * Callers pass an inline arrow (`onCredential={(t) => googleAuth(t)}`), so its
+   * identity changes on every render. Holding it in a ref keeps it out of the
+   * effect's dependencies — otherwise the effect re-ran constantly and called
+   * renderButton repeatedly into the same node, which is what made the button
+   * flicker or vanish.
+   */
+  const callbackRef = useRef(onCredential);
   useEffect(() => {
-    if (!scriptLoaded || !CLIENT_ID || !containerRef.current || !window.google) return;
+    callbackRef.current = onCredential;
+  }, [onCredential]);
+
+  const render = useCallback(() => {
+    if (renderedRef.current) return;
+    if (!CLIENT_ID || !containerRef.current || !window.google) return;
 
     window.google.accounts.id.initialize({
       client_id: CLIENT_ID,
-      callback: (response) => onCredential(response.credential),
+      callback: (response) => callbackRef.current(response.credential),
     });
+
+    // Match the surrounding form instead of a fixed 300px, which overflowed
+    // narrow phones and looked misaligned against full-width inputs.
+    const width = Math.round(containerRef.current.getBoundingClientRect().width) || 320;
+
     window.google.accounts.id.renderButton(containerRef.current, {
       theme: "outline",
       size: "large",
       shape: "rectangular",
-      width: 300,
+      width,
       text: "continue_with",
     });
-  }, [scriptLoaded, onCredential]);
+
+    renderedRef.current = true;
+    setReady(true);
+  }, []);
+
+  /**
+   * next/script only fires onLoad for the load it initiates. Navigating between
+   * /login and /signup client-side reuses the already-loaded script, so onLoad
+   * never fired again and the button silently never appeared. Poll briefly for
+   * the global instead, which covers both the first load and every reuse.
+   */
+  useEffect(() => {
+    if (!CLIENT_ID) return;
+    if (window.google) {
+      render();
+      return;
+    }
+    const started = Date.now();
+    const timer = setInterval(() => {
+      if (window.google) {
+        render();
+        clearInterval(timer);
+      } else if (Date.now() - started > 10_000) {
+        clearInterval(timer);
+      }
+    }, 120);
+    return () => clearInterval(timer);
+  }, [render]);
 
   if (!CLIENT_ID) {
     return (
@@ -72,9 +118,18 @@ export default function GoogleSignInButton({ onCredential }: GoogleSignInButtonP
       <Script
         src="https://accounts.google.com/gsi/client"
         strategy="afterInteractive"
-        onLoad={() => setScriptLoaded(true)}
+        onLoad={render}
       />
-      <div ref={containerRef} className="flex w-full justify-center" />
+      {/* Reserve the button's height so the form does not jump when it renders. */}
+      <div className="relative min-h-[44px] w-full">
+        {!ready && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 animate-pulse rounded-xl border border-gray-200 bg-gray-50"
+          />
+        )}
+        <div ref={containerRef} className="flex w-full justify-center" />
+      </div>
     </>
   );
 }

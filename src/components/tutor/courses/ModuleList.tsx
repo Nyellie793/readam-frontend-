@@ -30,6 +30,8 @@ interface ModuleListProps {
 }
 
 export default function ModuleList({ courseId, modules, editable, onChanged }: ModuleListProps) {
+  // The course's first lesson becomes the free preview automatically.
+  const totalLessons = modules.reduce((n, m) => n + m.lessons.length, 0);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(modules[0] ? [modules[0].id] : []));
   const [newModuleTitle, setNewModuleTitle] = useState("");
   const [addingModule, setAddingModule] = useState(false);
@@ -254,6 +256,7 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
           courseId={courseId}
           moduleId={lessonDialog.moduleId}
           lesson={lessonDialog.lesson}
+          isFirstLessonOfCourse={totalLessons === 0}
           open={!!lessonDialog}
           onOpenChange={(open) => !open && setLessonDialog(null)}
           onSaved={onChanged}

@@ -14,7 +14,9 @@
  */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { ADMIN_ROLES } from "@/lib/constants";
+import { ADMIN_ROLES, ROUTES } from "@/lib/constants";
+
+const ADMIN_LOGIN = ROUTES.adminLogin;
 
 const ADMIN_ROUTES = /^\/admin(\/|$)/;
 const TUTOR_ROUTES = /^\/tutor(\/|$)/;
@@ -29,19 +31,25 @@ export function proxy(req: NextRequest) {
   const role = req.cookies.get("readam_role")?.value ?? "";
   const isAdminRole = (ADMIN_ROLES as readonly string[]).includes(role);
 
-  /* ── Admin login page — guest-only, never gated by its own rule below ──── */
-  if (pathname === "/admin/login") {
+  /* ── Admin sign-in — guest-only, never gated by its own rule below ─────── */
+  if (pathname === ADMIN_LOGIN) {
     if (isAuth && isAdminRole) {
       return NextResponse.redirect(new URL("/admin", req.url));
     }
     return NextResponse.next();
   }
 
+  /* ── The old /admin/login must not confirm that an admin panel exists.
+        404 rather than redirect, so a scanner learns nothing. ─────────────── */
+  if (pathname === "/admin/login") {
+    return NextResponse.rewrite(new URL("/not-found-404", req.url));
+  }
+
   /* ── Admin routes ───────────────────────────────────────── */
   if (ADMIN_ROUTES.test(pathname)) {
     // Not logged in at all → go to admin login page
     if (!isAuth) {
-      return NextResponse.redirect(new URL("/admin/login", req.url));
+      return NextResponse.redirect(new URL(ADMIN_LOGIN, req.url));
     }
     // Logged in but not an admin → go home
     if (!isAdminRole) {
@@ -76,6 +84,7 @@ export function proxy(req: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/readam-console/:path*",
     "/tutor/:path*",
     "/onboarding-:path*",
     "/welcome-back",

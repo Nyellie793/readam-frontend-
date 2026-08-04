@@ -12,6 +12,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "@/components/admin/Sidebar";
 import { clearSession } from "@/lib/auth";
+import { ROUTES } from "@/lib/constants";
 import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
 
 interface TopbarProps {
@@ -28,7 +29,7 @@ export default function Topbar({ title, description }: TopbarProps) {
 
   function handleLogout() {
     clearSession();
-    router.push("/admin/login");
+    router.push(ROUTES.adminLogin);
   }
 
   return (

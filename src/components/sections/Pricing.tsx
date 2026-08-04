@@ -1,5 +1,9 @@
+"use client";
+
+import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useStoredUser } from "@/hooks/useStoredUser";
 
 const plans = [
   {
@@ -50,6 +54,11 @@ const plans = [
 ];
 
 export default function Pricing() {
+  const user = useStoredUser();
+  // Signed out, send them via login and return them to the purchase flow.
+  const target = "/payment/past-questions";
+  const pricingHref = user ? target : `/login?next=${encodeURIComponent(target)}`;
+
   return (
     <section className="bg-[#F8F9FC] py-24">
       <div className="mx-auto max-w-7xl px-6">
@@ -68,6 +77,12 @@ export default function Pricing() {
         {/* Cards */}
         <div className="grid gap-6 lg:grid-cols-4">
 
+          {/*
+            Every card's CTA was a bare <Button> with no handler, so the whole
+            pricing section was inert. These four plans are the Past Questions
+            bundles (past_q_single / small / medium / full), so the CTA goes to
+            the real purchase flow where the subjects are chosen.
+          */}
           {plans.map((plan) => {
 
             const styles = {
@@ -222,25 +237,20 @@ export default function Pricing() {
                 </ul>
 
                 {/* Button */}
-                <Button
-                  variant={plan.popular ? "default" : "outline"}
-                  className={`
-                    mt-8
-                    h-12
-                    rounded-xl
-                    font-semibold
-
-                    ${
-                      plan.popular
-                        ? color.button
-                        : color.button
-                    }
-                  `}
-                >
-                  {plan.popular
-                    ? "Subscribe Now"
-                    : "Subscribe"}
-                </Button>
+                <Link href={pricingHref} className="mt-8 block">
+                  <Button
+                    variant={plan.popular ? "default" : "outline"}
+                    className={`
+                      h-12
+                      w-full
+                      rounded-xl
+                      font-semibold
+                      ${color.button}
+                    `}
+                  >
+                    {plan.popular ? "Subscribe Now" : "Subscribe"}
+                  </Button>
+                </Link>
 
               </div>
             );

@@ -9,6 +9,26 @@ import { ROUTES } from "@/lib/constants";
 import { ApiRequestError } from "@/lib/api";
 import type { LoginPayload, RegisterPayload } from "@/types/user.types";
 
+
+/**
+ * Where to land after signing in. `?next=` lets a gated action resume where the
+ * user left off — e.g. asking the AI a question from the homepage.
+ *
+ * Read from window.location at submit time rather than via useSearchParams:
+ * subscribing during render opts the whole page out of prerendering unless it
+ * sits inside a Suspense boundary, which left /login and the admin sign-in
+ * serving an empty shell until JavaScript hydrated.
+ *
+ * Only same-origin relative paths are accepted, so this cannot be used to
+ * bounce someone to an external site after login.
+ */
+function readSafeNext(): string | null {
+  if (typeof window === "undefined") return null;
+  const value = new URLSearchParams(window.location.search).get("next");
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
 export function useAuth() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -30,7 +50,7 @@ export function useAuth() {
       } else if (data.user.role === "tutor") {
         router.push("/tutor");
       } else {
-        router.push("/dashboard");
+        router.push(readSafeNext() ?? "/dashboard");
       }
     } catch (err) {
       toast.error(
@@ -110,7 +130,7 @@ export function useAuth() {
       } else if (data.user.role === "tutor") {
         router.push("/tutor");
       } else {
-        router.push("/dashboard");
+        router.push(readSafeNext() ?? "/dashboard");
       }
     } catch (err) {
       toast.error(

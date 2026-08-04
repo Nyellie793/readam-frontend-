@@ -8,13 +8,16 @@ import LanguageToggle from "../shared/LanguageToggle";
 import ThemeToggle from "../shared/ThemeToggle";
 import Logo from "../shared/Logo";
 import { clearSession } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function MobileMenu() {
   const user = useStoredUser();
   const initials = initialsOf(user?.full_name, "--");
   const router = useRouter();
+  // The desktop navbar highlighted the current page; the mobile menu did not.
+  const pathname = usePathname();
 
   function handleLogout() {
     clearSession();
@@ -90,12 +93,25 @@ export default function MobileMenu() {
             <div className="border-b py-6"><Logo /></div>
 
             <nav className="flex flex-1 flex-col gap-2 py-8">
-              {NAV_LINKS.map((link) => (
-                <Link key={link.title} href={link.href}
-                  className="rounded-lg px-4 py-3 text-lg font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-600">
-                  {link.title}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const active =
+                  link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+                return (
+                  <Link
+                    key={link.title}
+                    href={link.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "rounded-lg px-4 py-3 text-lg font-medium transition",
+                      active
+                        ? "bg-blue-50 font-semibold text-blue-600"
+                        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    )}
+                  >
+                    {link.title}
+                  </Link>
+                );
+              })}
             </nav>
 
             <div className="border-t py-5">

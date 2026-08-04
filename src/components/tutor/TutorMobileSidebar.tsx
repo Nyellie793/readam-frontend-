@@ -15,16 +15,18 @@ export default function TutorMobileSidebar({ open, isVerified, onClose }: TutorM
       {open && <div onClick={onClose} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />}
 
       <aside
-        className={`fixed left-0 top-0 z-50 h-screen w-72 transform bg-white shadow-xl transition-transform duration-300 lg:hidden ${
+        className={`fixed left-0 top-0 z-50 flex h-dvh w-72 transform flex-col bg-white shadow-xl transition-transform duration-300 lg:hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex justify-end p-4">
+        <div className="flex shrink-0 justify-end p-4">
           <button onClick={onClose} className="rounded-lg p-2 hover:bg-gray-100" aria-label="Close menu">
             <X size={22} />
           </button>
         </div>
-        <TutorSidebar isVerified={isVerified} onNavigate={onClose} />
+        <div className="min-h-0 flex-1">
+          <TutorSidebar isVerified={isVerified} onNavigate={onClose} />
+        </div>
       </aside>
     </>
   );
