@@ -9,26 +9,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
 import type { TutorNotificationPrefsResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
-const PREFS: { key: keyof Omit<TutorNotificationPrefsResponse, "user_id">; label: string; description: string }[] = [
-  {
-    key: "email_notifications",
-    label: "Email Notifications",
-    description: "Course approvals, payouts and important account updates.",
-  },
-  {
-    key: "push_alerts",
-    label: "Push Alerts",
-    description: "Real-time alerts for new enrollments and reviews.",
-  },
-  {
-    key: "marketing_tips",
-    label: "Marketing Tips",
-    description: "Occasional tips on growing your courses and earnings.",
-  },
-];
 
 export default function TutorNotificationsCard() {
+  const t = useTranslations("tutor");
+  const PREFS: { key: keyof Omit<TutorNotificationPrefsResponse, "user_id">; label: string; description: string }[] = [
+    {
+      key: "email_notifications",
+      label: t("emailNotifications"),
+      description: t("emailNotifDesc"),
+    },
+    {
+      key: "push_alerts",
+      label: "Push Alerts",
+      description: "Real-time alerts for new enrollments and reviews.",
+    },
+    {
+      key: "marketing_tips",
+      label: t("marketingTips"),
+      description: t("marketingTipsDesc"),
+    },
+  ];
   const [prefs, setPrefs] = useState<TutorNotificationPrefsResponse | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
 
@@ -48,7 +50,7 @@ export default function TutorNotificationsCard() {
       setPrefs(updated);
     } catch (err) {
       setPrefs(prefs);
-      toast.error(errorMessage(err, "Couldn't update that preference."));
+      toast.error(errorMessage(err, t("errPref")));
     } finally {
       setSaving(null);
     }
@@ -59,9 +61,9 @@ export default function TutorNotificationsCard() {
       <CardHeader className="border-b border-gray-50 pb-5">
         <div className="flex items-center gap-2">
           <Bell className="size-4 text-blue-600" />
-          <CardTitle className="text-base font-bold text-gray-900">Notifications</CardTitle>
+          <CardTitle className="text-base font-bold text-gray-900">{t("notifications")}</CardTitle>
         </div>
-        <CardDescription className="text-xs text-gray-500">Choose what you want to hear about.</CardDescription>
+        <CardDescription className="text-xs text-gray-500">{t("chooseWhat")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-1 pt-6">
         {!prefs

@@ -19,6 +19,7 @@ import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
 import LessonEditorDialog from "./LessonEditorDialog";
 import type { CourseModule, ModuleLesson } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const LESSON_ICONS = { video: Video, pdf: FileText, quiz: HelpCircle };
 
@@ -30,6 +31,7 @@ interface ModuleListProps {
 }
 
 export default function ModuleList({ courseId, modules, editable, onChanged }: ModuleListProps) {
+  const t = useTranslations("tutor");
   // The course's first lesson becomes the free preview automatically.
   const totalLessons = modules.reduce((n, m) => n + m.lessons.length, 0);
   const [expanded, setExpanded] = useState<Set<string>>(new Set(modules[0] ? [modules[0].id] : []));
@@ -58,7 +60,7 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
       setExpanded((prev) => new Set(prev).add(created.id));
       onChanged();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't add module."));
+      toast.error(errorMessage(err, t("errAddModule")));
     } finally {
       setAddingModule(false);
     }
@@ -72,32 +74,32 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
       setRenamingModuleId(null);
       onChanged();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't rename module."));
+      toast.error(errorMessage(err, t("errRenameModule")));
     } finally {
       setBusyModuleId(null);
     }
   }
 
   async function handleDeleteModule(moduleId: string) {
-    if (!confirm("Delete this module and all its lessons?")) return;
+    if (!confirm(t("confirmDeleteModule"))) return;
     setBusyModuleId(moduleId);
     try {
       await TUTOR.deleteModule(courseId, moduleId);
       onChanged();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't delete module."));
+      toast.error(errorMessage(err, t("errDeleteModule")));
     } finally {
       setBusyModuleId(null);
     }
   }
 
   async function handleDeleteLesson(moduleId: string, lessonId: string) {
-    if (!confirm("Delete this lesson?")) return;
+    if (!confirm(t("confirmDeleteLesson"))) return;
     try {
       await TUTOR.deleteLesson(courseId, moduleId, lessonId);
       onChanged();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't delete lesson."));
+      toast.error(errorMessage(err, t("errDeleteLesson")));
     }
   }
 
@@ -162,7 +164,7 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
                         type="button"
                         onClick={() => handleDeleteModule(module.id)}
                         className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500"
-                        aria-label="Delete module"
+                        aria-label={t("deleteModule")}
                       >
                         <Trash2 className="size-3.5" />
                       </button>
@@ -175,7 +177,7 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
             {isOpen && (
               <div className="border-t border-gray-50 px-4 py-3">
                 {module.lessons.length === 0 ? (
-                  <p className="py-2 text-xs text-gray-400">No lessons yet.</p>
+                  <p className="py-2 text-xs text-gray-400">{t("noLessons")}</p>
                 ) : (
                   <div className="space-y-1.5">
                     {module.lessons.map((lesson) => {
@@ -202,7 +204,7 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
                                 type="button"
                                 onClick={() => handleDeleteLesson(module.id, lesson.id)}
                                 className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500"
-                                aria-label="Delete lesson"
+                                aria-label={t("deleteLesson")}
                               >
                                 <Trash2 className="size-3.5" />
                               </button>
@@ -236,7 +238,7 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
             value={newModuleTitle}
             onChange={(e) => setNewModuleTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddModule()}
-            placeholder="New module title…"
+            placeholder={t("newModulePh")}
             className="h-9 flex-1 rounded-lg border border-gray-200 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
           <button

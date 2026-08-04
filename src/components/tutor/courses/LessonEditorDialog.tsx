@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import type { CreateLessonRequest, ModuleLesson } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 type LessonType = "video" | "pdf" | "quiz";
 
@@ -37,6 +38,7 @@ export default function LessonEditorDialog({
   onOpenChange,
   onSaved,
 }: LessonEditorDialogProps) {
+  const t = useTranslations("tutor");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [type, setType] = useState<LessonType>("video");
@@ -90,7 +92,7 @@ export default function LessonEditorDialog({
         }
         if (status.state === "error") {
           setUploadState("error");
-          toast.error("Video processing failed. Try uploading again.");
+          toast.error(t("videoFailed"));
           return;
         }
       } catch {
@@ -98,7 +100,7 @@ export default function LessonEditorDialog({
       }
     }
     setUploadState("error");
-    toast.error("Video is taking longer than expected. Try again shortly.");
+    toast.error(t("videoSlow"));
   }
 
   async function handleVideoFile(file: File) {
@@ -116,8 +118,8 @@ export default function LessonEditorDialog({
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
         };
-        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error("Upload failed")));
-        xhr.onerror = () => reject(new Error("Upload failed"));
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(t("uploadFailed"))));
+        xhr.onerror = () => reject(new Error(t("uploadFailed")));
         const formData = new FormData();
         formData.append("file", file);
         xhr.send(formData);
@@ -127,7 +129,7 @@ export default function LessonEditorDialog({
       await pollVideoStatus(presigned.stream_uid);
     } catch (err) {
       setUploadState("error");
-      toast.error(errorMessage(err, "Couldn't upload that video."));
+      toast.error(errorMessage(err, t("errUploadVideo")));
     }
   }
 
@@ -143,20 +145,20 @@ export default function LessonEditorDialog({
       setUploadState("ready");
     } catch (err) {
       setUploadState("error");
-      toast.error(errorMessage(err, "Couldn't upload that PDF."));
+      toast.error(errorMessage(err, t("errUploadPdf")));
     }
   }
 
   function handleFileSelected(file: File) {
     if (type === "video") {
       if (!file.type.startsWith("video/")) {
-        toast.error("Please choose a video file.");
+        toast.error(t("chooseVideo"));
         return;
       }
       handleVideoFile(file);
     } else if (type === "pdf") {
       if (file.type !== "application/pdf") {
-        toast.error("Please choose a PDF file.");
+        toast.error(t("choosePdf"));
         return;
       }
       handlePdfFile(file);
@@ -165,15 +167,15 @@ export default function LessonEditorDialog({
 
   async function handleSave() {
     if (!title.trim()) {
-      toast.error("Give this lesson a title.");
+      toast.error(t("needLessonTitle"));
       return;
     }
     if (!lesson && type !== "quiz" && !contentUrl) {
-      toast.error(type === "video" ? "Upload a video first." : "Upload a PDF first.");
+      toast.error(type === "video" ? t("needVideo") : t("needPdf"));
       return;
     }
     if (!lesson && type === "video" && uploadState !== "ready") {
-      toast.error("Wait for the video to finish processing.");
+      toast.error(t("waitVideo"));
       return;
     }
 
@@ -197,15 +199,15 @@ export default function LessonEditorDialog({
 
       if (lesson) {
         await TUTOR.updateLesson(courseId, moduleId, lesson.id, body);
-        toast.success("Lesson updated.");
+        toast.success(t("lessonUpdated"));
       } else {
         await TUTOR.addLesson(courseId, moduleId, body);
-        toast.success("Lesson added.");
+        toast.success(t("lessonAdded"));
       }
       onSaved();
       onOpenChange(false);
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't save this lesson."));
+      toast.error(errorMessage(err, t("errSaveLesson")));
     } finally {
       setSaving(false);
     }
@@ -217,23 +219,23 @@ export default function LessonEditorDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{lesson ? "Edit Lesson" : "Add Lesson"}</DialogTitle>
+          <DialogTitle>{lesson ? t("editLesson") : t("addLesson")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Lesson Title</label>
+            <label className="text-xs font-semibold text-gray-700">{t("lessonTitle")}</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Introduction to Limits"
+              placeholder={t("lessonTitlePh")}
               className="h-10 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
 
           {!lesson && (
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Lesson Type</label>
+              <label className="text-xs font-semibold text-gray-700">{t("lessonType")}</label>
               <div className="grid grid-cols-3 gap-2">
                 {TYPE_OPTIONS.map((opt) => (
                   <button
@@ -262,7 +264,7 @@ export default function LessonEditorDialog({
           {(type === "video" || type === "pdf") && (
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-gray-700">
-                {type === "video" ? "Video File" : "PDF File"}
+                {type === "video" ? t("videoFile") : t("pdfFile")}
               </label>
               <div
                 onClick={() => !busy && fileInputRef.current?.click()}
@@ -287,7 +289,7 @@ export default function LessonEditorDialog({
                   <>
                     <CheckCircle2 className="size-5 text-teal-600" />
                     <p className="text-xs font-medium text-teal-700">
-                      {lesson ? "Current file kept — click to replace" : "Ready"}
+                      {lesson ? t("fileKept") : "Ready"}
                     </p>
                   </>
                 )}
@@ -316,21 +318,21 @@ export default function LessonEditorDialog({
 
           {type === "quiz" && (
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Reference Link (optional)</label>
+              <label className="text-xs font-semibold text-gray-700">{t("referenceLink")}</label>
               <input
                 value={contentUrl ?? ""}
                 onChange={(e) => {
                   setContentUrl(e.target.value || null);
                   setContentChanged(true);
                 }}
-                placeholder={lesson ? "Leave blank to keep the existing link" : "https://…"}
+                placeholder={lesson ? t("keepExisting") : "https://…"}
                 className="h-10 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Description (optional)</label>
+            <label className="text-xs font-semibold text-gray-700">{t("descriptionOpt")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}

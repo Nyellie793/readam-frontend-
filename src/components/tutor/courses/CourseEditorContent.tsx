@@ -12,6 +12,7 @@ import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import ModuleList from "./ModuleList";
 import type { CourseDetailResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-gray-100 text-gray-600",
@@ -20,18 +21,19 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: "bg-red-50 text-red-500",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: "Draft",
-  pending_review: "Pending Review",
-  published: "Published",
-  rejected: "Rejected",
-};
 
 interface CourseEditorContentProps {
   courseId: string;
 }
 
 export default function CourseEditorContent({ courseId }: CourseEditorContentProps) {
+  const t = useTranslations("tutor");
+  const STATUS_LABELS: Record<string, string> = {
+    draft: "Draft",
+    pending_review: t("pendingReview"),
+    published: "Published",
+    rejected: "Rejected",
+  };
   const router = useRouter();
   const [course, setCourse] = useState<CourseDetailResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +62,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
   }
 
   useEffect(() => {
-    reload().catch((err) => setError(errorMessage(err, "Couldn't load this course.")));
+    reload().catch((err) => setError(errorMessage(err, t("errLoadCourse"))));
   }, [courseId]);
 
   /**
@@ -78,9 +80,9 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
       const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
       await putToPresigned(presigned.upload_url, file);
       setThumbnailUrl(presigned.file_url);
-      toast.success("Cover uploaded. Save to apply it.");
+      toast.success(t("coverUploaded"));
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't upload that image."));
+      toast.error(errorMessage(err, t("errUploadImage")));
     } finally {
       setUploadingThumb(false);
     }
@@ -97,10 +99,10 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
         is_premium: Number(price) > 0,
         thumbnail_url: thumbnailUrl,
       });
-      toast.success("Course updated.");
+      toast.success(t("courseUpdated"));
       reload();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't save this course."));
+      toast.error(errorMessage(err, t("errSaveCourse")));
     } finally {
       setSaving(false);
     }
@@ -113,7 +115,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
       toast.success("Submitted for review.");
       reload();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't submit this course for review."));
+      toast.error(errorMessage(err, t("errSubmit")));
     } finally {
       setActionBusy(false);
     }
@@ -126,21 +128,21 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
       toast.success("Submission retracted — back to draft.");
       reload();
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't retract this submission."));
+      toast.error(errorMessage(err, t("errRetract")));
     } finally {
       setActionBusy(false);
     }
   }
 
   async function handleDelete() {
-    if (!confirm("Delete this course? This cannot be undone.")) return;
+    if (!confirm(t("confirmDeleteCourse"))) return;
     setActionBusy(true);
     try {
       await TUTOR.deleteCourse(courseId);
-      toast.success("Course deleted.");
+      toast.success(t("courseDeleted"));
       router.push("/tutor/courses");
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't delete this course."));
+      toast.error(errorMessage(err, t("errDeleteCourse")));
       setActionBusy(false);
     }
   }
@@ -189,7 +191,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
               type="button"
               onClick={handleSubmit}
               disabled={actionBusy || course.total_lessons === 0}
-              title={course.total_lessons === 0 ? "Add at least one lesson before submitting" : undefined}
+              title={course.total_lessons === 0 ? t("needLesson") : undefined}
               className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {actionBusy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
@@ -213,7 +215,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
               onClick={handleDelete}
               disabled={actionBusy}
               className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50 disabled:opacity-50"
-              aria-label="Delete course"
+              aria-label={t("deleteCourse")}
             >
               <Trash2 className="size-4" />
             </button>
@@ -235,7 +237,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
       )}
 
       <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-gray-900">Course Details</h2>
+        <h2 className="text-sm font-bold text-gray-900">{t("courseDetails")}</h2>
         <fieldset disabled={!editable} className="mt-4 space-y-4 disabled:opacity-60">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-gray-700">Title</label>
@@ -246,7 +248,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Description</label>
+            <label className="text-xs font-semibold text-gray-700">{t("description")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -256,7 +258,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Category</label>
+              <label className="text-xs font-semibold text-gray-700">{t("category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -270,7 +272,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Price (XAF)</label>
+              <label className="text-xs font-semibold text-gray-700">{t("price")}</label>
               <input
                 type="number"
                 min={0}
@@ -283,7 +285,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
           {/* Course cover. Cloudflare R2 only stores what we send it — nothing
               generates a thumbnail automatically, so this has to be uploaded. */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-gray-600">Course cover</label>
+            <label className="mb-1.5 block text-xs font-semibold text-gray-600">{t("courseCover")}</label>
             <div className="flex items-center gap-4">
               <div className="relative aspect-16/10 w-40 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
                 {thumbnailUrl ? (
@@ -313,9 +315,9 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
                   className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
                 >
                   {uploadingThumb ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
-                  {thumbnailUrl ? "Replace cover" : "Upload cover"}
+                  {thumbnailUrl ? t("replaceCover") : t("uploadCover")}
                 </button>
-                <p className="mt-2 text-[11px] text-gray-400">JPG, PNG or WebP. Max 5MB. Shown on the course card.</p>
+                <p className="mt-2 text-[11px] text-gray-400">{t("coverHint")}</p>
               </div>
             </div>
           </div>
@@ -337,7 +339,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-bold text-gray-900">Modules & Lessons</h2>
+        <h2 className="mb-3 text-sm font-bold text-gray-900">{t("modulesLessons")}</h2>
         <ModuleList courseId={courseId} modules={course.modules} editable={!!editable} onChanged={reload} />
       </div>
     </div>

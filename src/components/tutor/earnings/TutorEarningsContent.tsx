@@ -10,10 +10,12 @@ import RequestPayoutCard from "./RequestPayoutCard";
 import EarningsHistoryTable from "./EarningsHistoryTable";
 import PayoutHistoryTable from "./PayoutHistoryTable";
 import type { EarningItem, EarningsSummaryResponse, PayoutItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 type Tab = "earnings" | "payouts";
 
 export default function TutorEarningsContent() {
+  const t = useTranslations("tutor");
   const [summary, setSummary] = useState<EarningsSummaryResponse | null>(null);
   const [earnings, setEarnings] = useState<EarningItem[]>([]);
   const [payouts, setPayouts] = useState<PayoutItem[]>([]);
@@ -38,12 +40,12 @@ export default function TutorEarningsContent() {
 
   useEffect(() => {
     load()
-      .catch((err) => setError(errorMessage(err, "Couldn't load your earnings.")))
+      .catch((err) => setError(errorMessage(err, t("errLoadEarnings"))))
       .finally(() => setLoading(false));
   }, [load]);
 
   function refresh() {
-    load().catch((err) => setError(errorMessage(err, "Couldn't refresh your earnings.")));
+    load().catch((err) => setError(errorMessage(err, t("errRefreshEarnings"))));
   }
 
   if (loading) {
@@ -64,16 +66,16 @@ export default function TutorEarningsContent() {
   }
 
   const stats = [
-    { label: "Total Earned", value: summary?.total_earned ?? 0, icon: TrendingUp, tint: "text-blue-600 bg-blue-50" },
-    { label: "Pending Balance", value: summary?.pending_balance ?? 0, icon: Wallet, tint: "text-orange-600 bg-orange-50" },
-    { label: "Total Paid Out", value: summary?.total_paid_out ?? 0, icon: CheckCircle2, tint: "text-teal-600 bg-teal-50" },
+    { label: t("totalEarned"), value: summary?.total_earned ?? 0, icon: TrendingUp, tint: "text-blue-600 bg-blue-50" },
+    { label: t("pendingBalance"), value: summary?.pending_balance ?? 0, icon: Wallet, tint: "text-orange-600 bg-orange-50" },
+    { label: t("totalPaidOut"), value: summary?.total_paid_out ?? 0, icon: CheckCircle2, tint: "text-teal-600 bg-teal-50" },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-gray-900">Earnings</h1>
-        <p className="text-sm text-gray-500">Track your course sales and withdraw your balance.</p>
+        <h1 className="text-2xl font-extrabold text-gray-900">{t("earnings")}</h1>
+        <p className="text-sm text-gray-500">{t("earningsIntro")}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

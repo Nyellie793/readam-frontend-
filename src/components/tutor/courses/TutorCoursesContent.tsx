@@ -9,6 +9,7 @@ import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { CourseListItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-gray-100 text-gray-600",
@@ -17,29 +18,30 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: "bg-red-50 text-red-500",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: "Draft",
-  pending_review: "Pending Review",
-  published: "Published",
-  rejected: "Rejected",
-};
 
 export default function TutorCoursesContent() {
+  const t = useTranslations("tutor");
+  const STATUS_LABELS: Record<string, string> = {
+    draft: "Draft",
+    pending_review: t("pendingReview"),
+    published: "Published",
+    rejected: "Rejected",
+  };
   const [courses, setCourses] = useState<CourseListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     TUTOR.listMyCourses()
       .then(setCourses)
-      .catch((err) => setError(errorMessage(err, "Couldn't load your courses.")));
+      .catch((err) => setError(errorMessage(err, t("errLoadCourses"))));
   }, []);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">My Courses</h1>
-          <p className="text-sm text-gray-500">Create, edit and submit your courses for review.</p>
+          <h1 className="text-2xl font-extrabold text-gray-900">{t("myCourses")}</h1>
+          <p className="text-sm text-gray-500">{t("coursesIntro")}</p>
         </div>
         <CreateCourseDialog />
       </div>
@@ -53,7 +55,7 @@ export default function TutorCoursesContent() {
           <BookOpen className="size-10 text-gray-300" />
           <div>
             <p className="text-sm font-semibold text-gray-700">You haven&apos;t created any courses yet.</p>
-            <p className="text-xs text-gray-400">Start building your first course to reach students.</p>
+            <p className="text-xs text-gray-400">{t("startBuilding")}</p>
           </div>
           <CreateCourseDialog />
         </div>

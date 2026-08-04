@@ -8,8 +8,10 @@ import TutorProfileSettingsCard from "./TutorProfileSettingsCard";
 import TutorPayoutCard from "./TutorPayoutCard";
 import TutorNotificationsCard from "./TutorNotificationsCard";
 import type { TutorProfileResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 export default function TutorSettingsContent() {
+  const t = useTranslations("tutor");
   const [profile, setProfile] = useState<TutorProfileResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,15 +19,15 @@ export default function TutorSettingsContent() {
   useEffect(() => {
     TUTOR.getMyProfile()
       .then(setProfile)
-      .catch((err) => setError(errorMessage(err, "Couldn't load your settings.")))
+      .catch((err) => setError(errorMessage(err, t("errLoadSettings"))))
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-500">Manage your profile, payout details and notification preferences.</p>
+        <h1 className="text-2xl font-extrabold text-gray-900">{t("settings")}</h1>
+        <p className="text-sm text-gray-500">{t("settingsIntro")}</p>
       </div>
 
       {loading ? (

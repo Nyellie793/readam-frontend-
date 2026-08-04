@@ -3,6 +3,7 @@
 import { Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PayoutItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-orange-50 text-orange-600",
@@ -15,11 +16,12 @@ interface PayoutHistoryTableProps {
 }
 
 export default function PayoutHistoryTable({ payouts }: PayoutHistoryTableProps) {
+  const t = useTranslations("tutor");
   if (payouts.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-white py-12 text-center shadow-sm">
         <Wallet className="size-8 text-gray-300" />
-        <p className="text-sm text-gray-500">No payouts requested yet.</p>
+        <p className="text-sm text-gray-500">{t("noPayouts")}</p>
       </div>
     );
   }
@@ -30,10 +32,10 @@ export default function PayoutHistoryTable({ payouts }: PayoutHistoryTableProps)
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60 text-left text-xs font-semibold text-gray-500">
-              <th className="px-5 py-3">Amount</th>
+              <th className="px-5 py-3">{t("amount")}</th>
               <th className="px-5 py-3">Phone</th>
-              <th className="px-5 py-3">Medium</th>
-              <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3">{t("levelMedium")}</th>
+              <th className="px-5 py-3">{t("status")}</th>
               <th className="px-5 py-3">Date</th>
             </tr>
           </thead>

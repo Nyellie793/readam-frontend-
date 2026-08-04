@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 export default function TutorPayoutCard() {
+  const t = useTranslations("tutor");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [mtnNumber, setMtnNumber] = useState("");
@@ -33,9 +35,9 @@ export default function TutorPayoutCard() {
         mtn_number: mtnNumber || undefined,
         orange_money_number: orangeNumber || undefined,
       });
-      toast.success("Payout details updated.");
+      toast.success(t("payoutUpdated"));
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't update your payout details."));
+      toast.error(errorMessage(err, t("errPayoutDetails")));
     } finally {
       setSaving(false);
     }
@@ -46,7 +48,7 @@ export default function TutorPayoutCard() {
       <CardHeader className="border-b border-gray-50 pb-5">
         <div className="flex items-center gap-2">
           <Wallet className="size-4 text-blue-600" />
-          <CardTitle className="text-base font-bold text-gray-900">Payout Details</CardTitle>
+          <CardTitle className="text-base font-bold text-gray-900">{t("payoutDetails")}</CardTitle>
         </div>
         <CardDescription className="text-xs text-gray-500">
           Where your earnings are sent when you request a withdrawal.
@@ -62,20 +64,20 @@ export default function TutorPayoutCard() {
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700">MTN Mobile Money Number</label>
+                <label className="text-xs font-semibold text-gray-700">{t("mtnNumber")}</label>
                 <Input
                   value={mtnNumber}
                   onChange={(e) => setMtnNumber(e.target.value)}
-                  placeholder="+237 6XX XXX XXX"
+                  placeholder={t("phonePh")}
                   className="h-10 rounded-xl"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-gray-700">Orange Money Number</label>
+                <label className="text-xs font-semibold text-gray-700">{t("omNumber")}</label>
                 <Input
                   value={orangeNumber}
                   onChange={(e) => setOrangeNumber(e.target.value)}
-                  placeholder="+237 6XX XXX XXX"
+                  placeholder={t("phonePh")}
                   className="h-10 rounded-xl"
                 />
               </div>

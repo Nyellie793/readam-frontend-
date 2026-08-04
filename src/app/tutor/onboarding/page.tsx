@@ -9,15 +9,8 @@ import TUTOR from "@/services/tutor.service";
 import { getStoredUser, updateStoredUser } from "@/lib/auth";
 import { errorMessage, putToPresigned } from "@/lib/api";
 import type { ExperienceYears } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
-const TEACHING_LEVELS = [
-  { value: "", label: "Select level" },
-  { value: "primary", label: "Primary School" },
-  { value: "gce_o_level", label: "GCE O-Level" },
-  { value: "gce_a_level", label: "GCE A-Level" },
-  { value: "university", label: "University" },
-  { value: "professional", label: "Professional / Adult Education" },
-];
 
 const EXPERIENCE_OPTIONS: { value: ExperienceYears; label: string }[] = [
   { value: "1-3", label: "1-3 Years" },
@@ -26,6 +19,15 @@ const EXPERIENCE_OPTIONS: { value: ExperienceYears; label: string }[] = [
 ];
 
 export default function TutorOnboardingPage() {
+  const t = useTranslations("tutor");
+  const TEACHING_LEVELS = [
+    { value: "", label: "Select level" },
+    { value: "primary", label: t("levelPrimary") },
+    { value: "gce_o_level", label: t("levelOLevel") },
+    { value: "gce_a_level", label: t("levelALevel") },
+    { value: "university", label: t("levelUniversity") },
+    { value: "professional", label: t("levelProfessional") },
+  ];
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,11 +63,11 @@ export default function TutorOnboardingPage() {
 
   async function uploadPhoto(file: File) {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file.");
+      toast.error(t("chooseImage"));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Photo must be under 5MB.");
+      toast.error(t("photoTooBig"));
       return;
     }
     setUploading(true);
@@ -74,7 +76,7 @@ export default function TutorOnboardingPage() {
       await putToPresigned(presigned.upload_url, file);
       setAvatarUrl(presigned.file_url);
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't upload that photo."));
+      toast.error(errorMessage(err, t("errUploadPhoto")));
     } finally {
       setUploading(false);
     }
@@ -103,13 +105,13 @@ export default function TutorOnboardingPage() {
         });
       }
       if (profileCompleted) {
-        toast.success("Profile complete. Welcome to ReadAm!");
+        toast.success(t("profileComplete"));
         router.push("/tutor");
       } else {
         toast.success("Saved as draft.");
       }
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't save your profile."));
+      toast.error(errorMessage(err, t("errProfile")));
     } finally {
       setSaving(null);
     }
@@ -130,7 +132,7 @@ export default function TutorOnboardingPage() {
       </header>
 
       <div className="mx-auto max-w-3xl px-6 py-10">
-        <h1 className="text-3xl font-black text-gray-900">Complete Your Professional Profile</h1>
+        <h1 className="text-3xl font-black text-gray-900">{t("completeProfile")}</h1>
         <p className="mt-2 text-sm text-gray-500">
           Tell us more about your background and expertise to start connecting with students on ReadAm.
         </p>
@@ -154,7 +156,7 @@ export default function TutorOnboardingPage() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-md hover:bg-blue-700"
-                aria-label="Upload photo"
+                aria-label={t("uploadPhoto")}
               >
                 {uploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
               </button>
@@ -188,40 +190,40 @@ export default function TutorOnboardingPage() {
               }`}
             >
               <UploadCloud className="size-5 text-blue-500" />
-              <p className="text-sm font-medium text-gray-700">Drag and drop your photo here</p>
-              <p className="text-xs text-gray-400">JPG, PNG or GIF. Max 5MB.</p>
+              <p className="text-sm font-medium text-gray-700">{t("dragPhoto")}</p>
+              <p className="text-xs text-gray-400">{t("photoHint")}</p>
             </div>
           </div>
         </div>
 
         {/* Personal Details */}
         <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900">Personal Details</h2>
+          <h2 className="text-base font-bold text-gray-900">{t("personalDetails")}</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Full Name</label>
+              <label className="text-xs font-semibold text-gray-700">{t("fullName")}</label>
               <input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Dr. Sarah Jenkins"
+                placeholder={t("fullNamePh")}
                 className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Phone Number</label>
+              <label className="text-xs font-semibold text-gray-700">{t("phoneNumber")}</label>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+237 6XX XXX XXX"
+                placeholder={t("phonePh")}
                 className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">City</label>
+              <label className="text-xs font-semibold text-gray-700">{t("city")}</label>
               <input
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder="e.g. Douala"
+                placeholder={t("cityPh")}
                 className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
@@ -230,19 +232,19 @@ export default function TutorOnboardingPage() {
 
         {/* Professional Expertise */}
         <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900">Professional Expertise</h2>
+          <h2 className="text-base font-bold text-gray-900">{t("professionalExpertise")}</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">What do you teach?</label>
+              <label className="text-xs font-semibold text-gray-700">{t("whatTeach")}</label>
               <input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="e.g. Advanced Mathematics"
+                placeholder={t("subjectPh")}
                 className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Teaching Level</label>
+              <label className="text-xs font-semibold text-gray-700">{t("teachingLevel")}</label>
               <select
                 value={teachingLevel}
                 onChange={(e) => setTeachingLevel(e.target.value)}
@@ -258,7 +260,7 @@ export default function TutorOnboardingPage() {
           </div>
 
           <div className="mt-4 space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Years of Experience</label>
+            <label className="text-xs font-semibold text-gray-700">{t("yearsExperience")}</label>
             <div className="grid grid-cols-3 gap-3">
               {EXPERIENCE_OPTIONS.map((opt) => (
                 <button
@@ -278,11 +280,11 @@ export default function TutorOnboardingPage() {
           </div>
 
           <div className="mt-4 space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Short Bio</label>
+            <label className="text-xs font-semibold text-gray-700">{t("shortBio")}</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value.slice(0, 500))}
-              placeholder="Briefly describe your teaching philosophy and background..."
+              placeholder={t("bioPh")}
               rows={4}
               className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />

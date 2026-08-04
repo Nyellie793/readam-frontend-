@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import TutorMobileSidebar from "./TutorMobileSidebar";
+import { useTranslations } from "next-intl";
 
 interface TutorTopbarProps {
   greeting: string;
@@ -10,6 +11,7 @@ interface TutorTopbarProps {
 }
 
 export default function TutorTopbar({ greeting, isVerified }: TutorTopbarProps) {
+  const t = useTranslations("tutor");
   const [open, setOpen] = useState(false);
 
   return (
@@ -18,7 +20,7 @@ export default function TutorTopbar({ greeting, isVerified }: TutorTopbarProps) 
         <button
           onClick={() => setOpen(true)}
           className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100"
-          aria-label="Open menu"
+          aria-label={t("openMenu")}
         >
           <Menu size={22} />
         </button>

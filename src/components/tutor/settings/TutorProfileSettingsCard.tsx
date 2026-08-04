@@ -11,15 +11,8 @@ import TUTOR from "@/services/tutor.service";
 import { getStoredUser, updateStoredUser } from "@/lib/auth";
 import { errorMessage, putToPresigned } from "@/lib/api";
 import type { ExperienceYears, TutorProfileResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
-const TEACHING_LEVELS = [
-  { value: "", label: "Select level" },
-  { value: "primary", label: "Primary School" },
-  { value: "gce_o_level", label: "GCE O-Level" },
-  { value: "gce_a_level", label: "GCE A-Level" },
-  { value: "university", label: "University" },
-  { value: "professional", label: "Professional / Adult Education" },
-];
 
 const EXPERIENCE_OPTIONS: { value: ExperienceYears; label: string }[] = [
   { value: "1-3", label: "1-3 Years" },
@@ -33,6 +26,15 @@ interface TutorProfileSettingsCardProps {
 }
 
 export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProfileSettingsCardProps) {
+  const t = useTranslations("tutor");
+  const TEACHING_LEVELS = [
+    { value: "", label: "Select level" },
+    { value: "primary", label: t("levelPrimary") },
+    { value: "gce_o_level", label: t("levelOLevel") },
+    { value: "gce_a_level", label: t("levelALevel") },
+    { value: "university", label: t("levelUniversity") },
+    { value: "professional", label: t("levelProfessional") },
+  ];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -59,11 +61,11 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
 
   async function uploadPhoto(file: File) {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file.");
+      toast.error(t("chooseImage"));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Photo must be under 5MB.");
+      toast.error(t("photoTooBig"));
       return;
     }
     setUploading(true);
@@ -72,7 +74,7 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
       await putToPresigned(presigned.upload_url, file);
       setAvatarUrl(presigned.file_url);
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't upload that photo."));
+      toast.error(errorMessage(err, t("errUploadPhoto")));
     } finally {
       setUploading(false);
     }
@@ -100,9 +102,9 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
         });
       }
       onSaved(updated);
-      toast.success("Profile updated successfully!");
+      toast.success(t("profileUpdated"));
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't update your profile."));
+      toast.error(errorMessage(err, t("errProfile2")));
     } finally {
       setSaving(false);
     }
@@ -118,7 +120,7 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
   return (
     <Card className="border border-gray-100 shadow-sm rounded-2xl overflow-hidden bg-white">
       <CardHeader className="border-b border-gray-50 pb-5">
-        <CardTitle className="text-base font-bold text-gray-900">Professional Profile</CardTitle>
+        <CardTitle className="text-base font-bold text-gray-900">{t("professionalProfile")}</CardTitle>
         <CardDescription className="text-xs text-gray-500">
           This is what students see when they browse your courses.
         </CardDescription>
@@ -136,7 +138,7 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-md hover:bg-blue-700"
-              aria-label="Upload photo"
+              aria-label={t("uploadPhoto")}
             >
               {uploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
             </button>
@@ -153,30 +155,30 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
             />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-gray-800">Profile Picture</h4>
-            <p className="mt-1 text-xs text-gray-500">JPG, PNG or GIF. Max 5MB.</p>
+            <h4 className="text-sm font-bold text-gray-800">{t("profilePicture")}</h4>
+            <p className="mt-1 text-xs text-gray-500">{t("photoHint")}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Full Name</label>
+            <label className="text-xs font-semibold text-gray-700">{t("fullName")}</label>
             <Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-10 rounded-xl" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Phone Number</label>
+            <label className="text-xs font-semibold text-gray-700">{t("phoneNumber")}</label>
             <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="h-10 rounded-xl" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">City</label>
+            <label className="text-xs font-semibold text-gray-700">{t("city")}</label>
             <Input value={city} onChange={(e) => setCity(e.target.value)} className="h-10 rounded-xl" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">What do you teach?</label>
+            <label className="text-xs font-semibold text-gray-700">{t("whatTeach")}</label>
             <Input value={subject} onChange={(e) => setSubject(e.target.value)} className="h-10 rounded-xl" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Teaching Level</label>
+            <label className="text-xs font-semibold text-gray-700">{t("teachingLevel")}</label>
             <select
               value={teachingLevel}
               onChange={(e) => setTeachingLevel(e.target.value)}
@@ -190,7 +192,7 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
             </select>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Years of Experience</label>
+            <label className="text-xs font-semibold text-gray-700">{t("yearsExperience")}</label>
             <div className="grid grid-cols-3 gap-2">
               {EXPERIENCE_OPTIONS.map((opt) => (
                 <button
@@ -211,7 +213,7 @@ export default function TutorProfileSettingsCard({ profile, onSaved }: TutorProf
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-700">Short Bio</label>
+          <label className="text-xs font-semibold text-gray-700">{t("shortBio")}</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value.slice(0, 500))}

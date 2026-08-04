@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import TutorSidebar from "./TutorSidebar";
+import { useTranslations } from "next-intl";
 
 interface TutorMobileSidebarProps {
   open: boolean;
@@ -10,6 +11,7 @@ interface TutorMobileSidebarProps {
 }
 
 export default function TutorMobileSidebar({ open, isVerified, onClose }: TutorMobileSidebarProps) {
+  const t = useTranslations("tutor");
   return (
     <>
       {open && <div onClick={onClose} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />}
@@ -20,7 +22,7 @@ export default function TutorMobileSidebar({ open, isVerified, onClose }: TutorM
         }`}
       >
         <div className="flex shrink-0 justify-end p-4">
-          <button onClick={onClose} className="rounded-lg p-2 hover:bg-gray-100" aria-label="Close menu">
+          <button onClick={onClose} className="rounded-lg p-2 hover:bg-gray-100" aria-label={t("closeMenu")}>
             <X size={22} />
           </button>
         </div>

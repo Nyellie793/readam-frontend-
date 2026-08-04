@@ -8,6 +8,7 @@ import { TUTOR_NAV } from "@/constants/tutor-nav";
 import { cn } from "@/lib/utils";
 import { clearSession } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
+import { useTranslations } from "next-intl";
 
 interface TutorSidebarProps {
   isVerified: boolean;
@@ -15,6 +16,7 @@ interface TutorSidebarProps {
 }
 
 export default function TutorSidebar({ isVerified, onNavigate }: TutorSidebarProps) {
+  const t = useTranslations("tutor");
   const pathname = usePathname();
   const router = useRouter();
 
@@ -37,7 +39,7 @@ export default function TutorSidebar({ isVerified, onNavigate }: TutorSidebarPro
           )}
         >
           {isVerified ? <ShieldCheck className="size-3.5 shrink-0" /> : <Clock className="size-3.5 shrink-0" />}
-          {isVerified ? "Verified Tutor" : "Pending Admin Approval"}
+          {isVerified ? t("verifiedTutor") : t("pendingApproval")}
         </div>
       </div>
 

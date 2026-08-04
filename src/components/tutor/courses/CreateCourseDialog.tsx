@@ -8,8 +8,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 export default function CreateCourseDialog() {
+  const t = useTranslations("tutor");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -28,7 +30,7 @@ export default function CreateCourseDialog() {
 
   async function handleCreate() {
     if (!title.trim()) {
-      toast.error("Give your course a title.");
+      toast.error(t("needTitle"));
       return;
     }
     setCreating(true);
@@ -40,12 +42,12 @@ export default function CreateCourseDialog() {
         price: Number(price) || 0,
         is_premium: Number(price) > 0,
       });
-      toast.success("Course created. Now add modules and lessons.");
+      toast.success(t("courseCreated"));
       setOpen(false);
       reset();
       router.push(`/tutor/courses/${course.id}`);
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't create the course."));
+      toast.error(errorMessage(err, t("errCreate")));
     } finally {
       setCreating(false);
     }
@@ -64,34 +66,34 @@ export default function CreateCourseDialog() {
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create a New Course</DialogTitle>
+          <DialogTitle>{t("createCourse")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Course Title</label>
+            <label className="text-xs font-semibold text-gray-700">{t("courseTitle")}</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Advanced Calculus for A-Level"
+              placeholder={t("courseTitlePh")}
               className="h-10 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-700">Description</label>
+            <label className="text-xs font-semibold text-gray-700">{t("description")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              placeholder="What will students learn?"
+              placeholder={t("descriptionPh")}
               className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Category</label>
+              <label className="text-xs font-semibold text-gray-700">{t("category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -105,13 +107,13 @@ export default function CreateCourseDialog() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700">Price (XAF)</label>
+              <label className="text-xs font-semibold text-gray-700">{t("price")}</label>
               <input
                 type="number"
                 min={0}
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="0"
+                placeholder={t("pricePh")}
                 className="h-10 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>

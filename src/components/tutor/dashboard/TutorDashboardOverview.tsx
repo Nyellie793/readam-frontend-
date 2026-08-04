@@ -8,6 +8,7 @@ import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { CourseListItem, EarningsSummaryResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-gray-100 text-gray-600",
@@ -16,14 +17,15 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: "bg-red-50 text-red-500",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: "Draft",
-  pending_review: "Pending Review",
-  published: "Published",
-  rejected: "Rejected",
-};
 
 export default function TutorDashboardOverview() {
+  const t = useTranslations("tutor");
+  const STATUS_LABELS: Record<string, string> = {
+    draft: "Draft",
+    pending_review: t("pendingReview"),
+    published: "Published",
+    rejected: "Rejected",
+  };
   const [courses, setCourses] = useState<CourseListItem[] | null>(null);
   const [earnings, setEarnings] = useState<EarningsSummaryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export default function TutorDashboardOverview() {
         setCourses(courseList);
         setEarnings(earningsSummary);
       })
-      .catch((err) => setError(errorMessage(err, "Couldn't load your dashboard.")))
+      .catch((err) => setError(errorMessage(err, t("errLoadDash"))))
       .finally(() => setLoading(false));
   }, []);
 
@@ -66,7 +68,7 @@ export default function TutorDashboardOverview() {
   const stats = [
     { label: "Total Courses", value: list.length, icon: BookOpen, tint: "text-blue-600 bg-blue-50" },
     { label: "Published", value: counts.published, icon: CheckCircle2, tint: "text-teal-600 bg-teal-50" },
-    { label: "Pending Review", value: counts.pending_review, icon: Clock, tint: "text-orange-600 bg-orange-50" },
+    { label: t("pendingReview"), value: counts.pending_review, icon: Clock, tint: "text-orange-600 bg-orange-50" },
     { label: "Drafts", value: counts.draft, icon: FileEdit, tint: "text-gray-600 bg-gray-100" },
   ];
 
@@ -78,7 +80,7 @@ export default function TutorDashboardOverview() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900">{t("dashboard")}</h1>
           <p className="text-sm text-gray-500">Here&apos;s how your courses and earnings are doing.</p>
         </div>
         <Link
@@ -108,17 +110,17 @@ export default function TutorDashboardOverview() {
             <div className="flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
               <Wallet className="size-4.5" />
             </div>
-            <h2 className="text-sm font-bold text-gray-900">Earnings</h2>
+            <h2 className="text-sm font-bold text-gray-900">{t("earnings")}</h2>
           </div>
           <div className="mt-4 space-y-3">
             <div>
-              <p className="text-xs text-gray-500">Total Earned</p>
+              <p className="text-xs text-gray-500">{t("totalEarned")}</p>
               <p className="text-xl font-extrabold text-gray-900">
                 {(earnings?.total_earned ?? 0).toLocaleString()} XAF
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Pending Balance</p>
+              <p className="text-xs text-gray-500">{t("pendingBalance")}</p>
               <p className="text-lg font-bold text-orange-600">
                 {(earnings?.pending_balance ?? 0).toLocaleString()} XAF
               </p>
@@ -134,7 +136,7 @@ export default function TutorDashboardOverview() {
 
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-900">Recent Courses</h2>
+            <h2 className="text-sm font-bold text-gray-900">{t("recentCourses")}</h2>
             <Link href="/tutor/courses" className="text-xs font-semibold text-blue-600 hover:underline">
               View all
             </Link>
