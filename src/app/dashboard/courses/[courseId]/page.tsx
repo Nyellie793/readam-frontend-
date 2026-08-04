@@ -181,6 +181,11 @@ export default function LessonPage() {
                 src={lesson.content_url}
                 poster={course.thumbnail_url ?? undefined}
                 onProgress={handleProgress}
+                captions={{
+                  en: lesson.caption_url_en,
+                  fr: lesson.caption_url_fr,
+                  status: lesson.transcript_status,
+                }}
               />
             )}
 
