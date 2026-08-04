@@ -66,7 +66,7 @@ export default function NotificationsPage() {
 
           {!loading && notifications.length === 0 && (
             <p className="text-sm text-gray-400">
-              Nothing here yet — you'll see updates about your payments here as they happen.
+              Nothing here yet. You&apos;ll see updates about your payments here as they happen.
             </p>
           )}
 

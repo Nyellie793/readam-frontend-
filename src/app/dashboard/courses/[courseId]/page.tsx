@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Lock } from "lucide-react";
+import { Lock, AlertTriangle } from "lucide-react";
 import VideoPlayer from "@/components/dashboard/courses/VideoPlayer";
 import PdfViewer from "@/components/dashboard/courses/PDFViewer";
 import CourseOutline from "@/components/dashboard/courses/CourseOutline";
 import ContinueLearningCard from "@/components/dashboard/courses/ContinueLearningCard";
 import STUDENT from "@/services/student.service";
-import { ApiRequestError } from "@/lib/api";
+import { ApiRequestError, errorMessage } from "@/lib/api";
 import type { CourseDetailResponse, LessonContentResponse, ModuleLesson } from "@/types/api.types";
 
 export default function LessonPage() {
@@ -25,6 +25,10 @@ export default function LessonPage() {
   const [lesson, setLesson] = useState<LessonContentResponse | null>(null);
   const [lessonLoading, setLessonLoading] = useState(false);
   const [lessonDenied, setLessonDenied] = useState(false);
+  const [lessonError, setLessonError] = useState<string | null>(null);
+  // Bumping this re-runs the lesson fetch. Re-setting selectedLessonId to the
+  // same value would be a no-op, so a retry needs its own changing dep.
+  const [lessonRetry, setLessonRetry] = useState(0);
 
   const allLessons = useMemo(
     () =>
@@ -47,16 +51,43 @@ export default function LessonPage() {
       .catch((e) => setCourseError(e.message))
       .finally(() => setCourseLoading(false));
 
-    STUDENT.getEnrollments()
-      .then((data) => {
-        const enrollment = data.items.find((e) => e.course_id === courseId);
-        setHasAccess(
-          !!enrollment &&
-            enrollment.status === "active" &&
-            (!enrollment.expires_at || new Date(enrollment.expires_at) > new Date())
-        );
-      })
-      .catch(() => setHasAccess(false));
+    // Entitlement must be checked across *all* enrolment pages. Reading only
+    // page 1 meant a student whose enrolment had scrolled onto a later page saw
+    // a locked outline and a "Buy Course" button for content they already own —
+    // and the more they enrolled in, the more likely that became.
+    let cancelled = false;
+
+    (async () => {
+      try {
+        let page = 1;
+        for (;;) {
+          const data = await STUDENT.getEnrollments(page);
+          if (cancelled) return;
+
+          const enrollment = data.items.find((e) => e.course_id === courseId);
+          if (enrollment) {
+            setHasAccess(
+              enrollment.status === "active" &&
+                (!enrollment.expires_at || new Date(enrollment.expires_at) > new Date())
+            );
+            return;
+          }
+
+          const seen = data.page * data.page_size;
+          if (data.items.length === 0 || seen >= data.total) break;
+          page += 1;
+        }
+        setHasAccess(false);
+      } catch {
+        // Access is re-checked authoritatively by the lesson endpoint (403), so
+        // failing closed here only affects the outline's lock icons.
+        if (!cancelled) setHasAccess(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [courseId]);
 
   useEffect(() => {
@@ -64,15 +95,20 @@ export default function LessonPage() {
     setLessonLoading(true);
     setLessonDenied(false);
     setLesson(null);
+    setLessonError(null);
     STUDENT.getLessonContent(courseId, selectedLessonId)
       .then(setLesson)
       .catch((e) => {
         if (e instanceof ApiRequestError && e.status === 403) {
           setLessonDenied(true);
+          return;
         }
+        // Anything else (500, timeout, offline) used to be swallowed, leaving
+        // an unexplained blank rectangle where the player should be.
+        setLessonError(errorMessage(e, "This lesson could not be loaded."));
       })
       .finally(() => setLessonLoading(false));
-  }, [courseId, selectedLessonId]);
+  }, [courseId, selectedLessonId, lessonRetry]);
 
   function handleSelectLesson(l: ModuleLesson) {
     setSelectedLessonId(l.id);
@@ -126,7 +162,21 @@ export default function LessonPage() {
               </div>
             )}
 
-            {!lessonLoading && !lessonDenied && lesson?.type === "video" && lesson.content_url && (
+            {!lessonLoading && !lessonDenied && lessonError && (
+              <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-2xl bg-gray-950 px-6 text-center text-white/80">
+                <AlertTriangle className="size-7 text-orange-400" />
+                <p className="text-sm">{lessonError}</p>
+                <button
+                  type="button"
+                  onClick={() => setLessonRetry((n) => n + 1)}
+                  className="rounded-lg border border-white/20 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {!lessonLoading && !lessonDenied && !lessonError && lesson?.type === "video" && lesson.content_url && (
               <VideoPlayer
                 src={lesson.content_url}
                 poster={course.thumbnail_url ?? undefined}
@@ -134,23 +184,23 @@ export default function LessonPage() {
               />
             )}
 
-            {!lessonLoading && !lessonDenied && lesson?.type === "video" && !lesson.content_url && (
+            {!lessonLoading && !lessonDenied && !lessonError && lesson?.type === "video" && !lesson.content_url && (
               <div className="flex aspect-video items-center justify-center rounded-2xl bg-gray-950 text-sm text-white/60">
                 Video not uploaded yet.
               </div>
             )}
 
-            {!lessonLoading && !lessonDenied && lesson?.type === "pdf" && (
+            {!lessonLoading && !lessonDenied && !lessonError && lesson?.type === "pdf" && (
               <PdfViewer title={lesson.title} fileUrl={lesson.content_url} />
             )}
 
-            {!lessonLoading && !lessonDenied && lesson?.type === "quiz" && (
+            {!lessonLoading && !lessonDenied && !lessonError && lesson?.type === "quiz" && (
               <div className="flex aspect-video flex-col items-center justify-center gap-2 rounded-2xl bg-gray-950 text-white/80">
                 <p className="text-sm">Quiz lessons aren&apos;t supported in this view yet.</p>
               </div>
             )}
 
-            {!lessonLoading && !lessonDenied && lesson && lesson.type !== "pdf" && (
+            {!lessonLoading && !lessonDenied && !lessonError && lesson && lesson.type !== "pdf" && (
               <div className="mt-5 flex items-start justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                 <div className="min-w-0">
                   <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{lesson.title}</h1>

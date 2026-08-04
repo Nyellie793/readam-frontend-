@@ -14,7 +14,7 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { getStoredUser } from "@/lib/auth";
+import { useStoredUser } from "@/hooks/useStoredUser";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -176,7 +176,7 @@ export default function AiChatSession() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const [user, setUser] = useState<User | null>(null);
+  const user = useStoredUser();
   const [streakDays, setStreakDays] = useState(0);
   const [hasUnread, setHasUnread] = useState(false);
 
@@ -204,7 +204,6 @@ export default function AiChatSession() {
   const [cachedQuizzesById, setCachedQuizzesById] = useState<Record<string, QuizResponse>>({});
 
   useEffect(() => {
-    setUser(getStoredUser());
     STUDENT.getGamification().then((g) => setStreakDays(g.current_streak_days)).catch(() => null);
     STUDENT.getNotifications().then((d) => setHasUnread(d.unread_count > 0)).catch(() => null);
   }, []);

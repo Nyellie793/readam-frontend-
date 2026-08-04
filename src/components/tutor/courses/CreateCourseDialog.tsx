@@ -18,14 +18,12 @@ export default function CreateCourseDialog() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>(COURSE_CATEGORIES[0].value);
   const [price, setPrice] = useState("");
-  const [isPremium, setIsPremium] = useState(false);
 
   function reset() {
     setTitle("");
     setDescription("");
     setCategory(COURSE_CATEGORIES[0].value);
     setPrice("");
-    setIsPremium(false);
   }
 
   async function handleCreate() {
@@ -40,7 +38,7 @@ export default function CreateCourseDialog() {
         description: description.trim() || undefined,
         category,
         price: Number(price) || 0,
-        is_premium: isPremium,
+        is_premium: Number(price) > 0,
       });
       toast.success("Course created. Now add modules and lessons.");
       setOpen(false);
@@ -119,15 +117,6 @@ export default function CreateCourseDialog() {
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={isPremium}
-              onChange={(e) => setIsPremium(e.target.checked)}
-              className="size-4 rounded border-gray-300 accent-blue-600"
-            />
-            Premium course (requires subscription entitlement)
-          </label>
         </div>
 
         <DialogFooter>

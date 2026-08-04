@@ -20,11 +20,12 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-import { getStoredUser, clearSession } from "@/lib/auth";
+import { clearSession } from "@/lib/auth";
+import { useStoredUser } from "@/hooks/useStoredUser";
 
 export default function UserDropdown() {
   const router = useRouter();
-  const user = getStoredUser();
+  const user = useStoredUser();
 
   function handleLogout() {
     clearSession();

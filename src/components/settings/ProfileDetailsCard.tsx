@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import AUTH from "@/services/auth.service";
-import { ApiRequestError, errorMessage } from "@/lib/api";
+import { ApiRequestError, errorMessage, putToPresigned } from "@/lib/api";
 
 export default function ProfileDetailsCard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -73,11 +73,7 @@ export default function ProfileDetailsCard() {
     setUploading(true);
     try {
       const presigned = await AUTH.requestAssetUpload(file.name, file.type);
-      await fetch(presigned.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      await putToPresigned(presigned.upload_url, file);
       setAvatarUrl(presigned.file_url);
       toast.success("Photo uploaded — click Save Changes to apply it.");
     } catch (err) {

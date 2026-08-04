@@ -5,7 +5,6 @@ import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import Link from "next/link";
@@ -18,11 +17,16 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-export default function SignupForm() {
+interface SignupFormProps {
+  /** Chosen on /select-role and passed down from the page, which reads it
+   *  server-side. Reading it here with useSearchParams meant the entire form —
+   *  including the Google button — could not be prerendered. */
+  role: string;
+}
+
+export default function SignupForm({ role }: SignupFormProps) {
   const { register: registerUser, googleAuth, loading } = useAuth();
   const [showPw, setShowPw] = useState(false);
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role") ?? "student";
 
   const { register, handleSubmit, formState: { errors } } =
     useForm<FormData>({ resolver: zodResolver(schema) });

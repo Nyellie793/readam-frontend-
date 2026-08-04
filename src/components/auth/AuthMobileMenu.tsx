@@ -11,7 +11,6 @@ import {
 import { Menu } from "lucide-react";
 
 import { NAV_LINKS } from "@/constants/navigation";
-import { usePathname } from "next/navigation";
 
 import LanguageToggle from "../shared/LanguageToggle";
 import ThemeToggle from "../shared/ThemeToggle";

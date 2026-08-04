@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api, assertUploadable, putToPresigned } from "@/lib/api";
 import type {
   AISessionResponse,
   AISessionDetailResponse,
@@ -43,12 +43,11 @@ const AI = {
     ),
 
   uploadFile: async (file: File): Promise<AttachmentUploadResponse> => {
+    assertUploadable(file, "attachment");
     const presigned = await AI.createUpload(file.name, file.type);
-    await fetch(presigned.upload_url, {
-      method: "PUT",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
+    // Throws if the PUT is rejected, so the caller never attaches an id for an
+    // object that was never written.
+    await putToPresigned(presigned.upload_url, file);
     return presigned;
   },
 

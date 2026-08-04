@@ -10,7 +10,6 @@ import {
   BookOpen,
   CalendarCheck,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { SessionSummaryResponse, QuizResponse } from "@/types/api.types";
 
 interface SessionSummaryPanelProps {

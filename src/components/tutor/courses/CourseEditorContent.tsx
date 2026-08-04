@@ -41,7 +41,6 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
-  const [isPremium, setIsPremium] = useState(false);
 
   function hydrate(c: CourseDetailResponse) {
     setCourse(c);
@@ -49,7 +48,6 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
     setDescription(c.description ?? "");
     setCategory(c.category);
     setPrice(String(c.price));
-    setIsPremium(c.is_premium);
   }
 
   function reload() {
@@ -60,7 +58,13 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
     reload().catch((err) => setError(errorMessage(err, "Couldn't load this course.")));
   }, [courseId]);
 
-  const editable = course?.status === "draft" || course?.status === "rejected";
+  /**
+   * Published courses stay editable: syllabuses change and material goes out of
+   * date, so a tutor can add a module or fix a lesson without withdrawing the
+   * course from students who already paid. Only a course under review is frozen,
+   * because an admin is looking at it — retract it to edit.
+   */
+  const editable = course?.status !== "pending_review";
 
   async function handleSaveInfo() {
     setSaving(true);
@@ -70,7 +74,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
         description: description.trim() || null,
         category,
         price: Number(price) || 0,
-        is_premium: isPremium,
+        is_premium: Number(price) > 0,
       });
       toast.success("Course updated.");
       reload();
@@ -255,15 +259,6 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
               />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={isPremium}
-              onChange={(e) => setIsPremium(e.target.checked)}
-              className="size-4 rounded border-gray-300 accent-blue-600"
-            />
-            Premium course (requires subscription entitlement)
-          </label>
         </fieldset>
 
         {editable && (

@@ -104,6 +104,70 @@ async function request<T>(
   return res.json() as Promise<T>;
 }
 
+/** Limits applied before we even ask the API for a presigned URL. */
+export const UPLOAD_LIMITS = {
+  image: { maxBytes: 5 * 1024 * 1024, types: ["image/jpeg", "image/png", "image/webp"] },
+  document: { maxBytes: 25 * 1024 * 1024, types: ["application/pdf"] },
+  attachment: {
+    maxBytes: 10 * 1024 * 1024,
+    types: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
+  },
+} as const;
+
+export type UploadKind = keyof typeof UPLOAD_LIMITS;
+
+function humanSize(bytes: number): string {
+  return bytes >= 1024 * 1024
+    ? `${Math.round(bytes / (1024 * 1024))}MB`
+    : `${Math.round(bytes / 1024)}KB`;
+}
+
+/**
+ * Validate a file before requesting a presigned URL. The `accept` attribute on
+ * a file input is only a picker hint — it does not stop a user dragging in a
+ * 300MB video, and it is trivially bypassed.
+ */
+export function assertUploadable(file: File, kind: UploadKind): void {
+  const { maxBytes, types } = UPLOAD_LIMITS[kind];
+
+  if (!(types as readonly string[]).includes(file.type)) {
+    const readable = types.map((t) => t.split("/")[1].toUpperCase()).join(", ");
+    throw new ApiRequestError(415, `That file type isn't supported. Use ${readable}.`);
+  }
+  if (file.size > maxBytes) {
+    throw new ApiRequestError(413, `That file is too large. The limit is ${humanSize(maxBytes)}.`);
+  }
+}
+
+/**
+ * PUT a file to a presigned storage URL and confirm it actually landed.
+ *
+ * Every upload in the app used to ignore this response. A rejected PUT (CORS
+ * drift, expired presign, bucket policy) looked identical to success: the UI
+ * showed a confirmation and stored a URL pointing at nothing. Course thumbnails
+ * and lesson PDFs were published referencing objects that were never written.
+ */
+export async function putToPresigned(uploadUrl: string, file: File): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+  } catch {
+    // Network failure or a CORS rejection — fetch throws rather than resolving.
+    throw new ApiRequestError(0, "Upload failed. Check your connection and try again.");
+  }
+
+  if (!res.ok) {
+    throw new ApiRequestError(
+      res.status,
+      `Upload failed (${res.status}). Please try again, or pick a different file.`
+    );
+  }
+}
+
 export const api = {
   get:    <T>(path: string, auth = true)                 => request<T>(path, { method: "GET" }, auth),
   post:   <T>(path: string, body: unknown, auth = false) => request<T>(path, { method: "POST",  body: JSON.stringify(body) }, auth),

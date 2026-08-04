@@ -10,6 +10,8 @@ interface ChartProps {
   variant?: "bar" | "line";
   period?: "weekly" | "monthly";
   onPeriodChange?: (period: "weekly" | "monthly") => void;
+  /** Render placeholder bars instead of an empty chart while data loads. */
+  loading?: boolean;
 }
 
 /**
@@ -18,7 +20,7 @@ interface ChartProps {
  * staying trivial to swap for Recharts/Chart.js once real time-series
  * data is wired up later.
  */
-export default function Chart({ title, subtitle, data, variant = "bar", period, onPeriodChange }: ChartProps) {
+export default function Chart({ title, subtitle, data, variant = "bar", period, onPeriodChange, loading = false }: ChartProps) {
   const [active, setActive] = useState<number | null>(null);
   const max = Math.max(...data.map((d) => d.value), 1);
 
@@ -53,7 +55,19 @@ export default function Chart({ title, subtitle, data, variant = "bar", period, 
         )}
       </div>
 
-      {variant === "bar" ? (
+      {loading ? (
+        <div className="mt-8 flex h-48 items-end gap-3" aria-busy="true" aria-label="Loading chart">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} className="flex flex-1 flex-col justify-end">
+              <div
+                data-slot="skeleton"
+                className="w-full rounded-t-lg"
+                style={{ height: `${30 + ((i * 37) % 55)}%` }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : variant === "bar" ? (
         <div className={`mt-8 flex h-48 ${data.length > 10 ? "gap-1" : "gap-3"}`}>
           {data.map((point, i) => {
             const labelEvery = Math.max(1, Math.ceil(data.length / 8));

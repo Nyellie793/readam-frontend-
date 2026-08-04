@@ -19,7 +19,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
     pathname === "/dashboard/ai-tutor/ai-hub" ||
     pathname === "/dashboard/ai-tutor/ai-chat";
 
-  // Payments active if on /payment, /payment/ai-sessions, /checkout, /payment/success, or /payment/failed
+  // Payments active on the plans hub, either purchase flow, or checkout
   const inPayments = pathname.startsWith("/payment") || pathname.startsWith("/checkout");
 
   return (
@@ -103,7 +103,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
                     )}
                   >
                     <BookOpen className="size-3.5 shrink-0" />
-                    GCE Pricing
+                    Plans & Pricing
                   </Link>
                   <Link
                     href="/payment/ai-sessions"

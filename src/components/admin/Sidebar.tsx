@@ -6,6 +6,7 @@ import { ShieldCheck, LogOut } from "lucide-react";
 import { ADMIN_NAV } from "@/constants/admin-nav";
 import { cn } from "@/lib/utils";
 import { clearSession } from "@/lib/auth";
+import { ROUTES } from "@/lib/constants";
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -22,7 +23,7 @@ export default function Sidebar({ onNavigate }: SidebarProps) {
 
   function handleLogout() {
     clearSession();
-    router.push("/admin/login");
+    router.push(ROUTES.adminLogin);
   }
 
   return (

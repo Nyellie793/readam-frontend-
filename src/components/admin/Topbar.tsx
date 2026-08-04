@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Menu } from "lucide-react";
 import {
@@ -12,7 +11,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "@/components/admin/Sidebar";
-import { getStoredUser, clearSession } from "@/lib/auth";
+import { clearSession } from "@/lib/auth";
+import { ROUTES } from "@/lib/constants";
+import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
 
 interface TopbarProps {
   title: string;
@@ -21,27 +22,14 @@ interface TopbarProps {
 
 export default function Topbar({ title, description }: TopbarProps) {
   const router = useRouter();
-  const [name, setName] = useState("Admin");
-  const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    const user = getStoredUser();
-    if (user) {
-      setName(user.full_name ?? "Admin");
-      setEmail(user.email ?? "");
-    }
-  }, []);
-
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const user = useStoredUser();
+  const name = user?.full_name ?? "Admin";
+  const email = user?.email ?? "";
+  const initials = initialsOf(user?.full_name, "AD");
 
   function handleLogout() {
     clearSession();
-    router.push("/admin/login");
+    router.push(ROUTES.adminLogin);
   }
 
   return (

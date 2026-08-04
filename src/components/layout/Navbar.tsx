@@ -8,12 +8,12 @@ import ThemeToggle from "../shared/ThemeToggle";
 import { NAV_LINKS } from "@/constants/navigation";
 import { usePathname } from "next/navigation";
 import UserDropdown from "../auth/UserDropdown";
-import { getStoredUser } from "@/lib/auth";
+import { useStoredUser } from "@/hooks/useStoredUser";
 
 export default function Navbar() {
   const pathname = usePathname();
 
-  const user = getStoredUser();
+  const user = useStoredUser();
 
   const isAuthenticated = !!user;
 

@@ -31,7 +31,7 @@ export default function PaymentHistoryTable() {
     <div className="border border-gray-100 bg-white shadow-sm rounded-2xl overflow-hidden">
       <div className="border-b border-gray-50 p-5">
         <h3 className="text-base font-bold text-gray-900">Billing History</h3>
-        <p className="text-xs text-gray-500 mt-1">Every course purchase and AI credit pack you've bought.</p>
+        <p className="text-xs text-gray-500 mt-1">Every course purchase and AI credit pack you&apos;ve bought.</p>
       </div>
 
       <div className="overflow-x-auto">

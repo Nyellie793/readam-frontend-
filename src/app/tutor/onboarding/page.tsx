@@ -7,7 +7,7 @@ import { User, UploadCloud, Camera, Loader2 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import TUTOR from "@/services/tutor.service";
 import { getStoredUser, updateStoredUser } from "@/lib/auth";
-import { errorMessage } from "@/lib/api";
+import { errorMessage, putToPresigned } from "@/lib/api";
 import type { ExperienceYears } from "@/types/api.types";
 
 const TEACHING_LEVELS = [
@@ -71,11 +71,7 @@ export default function TutorOnboardingPage() {
     setUploading(true);
     try {
       const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
-      await fetch(presigned.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      await putToPresigned(presigned.upload_url, file);
       setAvatarUrl(presigned.file_url);
     } catch (err) {
       toast.error(errorMessage(err, "Couldn't upload that photo."));
