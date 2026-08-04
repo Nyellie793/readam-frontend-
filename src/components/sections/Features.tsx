@@ -1,12 +1,15 @@
 import { BookOpen, Sparkles, Clock, Video, BarChart2 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export default function Features() {
+export default async function Features() {
+  const t = await getTranslations("home");
+  const ts = await getTranslations("subjects");
   return (
     <section className="mx-auto max-w-7xl px-6 py-20 bg-[#F8F9FC]">
 
       {/* Section header */}
       <div className="mb-12 text-center">
-        <h2 className="text-3xl font-black text-gray-900">Master Your Curriculum</h2>
+        <h2 className="text-3xl font-black text-gray-900">{t("featuresTitle")}</h2>
         <p className="mt-2 text-sm text-gray-500">
           Built specifically for the Cameroonian educational landscape.
         </p>
@@ -33,12 +36,12 @@ export default function Features() {
           </p>
 
           <div className="mt-5 flex flex-wrap gap-2">
-            {["Physics", "Philosophy", "+12 more"].map((tag) => (
+            {["physicsTag", "philosophyTag", "moreTag"].map((tag) => (
               <span
-                key={tag}
+                key={ts(tag)}
                 className="rounded-full border border-gray-200 px-3 py-1 text-xs text-gray-500 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50 transition-colors duration-200 cursor-pointer"
               >
-                {tag}
+                {ts(tag)}
               </span>
             ))}
           </div>

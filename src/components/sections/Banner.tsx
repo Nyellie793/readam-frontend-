@@ -1,6 +1,8 @@
 import { Diamond } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export default function Banner() {
+export default async function Banner() {
+  const t = await getTranslations("home");
   return (
     <section className="bg-[#0f1b35] py-16 px-6">
       <div className="mx-auto max-w-2xl text-center">
@@ -12,14 +14,12 @@ export default function Banner() {
 
         {/* Heading */}
         <h2 className="text-2xl font-black leading-snug text-white sm:text-3xl">
-          Stop searching for notes. Stop guessing past questions.
+          {t("bannerTitle")}
         </h2>
 
         {/* Subtext */}
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-gray-400">
-          Cameroonian students deserve a centralized tool that makes exam
-          preparation simple and effective. No more expensive photocopies or
-          outdated resources.
+          {t("bannerBody")}
         </p>
 
         {/* Orange underline */}

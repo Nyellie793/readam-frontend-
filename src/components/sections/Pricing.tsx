@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import { useStoredUser } from "@/hooks/useStoredUser";
 
 const plans = [
@@ -54,6 +55,7 @@ const plans = [
 ];
 
 export default function Pricing() {
+  const t = useTranslations("home");
   const user = useStoredUser();
   // Signed out, send them via login and return them to the purchase flow.
   const target = "/payment/past-questions";
@@ -66,11 +68,11 @@ export default function Pricing() {
         {/* Heading */}
         <div className="mb-16 text-center">
           <h2 className="text-4xl font-black text-gray-900">
-            Simple, Affordable Pricing
+            {t("pricingTitle")}
           </h2>
 
           <p className="mt-3 text-gray-500">
-            Choose the plan that fits your study goals.
+            {t("pricingSubtitle")}
           </p>
         </div>
 
@@ -248,7 +250,7 @@ export default function Pricing() {
                       ${color.button}
                     `}
                   >
-                    {plan.popular ? "Subscribe Now" : "Subscribe"}
+                    {plan.popular ? t("subscribeNow") : t("subscribe")}
                   </Button>
                 </Link>
 

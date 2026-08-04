@@ -1,6 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export default function Newsletter() {
+  const t = useTranslations("home");
   return (
     <section className="bg-white py-16 lg:py-24">
 
@@ -32,10 +35,10 @@ export default function Newsletter() {
             lg:text-5xl
             "
           >
-            Continue Your{" "}
+            {t("newsletterLead")}{" "}
 
             <span className="text-orange-500">
-              Success Story
+              {t("newsletterAccent")}
             </span>
 
           </h2>
@@ -49,7 +52,7 @@ export default function Newsletter() {
             text-gray-300
             "
           >
-            Join 1000+ students who get weekly insights
+            {t("newsletterBody")}
             on turning dreams into reality and attaining
             success through our platform.
           </p>
@@ -111,7 +114,7 @@ export default function Newsletter() {
               hover:bg-orange-600
               "
             >
-              Subscribe
+              {t("newsletterCta")}
             </button>
 
           </div>

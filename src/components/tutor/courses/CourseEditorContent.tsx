@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Save, Send, Undo2, Trash2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Send, Undo2, Trash2, AlertCircle, Upload, Image as ImageIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import TUTOR from "@/services/tutor.service";
-import { errorMessage } from "@/lib/api";
+import Image from "next/image";
+import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import ModuleList from "./ModuleList";
 import type { CourseDetailResponse } from "@/types/api.types";
@@ -41,6 +42,9 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [uploadingThumb, setUploadingThumb] = useState(false);
+  const thumbInputRef = useRef<HTMLInputElement>(null);
 
   function hydrate(c: CourseDetailResponse) {
     setCourse(c);
@@ -48,6 +52,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
     setDescription(c.description ?? "");
     setCategory(c.category);
     setPrice(String(c.price));
+    setThumbnailUrl(c.thumbnail_url ?? null);
   }
 
   function reload() {
@@ -66,6 +71,21 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
    */
   const editable = course?.status !== "pending_review";
 
+  async function handleThumbnail(file: File) {
+    setUploadingThumb(true);
+    try {
+      assertUploadable(file, "image");
+      const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
+      await putToPresigned(presigned.upload_url, file);
+      setThumbnailUrl(presigned.file_url);
+      toast.success("Cover uploaded. Save to apply it.");
+    } catch (err) {
+      toast.error(errorMessage(err, "Couldn't upload that image."));
+    } finally {
+      setUploadingThumb(false);
+    }
+  }
+
   async function handleSaveInfo() {
     setSaving(true);
     try {
@@ -75,6 +95,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
         category,
         price: Number(price) || 0,
         is_premium: Number(price) > 0,
+        thumbnail_url: thumbnailUrl,
       });
       toast.success("Course updated.");
       reload();
@@ -257,6 +278,45 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
                 onChange={(e) => setPrice(e.target.value)}
                 className="h-10 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+            </div>
+          </div>
+          {/* Course cover. Cloudflare R2 only stores what we send it — nothing
+              generates a thumbnail automatically, so this has to be uploaded. */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-gray-600">Course cover</label>
+            <div className="flex items-center gap-4">
+              <div className="relative aspect-16/10 w-40 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                {thumbnailUrl ? (
+                  <Image src={thumbnailUrl} alt="" fill sizes="160px" className="object-cover" />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-gray-300">
+                    <ImageIcon className="size-6" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <input
+                  ref={thumbInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (f) handleThumbnail(f);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => thumbInputRef.current?.click()}
+                  disabled={uploadingThumb || !editable}
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {uploadingThumb ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+                  {thumbnailUrl ? "Replace cover" : "Upload cover"}
+                </button>
+                <p className="mt-2 text-[11px] text-gray-400">JPG, PNG or WebP. Max 5MB. Shown on the course card.</p>
+              </div>
             </div>
           </div>
         </fieldset>

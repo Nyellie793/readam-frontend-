@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
 const avatars = [
   { src: "/pic(1).png", alt: "Student 1" },
@@ -6,7 +7,8 @@ const avatars = [
   { src: "/Img_margin.png", alt: "Student 3" },
 ];
 
-export default function HeroStats() {
+export default async function HeroStats() {
+  const t = await getTranslations("home");
   return (
     <div className="mt-8 flex items-center gap-3">
       <div className="flex -space-x-2.5">
@@ -20,9 +22,9 @@ export default function HeroStats() {
         ))}
       </div>
       <p className="text-sm leading-snug text-gray-500">
-        Trusted by{" "}
+        {t("trustedByLead")}{" "}
         <span className="font-semibold text-blue-600">2,500+</span>{" "}
-        students across Cameroon&apos;s top institutions.
+        {t("trustedByTail")}
       </p>
     </div>
   );

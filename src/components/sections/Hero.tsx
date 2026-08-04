@@ -1,11 +1,13 @@
 import HeroBadge from "./HeroBadge";
+import { getTranslations } from "next-intl/server";
 import HeroButtons from "./HeroButtons";
 import HeroImage from "./HeroImage";
 import HeroStats from "./HeroStats";
 import SearchBar from "@/components/sections/SearchBar";
 import Subjects from "./Subjects";
 
-export default function Hero() {
+export default async function Hero() {
+  const t = await getTranslations("home");
   return (
     <section className="relative overflow-hidden bg-transparent">
 
@@ -25,16 +27,12 @@ export default function Hero() {
             <HeroBadge />
 
             <h1 className="mt-3 text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
-              Revolutionizing
-              <br />
-              Digital{" "}
-              <span className="text-blue-600">Learning With AI</span>
+              {t("titleLead")}{" "}
+              <span className="text-blue-600">{t("titleAccent")}</span>
             </h1>
 
             <p className="mt-4 max-w-md text-base leading-relaxed text-gray-500">
-              Transforming the future of success and Education with an
-              interactive trend first approach. Explore the beauty of learning
-              at your full potential, and succeeding with half the effort.
+              {t("subtitle")}
             </p>
 
             <HeroButtons />

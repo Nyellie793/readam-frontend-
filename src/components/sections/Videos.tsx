@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,11 +34,12 @@ const videos = [
   },
 ];
 
-export default function Videos() {
+export default async function Videos() {
+  const t = await getTranslations("home");
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20">
       <div className="mb-8 sm:mb-10 text-center">
-        <h2 className="text-2xl sm:text-3xl font-black text-gray-900">Browse Tutorial Videos</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-gray-900">{t("videosTitle")}</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">

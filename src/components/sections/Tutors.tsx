@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ const EXPERIENCE_LABEL: Record<string, string> = {
 };
 
 export default async function Tutors() {
+  const t = await getTranslations("home");
   // Live verified tutors when the API has them, otherwise the existing cards,
   // so this section never renders empty at launch.
   const { items } = await getPublicTutors({ pageSize: 3 });
@@ -76,7 +78,7 @@ export default async function Tutors() {
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 bg-[#F8F9FC]">
       <div className="mb-8 sm:mb-10 text-center">
-        <h2 className="text-2xl sm:text-3xl font-black text-gray-900">Meet Our Top Tutors</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-gray-900">{t("tutorsTitle")}</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
@@ -124,7 +126,7 @@ export default async function Tutors() {
                     size="sm"
                     className="rounded-lg sm:rounded-xl bg-blue-600 px-3 sm:px-4 text-white hover:bg-blue-700 text-xs h-7 sm:h-8"
                   >
-                    View profile
+                    {t("viewProfile")}
                   </Button>
                 </Link>
               </div>
@@ -139,7 +141,7 @@ export default async function Tutors() {
             size="lg"
             className="rounded-xl bg-blue-600 px-6 sm:px-8 text-sm sm:text-base text-white hover:bg-blue-700 shadow-lg"
           >
-            View All Tutors
+            {t("viewAllTutors")}
           </Button>
         </Link>
       </div>
