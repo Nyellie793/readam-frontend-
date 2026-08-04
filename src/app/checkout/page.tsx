@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import SubscriptionCheckout from "@/components/payment/SubscriptionCheckout";
 import CourseCheckout from "@/components/payment/CourseCheckout";
 import PastQuestionsCheckout from "@/components/payment/PastQuestionsCheckout";
+import { useTranslations } from "next-intl";
 
 /**
  * Every branch here initiates a real payment and polls the API for its status.
@@ -17,6 +18,7 @@ import PastQuestionsCheckout from "@/components/payment/PastQuestionsCheckout";
  * pretending to take money.
  */
 function CheckoutContent() {
+  const t = useTranslations("payment");
   const searchParams = useSearchParams();
 
   const productCode = searchParams.get("product");
@@ -38,7 +40,7 @@ function CheckoutContent() {
 
   return (
     <div className="mx-auto max-w-md space-y-3 px-6 py-20 text-center">
-      <p className="text-lg font-bold text-gray-900">Nothing to check out</p>
+      <p className="text-lg font-bold text-gray-900">{t("nothingToCheckout")}</p>
       <p className="text-sm leading-relaxed text-gray-500">
         This checkout link is missing a product. Pick a plan or a course and try
         again.
@@ -48,13 +50,13 @@ function CheckoutContent() {
           href="/payment"
           className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
         >
-          View plans
+          {t("viewPlans")}
         </Link>
         <Link
           href="/dashboard/courses"
           className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
         >
-          Browse courses
+          {t("browseCourses")}
         </Link>
       </div>
     </div>

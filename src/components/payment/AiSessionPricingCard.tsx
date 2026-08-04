@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Check, Star } from "lucide-react";
 import Link from "next/link";
 import type { ProductResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 interface AiSessionPricingCardProps {
   product: ProductResponse;
@@ -28,6 +29,7 @@ function featuresFor(product: ProductResponse): string[] {
 }
 
 export default function AiSessionPricingCard({ product, highlight }: AiSessionPricingCardProps) {
+  const t = useTranslations("payment");
   const features = featuresFor(product);
   const Icon = highlight ? Star : Check;
 
@@ -79,7 +81,7 @@ export default function AiSessionPricingCard({ product, highlight }: AiSessionPr
               : "border-blue-600 text-blue-600 hover:bg-blue-50"
           }`}
         >
-          {highlight ? "Subscribe Now" : "Buy Now"}
+          {highlight ? t("subscribeNow") : t("buyNow")}
         </button>
       </Link>
     </Card>

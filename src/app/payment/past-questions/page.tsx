@@ -9,8 +9,10 @@ import SubjectPicker from "@/components/payment/SubjectPicker";
 import { ShieldCheck } from "lucide-react";
 import STUDENT from "@/services/student.service";
 import type { PastQuestionsProductResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 export default function PastQuestionsPricingPage() {
+  const t = useTranslations("payment");
   const router = useRouter();
   const [products, setProducts] = useState<PastQuestionsProductResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,9 +44,9 @@ export default function PastQuestionsPricingPage() {
         <Topbar />
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <h1 className="text-3xl font-black text-gray-900">GCE Past Questions & Answers</h1>
+            <h1 className="text-3xl font-black text-gray-900">{t("pastQTitle")}</h1>
             <p className="text-xs text-gray-500 max-w-2xl mx-auto leading-relaxed">
-              Official ReadAm-curated past exam papers with full worked solutions. Choose the package that fits your subjects.
+              {t("pastQIntro")}
             </p>
           </div>
 
@@ -66,7 +68,7 @@ export default function PastQuestionsPricingPage() {
           <div className="flex gap-4 items-center rounded-2xl bg-blue-50/40 border border-blue-100 p-5 text-xs text-blue-900 max-w-5xl mx-auto">
             <ShieldCheck className="size-6 text-blue-600 shrink-0" />
             <div>
-              <h4 className="font-bold text-blue-950">Official ReadAm Content</h4>
+              <h4 className="font-bold text-blue-950">{t("officialContent")}</h4>
               <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
                 Curated and published directly by ReadAm, not third-party tutors. Payments processed via MTN Mobile Money or Orange Money through Fapshi.
               </p>

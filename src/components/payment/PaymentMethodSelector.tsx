@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export type PaymentMethod = "mtn" | "orange";
 
@@ -13,9 +14,10 @@ export default function PaymentMethodSelector({
   selected,
   onChange,
 }: PaymentMethodSelectorProps) {
+  const t = useTranslations("payment");
   return (
     <div className="border border-gray-100 bg-white p-6 shadow-sm rounded-2xl">
-      <h3 className="text-base font-bold text-gray-900 mb-4">Select Payment Method</h3>
+      <h3 className="text-base font-bold text-gray-900 mb-4">{t("selectMethod")}</h3>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* MTN MoMo Selector */}
@@ -35,7 +37,7 @@ export default function PaymentMethodSelector({
             </div>
             <div>
               <p className="text-xs font-bold text-gray-950">MTN MoMo</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Instant confirmation</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{t("instant")}</p>
             </div>
           </div>
           <div className="relative shrink-0">
@@ -63,7 +65,7 @@ export default function PaymentMethodSelector({
             </div>
             <div>
               <p className="text-xs font-bold text-gray-950">Orange Money</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Pay with OM</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{t("payWithOm")}</p>
             </div>
           </div>
           <div className="relative shrink-0">

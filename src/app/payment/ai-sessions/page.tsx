@@ -7,8 +7,10 @@ import AiSessionPricingCard from "@/components/payment/AiSessionPricingCard";
 import { ShieldCheck } from "lucide-react";
 import STUDENT from "@/services/student.service";
 import type { ProductResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 export default function AiSessionsPricingPage() {
+  const t = useTranslations("payment");
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,9 +33,9 @@ export default function AiSessionsPricingPage() {
         <Topbar />
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-6xl space-y-8">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <h1 className="text-3xl font-black text-gray-900">AI Study Sessions</h1>
+            <h1 className="text-3xl font-black text-gray-900">{t("optAiTitle")}</h1>
             <p className="text-xs text-gray-500 max-w-2xl mx-auto leading-relaxed">
-              Accelerate your learning with personalized AI-driven study sessions. Each session is designed to tackle your specific exam challenges and provide instant mastery over complex subjects.
+              {t("aiSessionsIntro")}
             </p>
           </div>
 
@@ -54,8 +56,9 @@ export default function AiSessionsPricingPage() {
           <div className="flex gap-4 items-center rounded-2xl bg-blue-50/40 border border-blue-100 p-5 text-xs text-blue-900 max-w-5xl mx-auto">
             <ShieldCheck className="size-6 text-blue-600 shrink-0" />
             <div>
-              <h4 className="font-bold text-blue-950">Secure Transactions</h4>
-              <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">All payments are processed via MTN Mobile Money or Orange Money through Fapshi.</p>
+              <h4 className="font-bold text-blue-950">{t("secureTransactions")}</h4>
+              <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
+              {t("fapshiNotice")}</p>
             </div>
           </div>
         </main>

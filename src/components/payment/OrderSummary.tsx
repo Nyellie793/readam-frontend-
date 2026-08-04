@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface OrderItem {
   name: string;
@@ -26,6 +27,7 @@ export default function OrderSummary({
   fee,
   total,
 }: OrderSummaryProps) {
+  const t = useTranslations("payment");
   // Fallback defaults if no items are passed
   const displayItems = items || [
     {
@@ -68,21 +70,21 @@ export default function OrderSummary({
         <div className="space-y-2.5 pt-4 border-t border-gray-50 text-xs font-semibold text-gray-600">
           {subtotal && (
             <div className="flex justify-between items-center">
-              <span>Subtotal</span>
+              <span>{t("subtotal")}</span>
               <span className="text-gray-900">{subtotal}</span>
             </div>
           )}
 
           {tax && (
             <div className="flex justify-between items-center">
-              <span>Tax (VAT 19.25%)</span>
+              <span>{t("tax")}</span>
               <span className="text-gray-900">{tax}</span>
             </div>
           )}
 
           {fee && (
             <div className="flex justify-between items-center">
-              <span>Platform Fee</span>
+              <span>{t("platformFee")}</span>
               <span className="text-gray-900">{fee}</span>
             </div>
           )}
@@ -90,14 +92,14 @@ export default function OrderSummary({
           {/* If neither subtotal nor tax is passed, we show course price to match checkout design */}
           {!subtotal && !fee && (
             <div className="flex justify-between items-center">
-              <span>Course Price</span>
+              <span>{t("coursePrice")}</span>
               <span className="text-gray-900">{displayItems[0]?.price}</span>
             </div>
           )}
           
           {!subtotal && tax && !fee && (
             <div className="flex justify-between items-center">
-              <span>Tax (VAT 19.25%)</span>
+              <span>{t("tax")}</span>
               <span className="text-gray-900">{tax}</span>
             </div>
           )}
@@ -112,7 +114,7 @@ export default function OrderSummary({
         {/* Guarantee Banner */}
         <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-100 p-3.5 text-xs text-emerald-800">
           <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-          <span className="font-bold">Money Back Guarantee (24h)</span>
+          <span className="font-bold">{t("moneyBack")}</span>
         </div>
       </div>
     </div>

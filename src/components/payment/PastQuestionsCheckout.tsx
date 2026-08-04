@@ -10,6 +10,7 @@ import OrderSummary from "@/components/payment/OrderSummary";
 import STUDENT from "@/services/student.service";
 import { errorMessage } from "@/lib/api";
 import type { PastQuestionsProductResponse, PaymentResponse, CourseListItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const POLL_INTERVAL_MS = 4000;
 const POLL_TIMEOUT_MS = 3 * 60 * 1000;
@@ -22,6 +23,7 @@ interface PastQuestionsCheckoutProps {
 }
 
 export default function PastQuestionsCheckout({ productCode, courseIds }: PastQuestionsCheckoutProps) {
+  const t = useTranslations("payment");
   const [product, setProduct] = useState<PastQuestionsProductResponse | null>(null);
   const [subjects, setSubjects] = useState<CourseListItem[]>([]);
   const [stage, setStage] = useState<Stage>("loading");
@@ -96,7 +98,7 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
       setPaymentId(payment.id);
       setStage("pending");
     } catch (err) {
-      setErrorText(errorMessage(err, "Couldn't start this payment. Please try again."));
+      setErrorText(errorMessage(err, t("couldNotStart")));
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +115,7 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
   if (stage === "not-found" || !product) {
     return (
       <div className="mx-auto max-w-md space-y-3 py-16 text-center">
-        <p className="text-lg font-bold text-gray-900">Unknown plan</p>
+        <p className="text-lg font-bold text-gray-900">{t("unknownPlan")}</p>
         <Link href="/payment/past-questions" className="text-sm font-semibold text-blue-600 hover:underline">
           Back to Past Questions
         </Link>
@@ -142,12 +144,12 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-black text-gray-900 sm:text-2xl">
-            {isSuccess ? "Payment Successful" : "Payment Failed"}
+            {isSuccess ? t("success") : t("failed")}
           </h2>
           <p className="mx-auto max-w-sm text-xs leading-relaxed text-gray-500">
             {isSuccess
               ? `${subjects.length} subject${subjects.length !== 1 ? "s" : ""} unlocked. Happy studying!`
-              : "The transaction didn't go through. This can happen from insufficient balance or a declined authorization. No charge was made."}
+              : t("failedBody")}
           </p>
         </div>
 
@@ -157,12 +159,12 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
             <span className="font-bold text-gray-900">{product.name}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Amount</span>
+            <span>{t("amount")}</span>
             <span className="font-bold text-gray-900">{(resolvedPayment?.amount ?? product.price_xaf).toLocaleString()} XAF</span>
           </div>
           {resolvedPayment?.medium && (
             <div className="flex items-center justify-between">
-              <span>Method</span>
+              <span>{t("method")}</span>
               <span className="font-bold text-gray-900">{resolvedPayment.medium}</span>
             </div>
           )}
@@ -172,7 +174,7 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
           {isSuccess ? (
             <Link href="/dashboard/courses" className="flex-1">
               <Button className="w-full rounded-xl bg-blue-600 text-xs font-bold hover:bg-blue-700">
-                Start Studying
+                {t("startStudying")}
               </Button>
             </Link>
           ) : (
@@ -184,7 +186,7 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
               }}
               className="flex-1 rounded-xl bg-blue-600 text-xs font-bold hover:bg-blue-700"
             >
-              Try Again
+              {t("tryAgain")}
             </Button>
           )}
           <Link href="/settings" className="flex-1">
@@ -203,11 +205,11 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
         <div className="flex justify-center">
           <Loader2 className="size-10 animate-spin text-blue-600" />
         </div>
-        <h2 className="text-lg font-bold text-gray-900">Waiting for confirmation</h2>
+        <h2 className="text-lg font-bold text-gray-900">{t("waiting")}</h2>
         <p className="mx-auto max-w-sm text-xs leading-relaxed text-gray-500">
           {stage === "pending"
-            ? "Check your phone for a payment prompt and enter your PIN to confirm."
-            : "This is taking longer than usual. We'll keep watching for it — you can also check back later in your billing history."}
+            ? t("checkPhone")
+            : t("stillPending")}
         </p>
         <Button
           variant="outline"
@@ -233,7 +235,7 @@ export default function PastQuestionsCheckout({ productCode, courseIds }: PastQu
         </div>
         <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
           <Lock className="size-4 shrink-0" />
-          <span className="uppercase tracking-wider">Secure Checkout</span>
+          <span className="uppercase tracking-wider">{t("secureCheckout")}</span>
         </div>
       </div>
 

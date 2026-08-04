@@ -10,6 +10,7 @@ import OrderSummary from "@/components/payment/OrderSummary";
 import STUDENT from "@/services/student.service";
 import { errorMessage } from "@/lib/api";
 import type { CourseDetailResponse, PaymentResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const POLL_INTERVAL_MS = 4000;
 const POLL_TIMEOUT_MS = 3 * 60 * 1000;
@@ -17,6 +18,7 @@ const POLL_TIMEOUT_MS = 3 * 60 * 1000;
 type Stage = "loading" | "not-found" | "form" | "pending" | "still-pending" | "success" | "failed";
 
 export default function CourseCheckout({ courseId }: { courseId: string }) {
+  const t = useTranslations("payment");
   const [course, setCourse] = useState<CourseDetailResponse | null>(null);
   const [stage, setStage] = useState<Stage>("loading");
   const [method, setMethod] = useState<PaymentMethod>("mtn");
@@ -82,7 +84,7 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
       setPaymentId(payment.id);
       setStage("pending");
     } catch (err) {
-      setErrorText(errorMessage(err, "Couldn't start this payment. Please try again."));
+      setErrorText(errorMessage(err, t("couldNotStart")));
     } finally {
       setSubmitting(false);
     }
@@ -99,7 +101,7 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
   if (stage === "not-found" || !course) {
     return (
       <div className="mx-auto max-w-md space-y-3 py-16 text-center">
-        <p className="text-lg font-bold text-gray-900">Course not found</p>
+        <p className="text-lg font-bold text-gray-900">{t("courseNotFound")}</p>
         <Link href="/dashboard/courses" className="text-sm font-semibold text-blue-600 hover:underline">
           Back to Explore Courses
         </Link>
@@ -126,27 +128,27 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-black text-gray-900 sm:text-2xl">
-            {isSuccess ? "Payment Successful" : "Payment Failed"}
+            {isSuccess ? t("success") : t("failed")}
           </h2>
           <p className="mx-auto max-w-sm text-xs leading-relaxed text-gray-500">
             {isSuccess
-              ? "You now have full access to this course."
-              : "The transaction didn't go through. This can happen from insufficient balance or a declined authorization. No charge was made."}
+              ? t("successCourse")
+              : t("failedBody")}
           </p>
         </div>
 
         <div className="space-y-3 border-t border-gray-100 pt-5 text-left text-xs font-semibold text-gray-600">
           <div className="flex items-center justify-between">
-            <span>Course</span>
+            <span>{t("course")}</span>
             <span className="font-bold text-gray-900">{course.title}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Amount</span>
+            <span>{t("amount")}</span>
             <span className="font-bold text-gray-900">{(resolvedPayment?.amount ?? course.price).toLocaleString()} XAF</span>
           </div>
           {resolvedPayment?.medium && (
             <div className="flex items-center justify-between">
-              <span>Method</span>
+              <span>{t("method")}</span>
               <span className="font-bold text-gray-900">{resolvedPayment.medium}</span>
             </div>
           )}
@@ -168,7 +170,7 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
               }}
               className="flex-1 rounded-xl bg-blue-600 text-xs font-bold hover:bg-blue-700"
             >
-              Try Again
+              {t("tryAgain")}
             </Button>
           )}
           <Link href="/settings" className="flex-1">
@@ -187,11 +189,11 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
         <div className="flex justify-center">
           <Loader2 className="size-10 animate-spin text-blue-600" />
         </div>
-        <h2 className="text-lg font-bold text-gray-900">Waiting for confirmation</h2>
+        <h2 className="text-lg font-bold text-gray-900">{t("waiting")}</h2>
         <p className="mx-auto max-w-sm text-xs leading-relaxed text-gray-500">
           {stage === "pending"
-            ? "Check your phone for a payment prompt and enter your PIN to confirm."
-            : "This is taking longer than usual. We'll keep watching for it — you can also check back later in your billing history."}
+            ? t("checkPhone")
+            : t("stillPending")}
         </p>
         <Button
           variant="outline"
@@ -217,7 +219,7 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
         </div>
         <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
           <Lock className="size-4 shrink-0" />
-          <span className="uppercase tracking-wider">Secure Checkout</span>
+          <span className="uppercase tracking-wider">{t("secureCheckout")}</span>
         </div>
       </div>
 
