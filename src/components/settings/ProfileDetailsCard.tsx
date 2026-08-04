@@ -10,8 +10,10 @@ import { Camera, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import AUTH from "@/services/auth.service";
 import { ApiRequestError, errorMessage, putToPresigned } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 export default function ProfileDetailsCard() {
+  const t = useTranslations("settings");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -53,9 +55,9 @@ export default function ProfileDetailsCard() {
       });
       updateStoredUser(updated);
       setAvatarUrl(updated.avatar_url ?? null);
-      toast.success("Profile updated successfully!");
+      toast.success(t("profileUpdated"));
     } catch (err) {
-      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't update your profile.");
+      toast.error(err instanceof ApiRequestError ? err.detail : t("profileFailed"));
     } finally {
       setLoading(false);
     }
@@ -63,11 +65,11 @@ export default function ProfileDetailsCard() {
 
   async function handlePhotoSelected(file: File) {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file.");
+      toast.error(t("chooseImage"));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Photo must be under 5MB.");
+      toast.error(t("photoTooBig"));
       return;
     }
     setUploading(true);
@@ -75,9 +77,9 @@ export default function ProfileDetailsCard() {
       const presigned = await AUTH.requestAssetUpload(file.name, file.type);
       await putToPresigned(presigned.upload_url, file);
       setAvatarUrl(presigned.file_url);
-      toast.success("Photo uploaded — click Save Changes to apply it.");
+      toast.success(t("photoUploaded"));
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't upload that photo."));
+      toast.error(errorMessage(err, t("photoFailed")));
     } finally {
       setUploading(false);
     }
@@ -93,9 +95,9 @@ export default function ProfileDetailsCard() {
   return (
     <Card className="border border-gray-100 shadow-sm rounded-2xl overflow-hidden bg-white">
       <CardHeader className="border-b border-gray-50 pb-5">
-        <CardTitle className="text-base font-bold text-gray-900">Personal Information</CardTitle>
+        <CardTitle className="text-base font-bold text-gray-900">{t("personalInfo")}</CardTitle>
         <CardDescription className="text-xs text-gray-500">
-          Update your profile details and managing how other users see you.
+          {t("personalInfoDesc")}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
@@ -113,7 +115,7 @@ export default function ProfileDetailsCard() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-blue-600 text-white shadow-md hover:bg-blue-700"
-                aria-label="Upload photo"
+                aria-label={t("uploadPhoto")}
               >
                 {uploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
               </button>
@@ -130,8 +132,8 @@ export default function ProfileDetailsCard() {
               />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-gray-800">Profile Picture</h4>
-              <p className="text-xs text-gray-500 mt-1">JPG, PNG or WebP. Max 5MB.</p>
+              <h4 className="text-sm font-bold text-gray-800">{t("profilePicture")}</h4>
+              <p className="text-xs text-gray-500 mt-1">{t("photoHint")}</p>
             </div>
           </div>
 
@@ -146,7 +148,7 @@ export default function ProfileDetailsCard() {
                 type="text"
                 value={formData.fullName}
                 onChange={handleChange}
-                placeholder="Enter your full name"
+                placeholder={t("enterFullName")}
                 className="h-10 rounded-xl"
                 required
               />
@@ -160,7 +162,7 @@ export default function ProfileDetailsCard() {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder={t("enterEmail")}
                 className="h-10 rounded-xl"
                 required
               />
@@ -174,7 +176,7 @@ export default function ProfileDetailsCard() {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="+237 6XX XXX XXX"
+                placeholder={t("phonePlaceholder")}
                 className="h-10 rounded-xl"
               />
             </div>
@@ -199,7 +201,7 @@ export default function ProfileDetailsCard() {
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-10 px-5 font-semibold text-xs transition-colors flex items-center gap-2 shadow-sm"
             >
               <Save className="size-3.5" />
-              {loading ? "Saving..." : "Save Changes"}
+              {loading ? t("saving") : t("saveChanges")}
             </Button>
           </div>
         </form>

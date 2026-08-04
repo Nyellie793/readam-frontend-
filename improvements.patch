@@ -1062,7 +1062,7 @@ index 70e0c00..c6afd16 100644
 +            type="email"
 +            autoComplete="email"
 +            {...register("email")}
-+            placeholder="alex@student.edu"
++            placeholder="alex@email.com"
 +            className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3.5 text-base text-gray-800 placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-3 focus:ring-blue-100"
            />
 +          {errors.email && (
@@ -1308,7 +1308,7 @@ index 1e1fa4d..0ab1b28 100644
 -            className="mt-1 w-full rounded-xl border px-4 py-3 text-base outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
 +            autoComplete="email"
 +            {...register("email")}
-+            placeholder="alex@student.edu"
++            placeholder="alex@email.com"
 +            className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3.5 text-base text-gray-800 placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-3 focus:ring-blue-100"
            />
 +          {errors.email && (

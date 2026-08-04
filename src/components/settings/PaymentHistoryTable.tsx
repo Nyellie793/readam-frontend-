@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import STUDENT from "@/services/student.service";
 import type { PaymentListItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const STATUS_STYLES: Record<string, string> = {
   successful: "bg-emerald-50 text-emerald-700 border-emerald-100",
@@ -17,6 +18,7 @@ function formatDate(iso: string): string {
 }
 
 export default function PaymentHistoryTable() {
+  const t = useTranslations("settings");
   const [payments, setPayments] = useState<PaymentListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +32,7 @@ export default function PaymentHistoryTable() {
   return (
     <div className="border border-gray-100 bg-white shadow-sm rounded-2xl overflow-hidden">
       <div className="border-b border-gray-50 p-5">
-        <h3 className="text-base font-bold text-gray-900">Billing History</h3>
+        <h3 className="text-base font-bold text-gray-900">{t("billingHistory")}</h3>
         <p className="text-xs text-gray-500 mt-1">Every course purchase and AI credit pack you&apos;ve bought.</p>
       </div>
 
@@ -40,9 +42,9 @@ export default function PaymentHistoryTable() {
             <tr>
               <th scope="col" className="px-6 py-4">Item</th>
               <th scope="col" className="px-6 py-4">Date</th>
-              <th scope="col" className="px-6 py-4">Method</th>
-              <th scope="col" className="px-6 py-4">Amount</th>
-              <th scope="col" className="px-6 py-4">Status</th>
+              <th scope="col" className="px-6 py-4">{t("method")}</th>
+              <th scope="col" className="px-6 py-4">{t("amount")}</th>
+              <th scope="col" className="px-6 py-4">{t("status")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -50,7 +52,7 @@ export default function PaymentHistoryTable() {
               <tr><td colSpan={5} className="px-6 py-6 text-center text-xs text-gray-400">Loading…</td></tr>
             )}
             {!loading && payments.length === 0 && (
-              <tr><td colSpan={5} className="px-6 py-6 text-center text-xs text-gray-400">No payments yet.</td></tr>
+              <tr><td colSpan={5} className="px-6 py-6 text-center text-xs text-gray-400">{t("noPayments")}</td></tr>
             )}
             {payments.map((p) => (
               <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">

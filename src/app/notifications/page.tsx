@@ -8,6 +8,7 @@ import NotificationGroup from "@/components/notifications/NotificationGroup";
 import NotificationCard from "@/components/notifications/NotificationCard";
 import STUDENT from "@/services/student.service";
 import type { NotificationItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 function isToday(iso: string): boolean {
   const d = new Date(iso);
@@ -23,6 +24,7 @@ function isYesterday(iso: string): boolean {
 }
 
 export default function NotificationsPage() {
+  const t = useTranslations("settings");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -66,13 +68,13 @@ export default function NotificationsPage() {
 
           {!loading && notifications.length === 0 && (
             <p className="text-sm text-gray-400">
-              Nothing here yet. You&apos;ll see updates about your payments here as they happen.
+              {t("noNotifications")}
             </p>
           )}
 
           <div className="space-y-8">
             {todayList.length > 0 && (
-              <NotificationGroup title="Today" badgeContent={unreadCount > 0 ? `${unreadCount} NEW` : undefined}>
+              <NotificationGroup title={t("today")} badgeContent={unreadCount > 0 ? `${unreadCount} ${t("new")}` : undefined}>
                 {todayList.map((n) => (
                   <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />
                 ))}
@@ -80,7 +82,7 @@ export default function NotificationsPage() {
             )}
 
             {yesterdayList.length > 0 && (
-              <NotificationGroup title="Yesterday">
+              <NotificationGroup title={t("yesterday")}>
                 {yesterdayList.map((n) => (
                   <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />
                 ))}
@@ -88,7 +90,7 @@ export default function NotificationsPage() {
             )}
 
             {olderList.length > 0 && (
-              <NotificationGroup title="Older">
+              <NotificationGroup title={t("older")}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {olderList.map((n) => (
                     <NotificationCard key={n.id} notification={n} onReadToggle={toggleRead} />

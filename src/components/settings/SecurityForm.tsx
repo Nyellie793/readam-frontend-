@@ -9,8 +9,10 @@ import { toast } from "sonner";
 import AUTH from "@/services/auth.service";
 import { saveSession } from "@/lib/auth";
 import { ApiRequestError } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 export default function SecurityForm() {
+  const t = useTranslations("settings");
   const [loading, setLoading] = useState(false);
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [passwords, setPasswords] = useState({
@@ -28,7 +30,7 @@ export default function SecurityForm() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
-      toast.error("New passwords do not match!");
+      toast.error(t("pwMismatch"));
       return;
     }
 
@@ -41,11 +43,11 @@ export default function SecurityForm() {
       saveSession(data);
       setHasPassword(true);
       toast.success(
-        hasPassword ? "Password changed successfully!" : "Password set — you can now also sign in with email and password."
+        hasPassword ? t("pwChanged") : t("pwSet")
       );
       setPasswords({ current: "", new: "", confirm: "" });
     } catch (err) {
-      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't update your password.");
+      toast.error(err instanceof ApiRequestError ? err.detail : t("pwFailed"));
     } finally {
       setLoading(false);
     }
@@ -58,50 +60,50 @@ export default function SecurityForm() {
           <div>
             <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
               <KeyRound className="size-4 text-blue-600" />
-              {hasPassword === false ? "Set a Password" : "Update Password"}
+              {hasPassword === false ? t("setPasswordTitle") : t("updatePasswordTitle")}
             </h3>
             <p className="text-xs text-gray-500 mt-1">
               {hasPassword === false
-                ? "You signed in with Google and don't have a password yet. Set one to also be able to sign in with your email."
-                : "Ensure your account is using a long, random password to stay secure."}
+                ? t("noPasswordYet")
+                : t("longRandom")}
             </p>
           </div>
 
           <div className="space-y-3">
             {hasPassword !== false && (
               <div className="space-y-1">
-                <label htmlFor="current" className="text-xs font-semibold text-gray-700">Current Password</label>
+                <label htmlFor="current" className="text-xs font-semibold text-gray-700">{t("currentPassword")}</label>
                 <Input
                   id="current"
                   type="password"
                   value={passwords.current}
                   onChange={(e) => setPasswords((p) => ({ ...p, current: e.target.value }))}
-                  placeholder="Enter current password"
+                  placeholder={t("enterCurrent")}
                   className="h-10 rounded-xl"
                   required
                 />
               </div>
             )}
             <div className="space-y-1">
-              <label htmlFor="new" className="text-xs font-semibold text-gray-700">New Password</label>
+              <label htmlFor="new" className="text-xs font-semibold text-gray-700">{t("newPassword")}</label>
               <Input
                 id="new"
                 type="password"
                 value={passwords.new}
                 onChange={(e) => setPasswords((p) => ({ ...p, new: e.target.value }))}
-                placeholder="Minimum 8 characters"
+                placeholder={t("min8")}
                 className="h-10 rounded-xl"
                 required
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="confirm" className="text-xs font-semibold text-gray-700">Confirm New Password</label>
+              <label htmlFor="confirm" className="text-xs font-semibold text-gray-700">{t("confirmNew")}</label>
               <Input
                 id="confirm"
                 type="password"
                 value={passwords.confirm}
                 onChange={(e) => setPasswords((p) => ({ ...p, confirm: e.target.value }))}
-                placeholder="Re-enter new password"
+                placeholder={t("reenterNew")}
                 className="h-10 rounded-xl"
                 required
               />
@@ -114,7 +116,7 @@ export default function SecurityForm() {
               disabled={loading || hasPassword === null}
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-10 px-5 font-semibold text-xs transition-colors"
             >
-              {loading ? "Updating..." : hasPassword === false ? "Set Password" : "Update Password"}
+              {loading ? "Updating..." : hasPassword === false ? "Set Password" : t("updatePasswordTitle")}
             </Button>
           </div>
         </form>

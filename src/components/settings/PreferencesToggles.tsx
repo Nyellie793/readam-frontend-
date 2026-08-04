@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { toast } from "sonner";
 import STUDENT from "@/services/student.service";
 import { ApiRequestError } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 // Custom Switch component for clean styling and state management
 function Switch({
@@ -40,6 +41,7 @@ function Switch({
 type NotificationKey = "email_alerts" | "study_reminders" | "weekly_digest";
 
 export default function PreferencesToggles() {
+  const t = useTranslations("settings");
   const [prefs, setPrefs] = useState<Record<NotificationKey, boolean>>({
     email_alerts: true,
     study_reminders: true,
@@ -67,10 +69,10 @@ export default function PreferencesToggles() {
     setPrefs((prev) => ({ ...prev, [key]: next }));
     try {
       await STUDENT.updateNotificationPrefs({ [key]: next });
-      toast.success("Preference updated!");
+      toast.success(t("prefUpdated"));
     } catch (err) {
       setPrefs((prev) => ({ ...prev, [key]: !next })); // revert on failure
-      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't update preference.");
+      toast.error(err instanceof ApiRequestError ? err.detail : t("prefFailed"));
     }
   }
 
@@ -80,15 +82,15 @@ export default function PreferencesToggles() {
         {/* Notifications Group */}
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-gray-800">Notification Channels</h3>
-            <p className="text-xs text-gray-500 mt-1">Configure where and when you receive study notices.</p>
+            <h3 className="text-sm font-bold text-gray-800">{t("notificationChannels")}</h3>
+            <p className="text-xs text-gray-500 mt-1">{t("notificationChannelsDesc")}</p>
           </div>
 
           <div className="space-y-3.5">
             <div className="flex items-center justify-between py-1">
               <div>
-                <p className="text-xs font-bold text-gray-800">Email Alerts</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">Receive updates on graded exams and teacher feedback.</p>
+                <p className="text-xs font-bold text-gray-800">{t("emailAlerts")}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{t("emailAlertsDesc")}</p>
               </div>
               <Switch
                 checked={prefs.email_alerts}
@@ -98,8 +100,8 @@ export default function PreferencesToggles() {
 
             <div className="flex items-center justify-between py-1 border-t border-gray-50 pt-3">
               <div>
-                <p className="text-xs font-bold text-gray-800">AI Tutor Reminders</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">Get nudges when you have scheduled study goals.</p>
+                <p className="text-xs font-bold text-gray-800">{t("aiReminders")}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{t("aiRemindersDesc")}</p>
               </div>
               <Switch
                 checked={prefs.study_reminders}
@@ -109,8 +111,8 @@ export default function PreferencesToggles() {
 
             <div className="flex items-center justify-between py-1 border-t border-gray-50 pt-3">
               <div>
-                <p className="text-xs font-bold text-gray-800">Weekly Performance Digest</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">Receive weekly course progress and AI analytics review.</p>
+                <p className="text-xs font-bold text-gray-800">{t("weeklyDigest")}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{t("weeklyDigestDesc")}</p>
               </div>
               <Switch
                 checked={prefs.weekly_digest}
@@ -124,13 +126,13 @@ export default function PreferencesToggles() {
         {/* Theme Settings */}
         <div className="space-y-4 border-t border-gray-100 pt-6">
           <div>
-            <h3 className="text-sm font-bold text-gray-800">Appearance Mode</h3>
-            <p className="text-xs text-gray-500 mt-1">Customise how the application looks on your display.</p>
+            <h3 className="text-sm font-bold text-gray-800">{t("appearance")}</h3>
+            <p className="text-xs text-gray-500 mt-1">{t("appearanceDesc")}</p>
           </div>
 
           <div className="flex items-center justify-between py-1">
             <div>
-              <p className="text-xs font-bold text-gray-800">Dark Mode Interface</p>
+              <p className="text-xs font-bold text-gray-800">{t("darkMode")}</p>
               <p className="text-[11px] text-gray-400 mt-0.5">
                 Coming soon.
               </p>

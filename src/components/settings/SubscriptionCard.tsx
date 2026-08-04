@@ -8,12 +8,14 @@ import { Sparkles, Calendar, Infinity as InfinityIcon } from "lucide-react";
 import Link from "next/link";
 import STUDENT from "@/services/student.service";
 import type { EntitlementResponse, ProductResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default function SubscriptionCard() {
+  const t = useTranslations("settings");
   const [entitlements, setEntitlements] = useState<EntitlementResponse[]>([]);
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export default function SubscriptionCard() {
       <CardHeader className="border-b border-gray-50 pb-5">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-base font-bold text-gray-900">AI Session Credits</CardTitle>
+            <CardTitle className="text-base font-bold text-gray-900">{t("aiCredits")}</CardTitle>
             <CardDescription className="text-xs text-gray-500">
               These are prepaid AI-tutor credit packs, not a recurring subscription — no auto-renewal, nothing to cancel.
             </CardDescription>
@@ -56,8 +58,8 @@ export default function SubscriptionCard() {
               <Sparkles className="size-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">No active AI credits</p>
-              <p className="mt-1 text-xs text-gray-500">Buy a credit pack to unlock unlimited or capped AI tutor sessions.</p>
+              <p className="text-sm font-bold text-gray-900">{t("noCredits")}</p>
+              <p className="mt-1 text-xs text-gray-500">{t("buyCreditPack")}</p>
             </div>
             <Link href="/payment">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-9 px-5 text-xs font-semibold">
@@ -75,14 +77,14 @@ export default function SubscriptionCard() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-gray-900">{productName(e.product_code)}</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">Full access to AI study helper and course resources</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{t("fullAccess")}</p>
                   </div>
                 </div>
 
                 <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 flex flex-col justify-between">
                   <div className="space-y-2.5">
                     <div className="flex justify-between items-baseline">
-                      <span className="text-xs text-gray-500">Sessions</span>
+                      <span className="text-xs text-gray-500">{t("sessions")}</span>
                       <span className="text-sm font-bold text-gray-900 flex items-center gap-1">
                         {e.sessions_remaining === null ? (
                           <>
@@ -95,7 +97,7 @@ export default function SubscriptionCard() {
                     </div>
                     {e.daily_session_cap !== null && (
                       <div className="flex justify-between items-center text-xs text-gray-600 border-t border-gray-100 pt-2.5">
-                        <span>Daily limit</span>
+                        <span>{t("dailyLimit")}</span>
                         <span className="font-semibold text-gray-800">{e.daily_session_cap} / day</span>
                       </div>
                     )}

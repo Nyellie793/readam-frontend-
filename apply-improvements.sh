@@ -499,7 +499,7 @@ export default function LoginForm() {
         <div>
           <label className="text-sm font-semibold text-gray-700">Email Address</label>
           <input type="email" autoComplete="email" {...register("email")}
-            placeholder="alex@student.edu"
+            placeholder="alex@email.com"
             className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3.5 text-base placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
         </div>
@@ -627,7 +627,7 @@ export default function SignupForm() {
         <div>
           <label className="text-sm font-semibold text-gray-700">Email Address</label>
           <input type="email" autoComplete="email" {...register("email")}
-            placeholder="alex@student.edu"
+            placeholder="alex@email.com"
             className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3.5 text-base placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
         </div>
