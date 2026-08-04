@@ -1,6 +1,7 @@
 "use client";
 
 import { FileWarning, BookOpen } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface PdfViewerProps {
   title: string;
@@ -8,6 +9,7 @@ interface PdfViewerProps {
 }
 
 export default function PdfViewer({ title, fileUrl }: PdfViewerProps) {
+  const t = useTranslations("dash");
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
       {/* PDF Topbar */}
@@ -27,7 +29,7 @@ export default function PdfViewer({ title, fileUrl }: PdfViewerProps) {
         ) : (
           <div className="flex h-full min-h-[calc(100vh-56px)] flex-col items-center justify-center gap-2 text-gray-400">
             <FileWarning className="size-8" />
-            <p className="text-sm">PDF not uploaded yet.</p>
+            <p className="text-sm">{t("pdfNotUploaded")}</p>
           </div>
         )}
       </div>

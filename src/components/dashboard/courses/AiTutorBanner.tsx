@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface AiTutorBannerProps {
   variant?: "wide" | "compact";
 }
 
 export default function AiTutorBanner({ variant = "wide" }: AiTutorBannerProps) {
+  const t = useTranslations("dash");
   return (
     <div
       className={cn(

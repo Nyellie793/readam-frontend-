@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import STUDENT from "@/services/student.service";
 import type { BadgeItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 const COLORS = [
   "bg-violet-100 text-violet-600",
@@ -12,6 +13,7 @@ const COLORS = [
 ];
 
 export default function RecentBadges() {
+  const t = useTranslations("dash");
   const [badges, setBadges] = useState<BadgeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +41,7 @@ export default function RecentBadges() {
 
       <div className="mt-4 flex gap-3">
         {!loading && badges.length === 0 && (
-          <p className="text-xs text-gray-400">Complete a lesson to earn your first badge.</p>
+          <p className="text-xs text-gray-400">{t("firstBadge")}</p>
         )}
         {badges.slice(0, 3).map((badge, i) => (
           <span

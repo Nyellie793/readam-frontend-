@@ -3,6 +3,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DailyActivityItem } from "@/types/api.types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface DailyStreakProps {
   streakDays: number | null;
@@ -17,9 +18,10 @@ interface DailyStreakProps {
  * dashboard were already making. The parent fetches once and passes down.
  */
 export default function DailyStreak({ streakDays, days, loading }: DailyStreakProps) {
+  const t = useTranslations("dash");
   return (
     <div className="rounded-2xl border bg-white p-5 shadow-sm">
-      <p className="text-sm font-bold">Daily Streak</p>
+      <p className="text-sm font-bold">{t("dailyStreak")}</p>
 
       <div className="mt-3 flex items-center gap-3">
         {loading || streakDays === null ? (
@@ -30,10 +32,10 @@ export default function DailyStreak({ streakDays, days, loading }: DailyStreakPr
 
         <p className="text-xs text-gray-500">
           {loading || streakDays === null
-            ? "Loading your streak…"
+            ? t("loadingStreak")
             : streakDays > 0
-              ? "Days of consistent learning."
-              : "Study today to start a streak."}
+              ? t("daysConsistent")
+              : t("studyToday")}
         </p>
       </div>
 

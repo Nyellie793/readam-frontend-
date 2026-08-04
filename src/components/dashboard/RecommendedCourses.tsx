@@ -5,6 +5,7 @@ import Link from "next/link";
 import STUDENT from "@/services/student.service";
 import type { CourseListItem } from "@/types/api.types";
 import CourseCard from "@/components/dashboard/courses/CourseCard";
+import { useTranslations } from "next-intl";
 
 function CourseCardSkeleton() {
   return (
@@ -17,6 +18,7 @@ function CourseCardSkeleton() {
 }
 
 export default function RecommendedCourses() {
+  const t = useTranslations("dash");
   const [courses, setCourses] = useState<CourseListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,13 +36,13 @@ export default function RecommendedCourses() {
 
   const subtitle = interests.length > 0
     ? `Based on your interest in ${interests.slice(0, 2).join(" and ")}`
-    : "Based on your interests and study history";
+    : t("basedOnInterests");
 
   return (
     <section>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Recommended for You</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t("recommended")}</h2>
           <p className="text-sm text-gray-500">{subtitle}</p>
         </div>
         <Link href="/dashboard/courses" className="text-sm font-semibold text-blue-600 hover:underline">

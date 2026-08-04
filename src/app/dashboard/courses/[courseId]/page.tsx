@@ -11,8 +11,10 @@ import ContinueLearningCard from "@/components/dashboard/courses/ContinueLearnin
 import STUDENT from "@/services/student.service";
 import { ApiRequestError, errorMessage } from "@/lib/api";
 import type { CourseDetailResponse, LessonContentResponse, ModuleLesson } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 export default function LessonPage() {
+  const t = useTranslations("dash");
   const { courseId } = useParams<{ courseId: string }>();
 
   const [course, setCourse] = useState<CourseDetailResponse | null>(null);
@@ -105,7 +107,7 @@ export default function LessonPage() {
         }
         // Anything else (500, timeout, offline) used to be swallowed, leaving
         // an unexplained blank rectangle where the player should be.
-        setLessonError(errorMessage(e, "This lesson could not be loaded."));
+        setLessonError(errorMessage(e, t("lessonFailed")));
       })
       .finally(() => setLessonLoading(false));
   }, [courseId, selectedLessonId, lessonRetry]);
@@ -123,13 +125,13 @@ export default function LessonPage() {
   }
 
   if (courseLoading) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-gray-400">Loading course…</div>;
+    return <div className="flex min-h-screen items-center justify-center text-sm text-gray-400">{t("loadingCourse")}</div>;
   }
 
   if (courseError || !course) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-red-500">
-        {courseError ?? "Course not found."}
+        {courseError ?? t("courseNotFound")}
       </div>
     );
   }
@@ -145,19 +147,19 @@ export default function LessonPage() {
           <div className="min-w-0 flex-1">
             {lessonLoading && (
               <div className="flex aspect-video items-center justify-center rounded-2xl bg-gray-950 text-sm text-white/60">
-                Loading lesson…
+                {t("loadingLesson")}
               </div>
             )}
 
             {!lessonLoading && lessonDenied && (
               <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-2xl bg-gray-950 text-white/80">
                 <Lock className="size-8" />
-                <p className="text-sm">Purchase this course to access this lesson.</p>
+                <p className="text-sm">{t("purchaseToAccess")}</p>
                 <Link
                   href={`/checkout?course=${courseId}`}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                 >
-                  Buy Course — {course.price.toLocaleString()} XAF
+                  {t("buyCourse")} — {course.price.toLocaleString()} XAF
                 </Link>
               </div>
             )}
@@ -171,7 +173,7 @@ export default function LessonPage() {
                   onClick={() => setLessonRetry((n) => n + 1)}
                   className="rounded-lg border border-white/20 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/10"
                 >
-                  Try again
+                  {t("tryAgain")}
                 </button>
               </div>
             )}
@@ -191,7 +193,7 @@ export default function LessonPage() {
 
             {!lessonLoading && !lessonDenied && !lessonError && lesson?.type === "video" && !lesson.content_url && (
               <div className="flex aspect-video items-center justify-center rounded-2xl bg-gray-950 text-sm text-white/60">
-                Video not uploaded yet.
+                {t("videoNotUploaded")}
               </div>
             )}
 
@@ -218,13 +220,13 @@ export default function LessonPage() {
 
             {upNext.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-lg font-bold text-gray-900">Up Next</h2>
+                <h2 className="text-lg font-bold text-gray-900">{t("upNext")}</h2>
                 <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-3">
                   {upNext.map((item) => (
                     <ContinueLearningCard
                       key={item.id}
                       title={item.title}
-                      meta={item.is_preview ? "Free preview" : "Next in course"}
+                      meta={item.is_preview ? t("freePreview") : t("nextInCourse")}
                       durationSeconds={item.duration_seconds}
                       image={course.thumbnail_url}
                       onClick={() => setSelectedLessonId(item.id)}

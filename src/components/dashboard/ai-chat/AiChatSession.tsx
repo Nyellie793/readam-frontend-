@@ -30,6 +30,7 @@ import type {
   QuizResponse,
 } from "@/types/api.types";
 import type { User } from "@/types/user.types";
+import { useTranslations } from "next-intl";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -74,6 +75,7 @@ function formatContent(text: string) {
 // ─── Message bubble ───────────────────────────────────────────────────────────
 
 function MessageBubble({ msg, user }: { msg: AIMessageResponse; user: User | null }) {
+  const t = useTranslations("dash");
   const isTutor = msg.role === "assistant";
   const initials = (user?.full_name ?? "S")
     .split(" ")
@@ -141,7 +143,7 @@ function MessageBubble({ msg, user }: { msg: AIMessageResponse; user: User | nul
         </div>
 
         <p className="text-[11px] text-gray-400">
-          {isTutor ? "AI Tutor" : "You"} &middot; {timeAgo(msg.created_at)}
+          {isTutor ? t("aiTutor") : t("you")} &middot; {timeAgo(msg.created_at)}
         </p>
       </div>
     </div>
@@ -170,6 +172,7 @@ function TypingBubble() {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AiChatSession() {
+  const t = useTranslations("dash");
   const router = useRouter();
   const searchParams = useSearchParams();
   const initRan = useRef(false);
@@ -258,10 +261,10 @@ export default function AiChatSession() {
           setGeneratingRevision(true);
           try {
             await AI.generateRevision(started.id);
-            toast.success("Revision summary generated.");
+            toast.success(t("revisionGenerated"));
             await refreshSummary(started.id);
           } catch (err) {
-            toast.error(errorMessage(err, "Couldn't generate a revision summary."));
+            toast.error(errorMessage(err, t("revisionFailed")));
           } finally {
             setGeneratingRevision(false);
           }
@@ -273,7 +276,7 @@ export default function AiChatSession() {
             setActiveQuiz(quiz);
             await refreshSummary(started.id);
           } catch (err) {
-            toast.error(errorMessage(err, "Couldn't generate a quiz."));
+            toast.error(errorMessage(err, t("quizFailed")));
           } finally {
             setGeneratingQuiz(false);
           }
@@ -281,10 +284,10 @@ export default function AiChatSession() {
           setGeneratingStudyPlan(true);
           try {
             await AI.generateStudyPlan(started.id);
-            toast.success("Study plan generated.");
+            toast.success(t("planGenerated"));
             await refreshSummary(started.id);
           } catch (err) {
-            toast.error(errorMessage(err, "Couldn't generate a study plan."));
+            toast.error(errorMessage(err, t("planFailed")));
           } finally {
             setGeneratingStudyPlan(false);
           }
@@ -294,7 +297,7 @@ export default function AiChatSession() {
             const resp = await AI.sendMessage(started.id, topic);
             setMessages([resp.user_message, resp.assistant_message]);
           } catch (err) {
-            toast.error(errorMessage(err, "Couldn't send your message."));
+            toast.error(errorMessage(err, t("sendFailed")));
           } finally {
             setSending(false);
           }
@@ -302,7 +305,7 @@ export default function AiChatSession() {
       } catch (err) {
         setInitError({
           status: err instanceof ApiRequestError ? err.status : 500,
-          detail: errorMessage(err, "Something went wrong starting your session."),
+          detail: errorMessage(err, t("somethingWrongSession")),
         });
       } finally {
         setLoading(false);
@@ -333,7 +336,7 @@ export default function AiChatSession() {
     const text = input.trim();
     if (!text || !session || sending) return;
     if (!isActive) {
-      toast.error("This session has expired. Start a new one from the AI Hub.");
+      toast.error(t("sessionExpired"));
       return;
     }
 
@@ -364,7 +367,7 @@ export default function AiChatSession() {
       if (err instanceof ApiRequestError && err.status === 409) {
         setRemainingSeconds(0);
       }
-      toast.error(errorMessage(err, "Message failed to send."));
+      toast.error(errorMessage(err, t("msgFailed")));
     } finally {
       setSending(false);
     }
@@ -386,7 +389,7 @@ export default function AiChatSession() {
       const uploaded = await AI.uploadFile(file);
       setPendingAttachment({ id: uploaded.attachment_id, filename: file.name });
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't upload that file."));
+      toast.error(errorMessage(err, t("uploadFailed")));
     } finally {
       setUploading(false);
     }
@@ -397,10 +400,10 @@ export default function AiChatSession() {
     setGeneratingRevision(true);
     try {
       await AI.generateRevision(session.id);
-      toast.success("Revision summary generated.");
+      toast.success(t("revisionGenerated"));
       await refreshSummary(session.id);
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't generate a revision summary."));
+      toast.error(errorMessage(err, t("revisionFailed")));
     } finally {
       setGeneratingRevision(false);
     }
@@ -415,7 +418,7 @@ export default function AiChatSession() {
       setActiveQuiz(quiz);
       await refreshSummary(session.id);
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't generate a quiz."));
+      toast.error(errorMessage(err, t("quizFailed")));
     } finally {
       setGeneratingQuiz(false);
     }
@@ -426,10 +429,10 @@ export default function AiChatSession() {
     setGeneratingStudyPlan(true);
     try {
       await AI.generateStudyPlan(session.id);
-      toast.success("Study plan generated.");
+      toast.success(t("planGenerated"));
       await refreshSummary(session.id);
     } catch (err) {
-      toast.error(errorMessage(err, "Couldn't generate a study plan."));
+      toast.error(errorMessage(err, t("planFailed")));
     } finally {
       setGeneratingStudyPlan(false);
     }
@@ -450,11 +453,11 @@ export default function AiChatSession() {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 px-6 text-center">
         <p className="text-lg font-bold text-gray-900">
-          {noCredits ? "No AI sessions remaining" : "Couldn't start this session"}
+          {noCredits ? t("noCredits") : t("sessionStartFailed")}
         </p>
         <p className="max-w-sm text-sm text-gray-500">
           {noCredits
-            ? "You've used up your AI tutor credits. Buy more to keep chatting, generating quizzes, and more."
+            ? t("noCreditsBody")
             : initError.detail}
         </p>
         {noCredits ? (
@@ -479,8 +482,8 @@ export default function AiChatSession() {
   const lessonLabel = summary?.lesson_title
     ? `Topic: ${summary.lesson_title}`
     : session?.session_type === "lesson"
-      ? "Topic: this lesson"
-      : "General session";
+      ? t("topicThisLesson")
+      : t("generalSession");
 
   return (
     <div className="flex h-[calc(100vh-0px)] flex-col overflow-hidden">
@@ -490,13 +493,13 @@ export default function AiChatSession() {
           <Link
             href="/dashboard/ai-tutor/ai-hub"
             className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
-            aria-label="Back to AI Hub"
+            aria-label={t("backToHub")}
           >
             <ArrowLeft className="size-5" />
           </Link>
 
           <div>
-            <h1 className="text-sm font-bold text-gray-900">AI Active Session</h1>
+            <h1 className="text-sm font-bold text-gray-900">{t("aiActiveSession")}</h1>
             <div className="flex items-center gap-1.5">
               <span className={cn("size-2 rounded-full", isActive ? "bg-green-500" : "bg-gray-300")} />
               <p className="text-xs text-gray-500">{lessonLabel}</p>
@@ -508,7 +511,7 @@ export default function AiChatSession() {
           <Link
             href="/notifications"
             className="relative rounded-full p-2 text-gray-500 hover:bg-gray-100"
-            aria-label="Notifications"
+            aria-label={t("notifications")}
           >
             <Bell className="size-4" />
             {hasUnread && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-red-500" />}
@@ -525,7 +528,7 @@ export default function AiChatSession() {
             <div className="space-y-5 pb-4">
               {messages.length === 0 && !sending && (
                 <p className="pt-10 text-center text-sm text-gray-400">
-                  Ask a question to get started.
+                  {t("askToStart")}
                 </p>
               )}
               {messages.map((msg) => (
@@ -542,7 +545,7 @@ export default function AiChatSession() {
               <p className="mb-2 text-center text-xs font-semibold text-orange-500">
                 This session has expired.{" "}
                 <Link href="/dashboard/ai-tutor/ai-hub" className="underline">
-                  Start a new one
+                  {t("startNewOne")}
                 </Link>
               </p>
             )}
@@ -551,7 +554,7 @@ export default function AiChatSession() {
               <div className="mb-2 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700">
                 <FileText className="size-3.5 shrink-0" />
                 <span className="flex-1 truncate">{pendingAttachment.filename}</span>
-                <button onClick={() => setPendingAttachment(null)} aria-label="Remove attachment">
+                <button onClick={() => setPendingAttachment(null)} aria-label={t("removeAttachment")}>
                   <X className="size-3.5" />
                 </button>
               </div>
@@ -567,7 +570,7 @@ export default function AiChatSession() {
               />
               <button
                 type="button"
-                aria-label="Attach file"
+                aria-label={t("attachFile")}
                 disabled={!isActive || uploading}
                 onClick={() => fileInputRef.current?.click()}
                 className="mb-1 shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-40"
@@ -579,7 +582,7 @@ export default function AiChatSession() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask a question or explain your reasoning..."
+                placeholder={t("askPlaceholder")}
                 rows={1}
                 disabled={!isActive}
                 className="flex-1 resize-none bg-transparent py-1.5 text-sm text-gray-800 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed"
@@ -588,9 +591,9 @@ export default function AiChatSession() {
 
               <button
                 type="button"
-                aria-label="Voice input"
+                aria-label={t("voiceInput")}
                 disabled
-                title="Voice input isn't available yet."
+                title={t("voiceUnavailable")}
                 className="mb-1 shrink-0 rounded-lg p-1.5 text-gray-300"
               >
                 <Mic className="size-4" />
@@ -613,7 +616,7 @@ export default function AiChatSession() {
             </div>
 
             <p className="mt-1.5 text-center text-[11px] text-gray-400">
-              ReadAm AI can make mistakes. Verify important information.
+              {t("aiDisclaimer")}
             </p>
           </div>
         </div>
@@ -649,13 +652,13 @@ export default function AiChatSession() {
             <p className="truncate text-sm font-semibold text-gray-900">
               {user?.full_name ?? "Student"}
             </p>
-            <p className="text-xs text-orange-500">{streakDays} Day Streak 🔥</p>
+            <p className="text-xs text-orange-500">{streakDays} {t("dayStreak")} 🔥</p>
           </div>
           <Link
             href="/payment/ai-sessions"
             className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-blue-700"
           >
-            Get More Credits
+            {t("getMoreCredits")}
           </Link>
         </div>
       </div>

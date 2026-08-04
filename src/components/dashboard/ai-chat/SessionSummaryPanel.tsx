@@ -11,6 +11,7 @@ import {
   CalendarCheck,
 } from "lucide-react";
 import type { SessionSummaryResponse, QuizResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 interface SessionSummaryPanelProps {
   sessionType: "lesson" | "general";
@@ -50,10 +51,11 @@ export default function SessionSummaryPanel({
   onOpenQuiz,
   cachedQuizzesById,
 }: SessionSummaryPanelProps) {
+  const t = useTranslations("dash");
   return (
     <aside className="hidden w-72 shrink-0 space-y-4 overflow-y-auto lg:block">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-gray-900">Session Summary</h2>
+        <h2 className="font-bold text-gray-900">{t("sessionSummary")}</h2>
         <span
           className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
             isActive
@@ -81,7 +83,7 @@ export default function SessionSummaryPanel({
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-50">
                       <Lightbulb className="size-4 text-blue-600" />
                     </div>
-                    <p className="text-sm font-semibold text-gray-900">Revision Summary</p>
+                    <p className="text-sm font-semibold text-gray-900">{t("revisionSummary")}</p>
                   </summary>
                   <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-gray-600">
                     {r.content}
@@ -111,7 +113,7 @@ export default function SessionSummaryPanel({
                         Quiz &middot; {q.num_questions} questions
                       </p>
                       <p className="mt-0.5 text-xs text-gray-500">
-                        {q.taken ? `Best: ${q.best_score}/${q.best_total}` : "Not attempted yet"}
+                        {q.taken ? `Best: ${q.best_score}/${q.best_total}` : t("notAttempted")}
                       </p>
                     </div>
                   </button>
@@ -126,7 +128,7 @@ export default function SessionSummaryPanel({
                 <div key={p.id} className="rounded-2xl border-2 border-purple-200 bg-purple-50 p-4">
                   <div className="flex items-center gap-2">
                     <BarChart3 className="size-4 text-purple-600" />
-                    <p className="text-sm font-semibold text-purple-700">Study Plan Ready</p>
+                    <p className="text-sm font-semibold text-purple-700">{t("studyPlanReady")}</p>
                   </div>
                   <p className="mt-1.5 text-xs text-purple-600">
                     Generated {new Date(p.created_at).toLocaleString()}

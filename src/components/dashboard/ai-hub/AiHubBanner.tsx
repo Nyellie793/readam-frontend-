@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function AiHubBanner() {
+  const t = useTranslations("dash");
   return (
     <div className="relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-700 p-6 text-white sm:p-8">
       <div className="pointer-events-none absolute inset-0 opacity-20">

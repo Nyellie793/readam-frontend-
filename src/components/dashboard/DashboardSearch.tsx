@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/Input";
+import { useTranslations } from "next-intl";
 
 export default function DashboardSearch() {
+  const t = useTranslations("dash");
   const router = useRouter();
   const [value, setValue] = useState("");
 
@@ -22,7 +24,7 @@ export default function DashboardSearch() {
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Search courses..."
+        placeholder={t("searchCoursesShort")}
         className="h-12 w-full rounded-full border-gray-200 bg-white pl-12 shadow-sm"
       />
     </form>

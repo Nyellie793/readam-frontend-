@@ -7,6 +7,7 @@ import STUDENT from "@/services/student.service";
 import type { DailyActivityItem } from "@/types/api.types";
 import DailyStreak from "./DailyStreak";
 import RecentBadges from "./RecentBadges";
+import { useTranslations } from "next-intl";
 
 function dayOfMonth(isoDate: string): string {
   return String(Number(isoDate.slice(-2)));
@@ -18,6 +19,7 @@ function dayOfMonth(isoDate: string): string {
  * from every dashboard load.
  */
 export default function WeeklyActivity() {
+  const t = useTranslations("dash");
   const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
   const [days, setDays] = useState<DailyActivityItem[]>([]);
   const [weekDays, setWeekDays] = useState<DailyActivityItem[]>([]);
@@ -63,9 +65,9 @@ export default function WeeklyActivity() {
       {failed ? (
         <div className="flex flex-col items-start gap-3 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <div>
-            <h3 className="text-sm font-bold text-gray-900">Weekly Study Activity</h3>
+            <h3 className="text-sm font-bold text-gray-900">{t("weeklyActivity")}</h3>
             <p className="mt-1 text-xs text-gray-500">
-              Your activity chart could not be loaded. Your XP is unaffected.
+              {t("activityFailed")}
             </p>
           </div>
           <button
@@ -74,13 +76,13 @@ export default function WeeklyActivity() {
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline"
           >
             <RotateCw className="size-3.5" />
-            Retry
+            {t("retry")}
           </button>
         </div>
       ) : (
         <Chart
-          title="Weekly Study Activity"
-          subtitle="XP earned per day"
+          title={t("weeklyActivity")}
+          subtitle={t("xpPerDay")}
           data={chartData}
           period={period}
           onPeriodChange={setPeriod}

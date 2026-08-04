@@ -9,6 +9,7 @@ import AiTutorBanner from "@/components/dashboard/courses/AiTutorBanner";
 import CourseFilters from "@/components/dashboard/courses/CourseFilters";
 import STUDENT from "@/services/student.service";
 import type { CourseListItem } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 function CourseCardSkeleton() {
   return (
@@ -21,6 +22,7 @@ function CourseCardSkeleton() {
 }
 
 function CoursesPageContent() {
+  const t = useTranslations("dash");
   const searchParams = useSearchParams();
   const category = searchParams.get("category") ?? "";
   const contentTypes = searchParams.getAll("content_type");
@@ -70,7 +72,7 @@ function CoursesPageContent() {
 
   const recommendedSubtitle = interests.length > 0
     ? `Based on your interest in ${interests.slice(0, 2).join(" and ")}`
-    : "Based on your interests and study history";
+    : t("basedOnInterests");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,12 +82,12 @@ function CoursesPageContent() {
         <button
           onClick={() => setDrawerOpen(true)}
           className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100"
-          aria-label="Open filters"
+          aria-label={t("openFilters")}
         >
           <Menu size={20} />
         </button>
 
-        <span className="text-sm font-semibold text-gray-800">Explore Courses</span>
+        <span className="text-sm font-semibold text-gray-800">{t("exploreCourses")}</span>
 
         <div className="flex items-center gap-1">
           <button onClick={() => setSearchOpen(o => !o)}
@@ -109,7 +111,7 @@ function CoursesPageContent() {
             autoFocus
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search for courses..."
+            placeholder={t("searchCourses")}
             className="flex-1 bg-transparent text-sm outline-none"
           />
           <button onClick={() => setSearchOpen(false)}>
@@ -144,7 +146,7 @@ function CoursesPageContent() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search for engineering or design courses..."
+            placeholder={t("searchCourses")}
             className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:bg-white"
           />
         </div>
@@ -156,7 +158,7 @@ function CoursesPageContent() {
       <main className="min-w-0 px-4 py-8 sm:px-6 lg:px-10">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Recommended for You</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t("recommended")}</h1>
             <p className="mt-1 text-sm text-gray-500">{recommendedSubtitle}</p>
           </div>
         </div>
@@ -165,7 +167,7 @@ function CoursesPageContent() {
           {recommendedLoading
             ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)
             : recommended.length === 0
-            ? <p className="text-sm text-gray-500">No recommendations yet.</p>
+            ? <p className="text-sm text-gray-500">{t("noRecommendations")}</p>
             : recommended.map(course => (
                 <CourseCard key={course.id} course={course} />
               ))}
@@ -173,12 +175,12 @@ function CoursesPageContent() {
 
         <div className="mt-10">
           <h2 className="text-2xl font-bold text-gray-900">
-            {search ? `Results for "${search}"` : "Browse All Courses"}
+            {search ? `Results for "${search}"` : t("browseAll")}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
             {category || contentTypes.length > 0 || officialOnly
-              ? "Filtered results"
-              : "All published courses on the platform"}
+              ? t("filteredResults")
+              : t("allPublished")}
           </p>
         </div>
 
@@ -188,7 +190,7 @@ function CoursesPageContent() {
           {browseLoading
             ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)
             : browseResults.length === 0
-            ? <p className="text-sm text-gray-500">No courses found.</p>
+            ? <p className="text-sm text-gray-500">{t("noCourses")}</p>
             : browseResults.map(course => (
                 <CourseCard key={course.id} course={course} />
               ))}

@@ -5,8 +5,10 @@ import { Flame } from "lucide-react";
 import STUDENT from "@/services/student.service";
 import type { DailyActivityItem } from "@/types/api.types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export default function AiHubLearningStreak() {
+  const t = useTranslations("dash");
   const [streakDays, setStreakDays] = useState(0);
   const [totalXp, setTotalXp] = useState(0);
   const [days, setDays] = useState<DailyActivityItem[]>([]);
@@ -29,7 +31,7 @@ export default function AiHubLearningStreak() {
   return (
     <div className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-gray-900">Learning Streak</h3>
+        <h3 className="font-bold text-gray-900">{t("learningStreak")}</h3>
         <div className="flex size-8 items-center justify-center rounded-full bg-orange-100">
           <Flame className="size-4 text-orange-500" />
         </div>
@@ -46,7 +48,7 @@ export default function AiHubLearningStreak() {
           <p className="text-xl font-extrabold text-gray-900">{loading ? "…" : totalXp.toLocaleString()}</p>
         </div>
         <div className="rounded-xl bg-gray-50 px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Active Days</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">{t("activeDays")}</p>
           <p className="text-xl font-extrabold text-gray-900">{loading ? "…" : `${weeklyGoalPct}%`}</p>
         </div>
       </div>
@@ -67,12 +69,12 @@ export default function AiHubLearningStreak() {
 
       <div className="mt-4 border-t border-gray-100 pt-4">
         <p className="text-sm font-semibold text-gray-800">
-          {streakDays > 0 ? "Keep going!" : "Start a session today to begin your streak."}
+          {streakDays > 0 ? t("keepGoing") : t("startToday")}
         </p>
         <p className="text-xs text-gray-500">
           {activeDaysThisWeek > 0
             ? `You've studied ${activeDaysThisWeek} of the last ${days.length || 7} days.`
-            : "No activity yet this week."}
+            : t("noActivityWeek")}
         </p>
       </div>
     </div>

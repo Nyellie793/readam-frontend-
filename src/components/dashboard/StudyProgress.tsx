@@ -5,6 +5,7 @@ import { RotateCw } from "lucide-react";
 import STUDENT from "@/services/student.service";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GamificationResponse } from "@/types/api.types";
+import { useTranslations } from "next-intl";
 
 /**
  * These tiles used to initialise to 0 with no loading or error state, so a
@@ -13,6 +14,7 @@ import type { GamificationResponse } from "@/types/api.types";
  * genuinely lost the streak.
  */
 export default function StudyProgress() {
+  const t = useTranslations("dash");
   const [data, setData] = useState<GamificationResponse | null>(null);
   const [enrollmentCount, setEnrollmentCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,16 +40,16 @@ export default function StudyProgress() {
   }, [load]);
 
   const stats = [
-    { label: "Enrolled Courses", value: enrollmentCount, suffix: "" },
-    { label: "Study Streak", value: data?.current_streak_days ?? null, suffix: " days" },
-    { label: "Total XP", value: data?.total_xp ?? null, suffix: " xp" },
-    { label: "Longest Streak", value: data?.longest_streak_days ?? null, suffix: " days" },
+    { label: t("enrolledCourses"), value: enrollmentCount, suffix: "" },
+    { label: t("studyStreak"), value: data?.current_streak_days ?? null, suffix: t("days") },
+    { label: t("totalXp"), value: data?.total_xp ?? null, suffix: t("xp") },
+    { label: t("longestStreak"), value: data?.longest_streak_days ?? null, suffix: t("days") },
   ];
 
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-base font-bold">Study Progress</h2>
+        <h2 className="text-base font-bold">{t("studyProgress")}</h2>
         {failed && (
           <button
             type="button"
@@ -55,15 +57,14 @@ export default function StudyProgress() {
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline"
           >
             <RotateCw className="size-3.5" />
-            Retry
+            {t("retry")}
           </button>
         )}
       </div>
 
       {failed ? (
         <div className="rounded-xl border border-gray-100 bg-white p-5 text-sm text-gray-500 shadow-sm">
-          Your progress could not be loaded just now. This does not affect your
-          streak or your XP.
+          {t("progressFailed")}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

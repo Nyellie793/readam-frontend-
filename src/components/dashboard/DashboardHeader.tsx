@@ -6,8 +6,10 @@ import DashboardGreeting from "./DashboardGreeting";
 import DashboardMobileSidebar from "./DashboardMobileSidebar";
 import DashboardSearch from "./DashboardSearch";
 import DashboardActions from "./DashboardActions";
+import { useTranslations } from "next-intl";
 
 export default function DashboardHeader() {
+  const t = useTranslations("dash");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -19,7 +21,7 @@ export default function DashboardHeader() {
           <button
             onClick={() => setSidebarOpen(true)}
             className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100"
-            aria-label="Open menu"
+            aria-label={t("openMenu")}
           >
             <Menu size={22} />
           </button>
@@ -34,13 +36,13 @@ export default function DashboardHeader() {
           >
             <Search className="size-5" />
           </button>
-          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label="Notifications">
+          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label={t("notifications")}>
             <Bell className="size-5" />
           </button>
-          <button className="rounded-full p-2 text-violet-500 hover:bg-gray-100" aria-label="AI Assistant">
+          <button className="rounded-full p-2 text-violet-500 hover:bg-gray-100" aria-label={t("aiAssistant")}>
             <Sparkles className="size-5" />
           </button>
-          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label="Settings">
+          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label={t("settings")}>
             <Settings className="size-5" />
           </button>
         </div>
@@ -53,7 +55,7 @@ export default function DashboardHeader() {
             <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
             <input
               autoFocus
-              placeholder="Search courses..."
+              placeholder={t("searchCoursesShort")}
               className="h-11 w-full rounded-full border border-gray-200 bg-white pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>

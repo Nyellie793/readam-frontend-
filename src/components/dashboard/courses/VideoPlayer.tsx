@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { Captions, CaptionsOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface VideoCaptions {
   en: string | null;
@@ -26,6 +27,7 @@ export default function VideoPlayer({
   onProgress,
   captions,
 }: VideoPlayerProps) {
+  const t = useTranslations("dash");
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastReportedRef = useRef(0);
   const locale = useLocale();
@@ -131,7 +133,7 @@ export default function VideoPlayer({
             className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
           >
             {showCaptions ? <Captions className="size-4" /> : <CaptionsOff className="size-4" />}
-            {showCaptions ? "Subtitles on" : "Subtitles off"}
+            {showCaptions ? t("subtitlesOn") : t("subtitlesOff")}
           </button>
 
           {showCaptions && trackCount > 1 && (
@@ -158,7 +160,7 @@ export default function VideoPlayer({
 
       {captions?.status === "pending" && (
         <p className="border-t border-white/10 bg-gray-950 px-3 py-2 text-xs text-white/40">
-          Subtitles are still being generated for this lesson.
+          {t("subtitlesPending")}
         </p>
       )}
     </div>

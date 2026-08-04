@@ -5,15 +5,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getStoredUser } from "@/lib/auth";
 import type { User } from "@/types/user.types";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function DashboardGreeting() {
+  const t = useTranslations("dash");
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     setUser(getStoredUser());
   }, []);
 
-  const name = user?.full_name ?? "Student";
+  const name = user?.full_name ?? t("student");
 
   const initials = name
     .split(" ")
@@ -28,11 +30,11 @@ export default function DashboardGreeting() {
         const hour = new Date().getHours();
     
         if (hour < 12)
-            setGreeting("Good Morning");
+            setGreeting(t("goodMorning"));
         else if (hour < 17)
-            setGreeting("Good Afternoon");
+            setGreeting(t("goodAfternoon"));
         else
-            setGreeting("Good Evening");
+            setGreeting(t("goodEvening"));
     }, []);
 
   return (

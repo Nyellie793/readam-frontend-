@@ -9,16 +9,15 @@ import { STUDENT_NAV } from "@/constants/student-nav";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import STUDENT from "@/services/student.service";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 // Real backend LessonType values — a course "matches" a checked type if it
 // has at least one lesson of that type (see course_service.list_published_courses).
 const CONTENT_TYPES = [
-  { id: "video", label: "Video Lessons" },
-  { id: "pdf", label: "PDF Guides" },
-  { id: "quiz", label: "Practice Tests" },
+  { id: "video", labelKey: "videoLessons" },
+  { id: "pdf", labelKey: "pdfGuides" },
+  { id: "quiz", labelKey: "practiceTests" },
 ];
-
-const CATEGORIES = [{ value: "", label: "All Categories" }, ...COURSE_CATEGORIES];
 
 interface CourseFiltersProps {
   onNavigate?: () => void;
@@ -29,6 +28,8 @@ export default function CourseFilters({
   onNavigate,
   showLogo = true,
 }: CourseFiltersProps) {
+  const t = useTranslations("dash");
+  const CATEGORIES = [{ value: "", label: t("allCategories") }, ...COURSE_CATEGORIES];
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -101,7 +102,7 @@ export default function CourseFilters({
       </nav>
 
       <div className="mt-6 border-t border-gray-100 px-6 pt-6">
-        <p className="text-sm font-bold text-gray-900">Content Type</p>
+        <p className="text-sm font-bold text-gray-900">{t("contentType")}</p>
         <div className="mt-3 flex flex-col gap-2.5">
           {CONTENT_TYPES.map((type) => (
             <label
@@ -114,7 +115,7 @@ export default function CourseFilters({
                 onChange={() => toggleType(type.id)}
                 className="size-4 rounded border-gray-300 accent-blue-600"
               />
-              {type.label}
+              {t(type.labelKey)}
             </label>
           ))}
         </div>
@@ -128,12 +129,12 @@ export default function CourseFilters({
             onChange={toggleOfficialOnly}
             className="size-4 rounded border-gray-300 accent-blue-600"
           />
-          <span className="font-bold text-gray-900">Official Past Questions Only</span>
+          <span className="font-bold text-gray-900">{t("officialOnly")}</span>
         </label>
       </div>
 
       <div className="mt-6 border-t border-gray-100 px-6 pt-6">
-        <p className="text-sm font-bold text-gray-900">Category</p>
+        <p className="text-sm font-bold text-gray-900">{t("category")}</p>
         <div className="relative mt-3">
           <select
             value={category}

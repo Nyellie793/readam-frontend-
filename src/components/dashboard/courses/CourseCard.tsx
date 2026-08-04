@@ -9,8 +9,10 @@ import type { CourseListItem } from "@/types/api.types";
 import STUDENT from "@/services/student.service";
 import { ApiRequestError } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export default function CourseCard({ course }: { course: CourseListItem }) {
+  const t = useTranslations("dash");
   const isVideo = course.has_video;
   const isFree = course.price === 0 && !course.is_premium;
   const [enrolling, setEnrolling] = useState(false);
@@ -28,7 +30,7 @@ export default function CourseCard({ course }: { course: CourseListItem }) {
       setEnrolled(true);
       toast.success(`Enrolled in ${course.title}`);
     } catch (err) {
-      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't enroll. Try again.");
+      toast.error(err instanceof ApiRequestError ? err.detail : t("enrollFailed"));
     } finally {
       setEnrolling(false);
     }
@@ -44,7 +46,7 @@ export default function CourseCard({ course }: { course: CourseListItem }) {
       await (next ? STUDENT.saveCourse(course.id) : STUDENT.unsaveCourse(course.id));
       setSaved(next);
     } catch (err) {
-      toast.error(err instanceof ApiRequestError ? err.detail : "Couldn't update saved courses.");
+      toast.error(err instanceof ApiRequestError ? err.detail : t("savedFailed"));
     } finally {
       setSavingBusy(false);
     }
@@ -95,7 +97,7 @@ export default function CourseCard({ course }: { course: CourseListItem }) {
           </h3>
           <button
             type="button"
-            aria-label={saved ? "Remove from saved courses" : "Save course"}
+            aria-label={saved ? t("unsaveCourse") : t("saveCourse")}
             onClick={handleToggleSave}
             disabled={savingBusy}
             className="shrink-0 text-gray-400 transition-colors hover:text-gray-700"
@@ -141,7 +143,7 @@ export default function CourseCard({ course }: { course: CourseListItem }) {
               )}
             >
               {enrolling && <Loader2 className="size-3.5 animate-spin" />}
-              {enrolled ? "Enrolled" : enrolling ? "Enrolling…" : "Enroll Now"}
+              {enrolled ? t("enrolled") : enrolling ? t("enrolling") : t("enrollNow")}
             </button>
           ) : course.is_premium ? (
             <Link

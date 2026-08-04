@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BookOpen, BrainCircuit, FileText, CalendarCheck, ArrowRight } from "lucide-react";
 import LessonPicker from "./LessonPicker";
+import { useTranslations } from "next-intl";
 
 type Feature = {
   icon: typeof BookOpen;
@@ -19,57 +20,59 @@ type Feature = {
   | { needsLesson: false; href: string }
 );
 
-const FEATURES: Feature[] = [
-  {
-    icon: BookOpen,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    title: "Quick Revision",
-    desc: "Summarize complex chapters and generate key takeaways for a rapid refresh before class.",
-    cta: "Start Session",
-    ctaColor: "text-blue-600",
-    needsLesson: true,
-    intent: "revision",
-    pickerTitle: "Choose a lesson to revise",
-  },
-  {
-    icon: BrainCircuit,
-    color: "text-teal-600",
-    bg: "bg-teal-50",
-    title: "Adaptive Quiz",
-    desc: "Test your knowledge with dynamic questions that adjust difficulty based on your performance.",
-    cta: "Test Knowledge",
-    ctaColor: "text-teal-600",
-    needsLesson: true,
-    intent: "quiz",
-    pickerTitle: "Choose a lesson to quiz yourself on",
-  },
-  {
-    icon: FileText,
-    color: "text-orange-500",
-    bg: "bg-orange-50",
-    title: "Past Questions",
-    desc: "Solve previous GCE and local exam papers with step-by-step AI guidance and marking.",
-    cta: "Practice Now",
-    ctaColor: "text-orange-500",
-    needsLesson: true,
-    intent: "quiz",
-    pickerTitle: "Choose a lesson to practice questions from",
-  },
-  {
-    icon: CalendarCheck,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
-    title: "Study Plan",
-    desc: "Generate a tailored schedule based on your exam dates, weak areas, and available time.",
-    cta: "Optimize Schedule",
-    ctaColor: "text-purple-600",
-    needsLesson: false,
-    href: "/dashboard/ai-tutor/ai-chat?intent=study-plan",
-  },
-];
 
 export default function AiHubFeatureCards() {
+  const t = useTranslations("dash");
+  // Defined inside the component so the copy can be translated.
+  const FEATURES: Feature[] = [
+    {
+      icon: BookOpen,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      title: t("quickRevision"),
+      desc: t("quickRevisionDesc"),
+      cta: "Start Session",
+      ctaColor: "text-blue-600",
+      needsLesson: true,
+      intent: "revision",
+      pickerTitle: t("chooseLessonRevise"),
+    },
+    {
+      icon: BrainCircuit,
+      color: "text-teal-600",
+      bg: "bg-teal-50",
+      title: t("adaptiveQuiz"),
+      desc: t("adaptiveQuizDesc"),
+      cta: t("testKnowledge"),
+      ctaColor: "text-teal-600",
+      needsLesson: true,
+      intent: "quiz",
+      pickerTitle: t("chooseLessonQuiz"),
+    },
+    {
+      icon: FileText,
+      color: "text-orange-500",
+      bg: "bg-orange-50",
+      title: t("pastQuestions"),
+      desc: t("pastQuestionsDesc"),
+      cta: t("practiceNow"),
+      ctaColor: "text-orange-500",
+      needsLesson: true,
+      intent: "quiz",
+      pickerTitle: t("chooseLessonPractice"),
+    },
+    {
+      icon: CalendarCheck,
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      title: t("studyPlan"),
+      desc: t("optimizeScheduleDesc"),
+      cta: t("optimizeSchedule"),
+      ctaColor: "text-purple-600",
+      needsLesson: false,
+      href: "/dashboard/ai-tutor/ai-chat?intent=study-plan",
+    },
+  ];
   const router = useRouter();
   const [pickerFor, setPickerFor] = useState<Feature | null>(null);
 
