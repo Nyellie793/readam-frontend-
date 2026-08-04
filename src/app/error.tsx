@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RotateCw, Home } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /**
  * Route-level error boundary. Without this, any render-time exception in a
@@ -15,6 +16,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("common");
   useEffect(() => {
     // Replace with your error reporter (Sentry etc.) when one is wired up.
     console.error("Route error:", error);
@@ -27,7 +29,7 @@ export default function Error({
           <AlertTriangle className="size-6" />
         </span>
 
-        <h1 className="mt-5 text-xl font-black text-gray-900">Something went wrong</h1>
+        <h1 className="mt-5 text-xl font-black text-gray-900">{t("somethingWrong")}</h1>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500">
           This page failed to load. It is usually temporary, so trying again
           often works. Nothing you were doing has been lost.

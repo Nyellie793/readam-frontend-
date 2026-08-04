@@ -64,7 +64,7 @@ export default function PaymentMethodSelector({
               <span className="text-[16px] font-black text-white">OM</span>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-950">Orange Money</p>
+              <p className="text-xs font-bold text-gray-950">{t("orangeMoney")}</p>
               <p className="text-[10px] text-gray-400 mt-0.5">{t("payWithOm")}</p>
             </div>
           </div>

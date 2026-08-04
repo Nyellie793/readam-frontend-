@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Star, BookOpen, BadgeCheck, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { getTranslations } from "next-intl/server";
 
 const ALL_TUTORS = [
     {
@@ -194,6 +195,7 @@ async function loadTutor(id: string): Promise<Tutor | null> {
 }
 
 export default async function TutorProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations("tutors");
     const { id } = await params;
     const tutor = await loadTutor(id);
     if (!tutor) notFound();
@@ -225,7 +227,7 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
                                 {tutor.verified && (
                                     <div className="mt-2 flex items-center gap-1.5">
                                         <BadgeCheck className="h-4 w-4 text-blue-600" />
-                                        <span className="text-sm font-medium text-blue-600">Verified Tutor</span>
+                                        <span className="text-sm font-medium text-blue-600">{t("verified")}</span>
                                     </div>
                                 )}
                                 <hr className="my-5 border-gray-100" />
@@ -243,7 +245,7 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
                                     {tutor.verified && (
                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                             <BadgeCheck className="h-4 w-4 shrink-0 text-gray-400" />
-                                            <span className="font-semibold text-gray-900">Verified Tutor</span>
+                                            <span className="font-semibold text-gray-900">{t("verified")}</span>
                                         </div>
                                     )}
                                 </div>
@@ -263,7 +265,7 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
                                 <p className="mt-3 text-sm leading-relaxed text-gray-500">{tutor.bio}</p>
                             </div>
                             <div className="p-8 lg:min-w-[260px]">
-                                <h2 className="text-base font-bold text-gray-900">Areas of Expertise</h2>
+                                <h2 className="text-base font-bold text-gray-900">{t("expertise")}</h2>
                                 <div className="mt-4 flex flex-wrap gap-2">
                                     {tutor.expertise.map((tag) => (
                                         <span key={tag} className="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-default">

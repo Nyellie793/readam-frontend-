@@ -4,6 +4,7 @@ import { Star, BookOpen, GraduationCap, Search } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicTutors } from "@/lib/public-api";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Public tutor directory, rendered from GET /v1/tutors (verified profiles
@@ -37,6 +38,7 @@ export default async function TutorsPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  const t = await getTranslations("tutors");
   const { q } = await searchParams;
   const { items, total } = await getPublicTutors({ search: q, pageSize: 48 });
 
@@ -67,7 +69,7 @@ export default async function TutorsPage({
                 <input
                   name="q"
                   defaultValue={q ?? ""}
-                  placeholder="Search by name or subject"
+                  placeholder={t("searchPlaceholder")}
                   aria-label="Search tutors"
                   className="h-11 w-full rounded-full border border-gray-200 bg-white pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />

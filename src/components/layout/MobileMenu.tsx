@@ -15,6 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 export default function MobileMenu() {
   const t = useTranslations("nav");
+  const tc = useTranslations("common");
   const user = useStoredUser();
   const initials = initialsOf(user?.full_name, "--");
   const router = useRouter();
@@ -117,7 +118,7 @@ export default function MobileMenu() {
             </nav>
 
             <div className="border-t py-5">
-              <p className="mb-3 text-sm font-semibold text-gray-500">Language & Theme</p>
+              <p className="mb-3 text-sm font-semibold text-gray-500">{tc("languageTheme")}</p>
               <div className="flex items-center justify-between gap-3">
                 <LanguageToggle />
                 <ThemeToggle />

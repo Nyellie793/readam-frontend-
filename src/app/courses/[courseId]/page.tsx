@@ -7,6 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
 import { initialsOf } from "@/hooks/useStoredUser";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Public course detail. The catalogue used to link here from /courses even
@@ -51,6 +52,7 @@ export default async function PublicCoursePage({
 }: {
   params: Promise<{ courseId: string }>;
 }) {
+  const t = await getTranslations("courses");
   const { courseId } = await params;
   const course = await getPublicCourse(courseId);
   if (!course) notFound();
@@ -101,7 +103,7 @@ export default async function PublicCoursePage({
                     </span>
                   )}
                   <span className="text-sm">
-                    <span className="text-gray-400">Taught by </span>
+                    <span className="text-gray-400">{t("taughtBy")} </span>
                     <span className="font-semibold text-gray-900">{course.tutor_name}</span>
                   </span>
                 </Link>
@@ -123,7 +125,7 @@ export default async function PublicCoursePage({
                 <p className="mt-6 text-base leading-relaxed text-gray-600">{course.description}</p>
               )}
 
-              <h2 className="mt-10 text-xl font-bold text-gray-900">What this course covers</h2>
+              <h2 className="mt-10 text-xl font-bold text-gray-900">{t("covers")}</h2>
 
               {modules.length > 0 ? (
                 <div className="mt-4 space-y-4">

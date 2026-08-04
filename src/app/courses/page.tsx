@@ -7,6 +7,7 @@ import { getPublicCourses } from "@/lib/public-api";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import { initialsOf } from "@/hooks/useStoredUser";
 import type { CourseListItem } from "@/types/api.types";
+import { getTranslations } from "next-intl/server";
 
 /**
  * Public course catalogue, rendered from GET /v1/courses. A server component,
@@ -90,6 +91,7 @@ export default async function CoursesPage({
 }: {
   searchParams: Promise<{ q?: string; category?: string }>;
 }) {
+  const t = await getTranslations("courses");
   const { q, category } = await searchParams;
   const { items, total } = await getPublicCourses({
     search: q,
@@ -126,7 +128,7 @@ export default async function CoursesPage({
                 <input
                   name="q"
                   defaultValue={q ?? ""}
-                  placeholder="Search courses"
+                  placeholder={t("searchPlaceholder")}
                   aria-label="Search courses"
                   className="h-11 w-full rounded-full border border-gray-200 bg-white pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />

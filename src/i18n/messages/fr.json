@@ -66,7 +66,9 @@
     "noMatchBody": "Essayez un autre nom ou une autre matière, ou parcourez tous les tuteurs vérifiés à ce jour.",
     "showAll": "Afficher tous les tuteurs",
     "becomeTutor": "Devenir tuteur",
-    "browseCourses": "Parcourir les cours"
+    "browseCourses": "Parcourir les cours",
+    "expertise": "Domaines d'expertise",
+    "verified": "Tuteur vérifié"
   },
   "auth": {
     "welcomeBack": "Bon retour",
@@ -249,7 +251,10 @@
     "back": "Retour",
     "somethingWrong": "Une erreur est survenue",
     "notFoundTitle": "Page introuvable",
-    "contactSupport": "Contacter l'assistance"
+    "contactSupport": "Contacter l'assistance",
+    "languageTheme": "Langue et thème",
+    "orangeMoney": "Orange Money",
+    "mtnMomo": "MTN MoMo"
   },
   "home": {
     "badge": "La première plateforme d'étude par IA du Cameroun",

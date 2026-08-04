@@ -151,7 +151,7 @@ export default function CourseFilters({
 
       <div className="mt-auto p-6 pt-10">
         <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-          <p className="text-sm font-semibold text-gray-900">Study Streak</p>
+          <p className="text-sm font-semibold text-gray-900">{t("studyStreak")}</p>
           <div className="mt-2 flex items-center gap-1.5 text-sm">
             <Flame className="size-4 fill-orange-500 text-orange-500" />
             <span className="font-semibold text-gray-900">
