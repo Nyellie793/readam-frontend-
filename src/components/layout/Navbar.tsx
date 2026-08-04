@@ -5,12 +5,14 @@ import Logo from "../shared/Logo";
 import MobileMenu from "./MobileMenu";
 import LanguageToggle from "../shared/LanguageToggle";
 import ThemeToggle from "../shared/ThemeToggle";
+import { useTranslations } from "next-intl";
 import { NAV_LINKS } from "@/constants/navigation";
 import { usePathname } from "next/navigation";
 import UserDropdown from "../auth/UserDropdown";
 import { useStoredUser } from "@/hooks/useStoredUser";
 
 export default function Navbar() {
+  const t = useTranslations("nav");
   const pathname = usePathname();
 
   const user = useStoredUser();
@@ -35,7 +37,7 @@ export default function Navbar() {
 
               return (
                 <Link
-                  key={link.title}
+                  key={t(link.title)}
                   href={link.href}
                   className={`
                     relative pb-2 text-sm font-medium transition
@@ -46,7 +48,7 @@ export default function Navbar() {
                     }
                   `}
                 >
-                  {link.title}
+                  {t(link.title)}
 
                   {active && (
                     <span className="absolute left-0 bottom-0 h-[3px] w-full rounded-full bg-orange-500" />
@@ -72,7 +74,7 @@ export default function Navbar() {
                   rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white
                   transition hover:bg-blue-700
                   ">
-                    Log In
+                    {t("logIn")}
                   </Link>
             )}
           </div>

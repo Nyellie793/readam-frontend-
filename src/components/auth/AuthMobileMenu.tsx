@@ -10,6 +10,7 @@ import {
 
 import { Menu } from "lucide-react";
 
+import { useTranslations } from "next-intl";
 import { NAV_LINKS } from "@/constants/navigation";
 
 import LanguageToggle from "../shared/LanguageToggle";
@@ -17,6 +18,7 @@ import ThemeToggle from "../shared/ThemeToggle";
 import Logo from "../shared/Logo";
 
 export default function AuthMobileMenu() {
+  const t = useTranslations("nav");
   return (
     <Sheet>
       <SheetTrigger
@@ -48,7 +50,7 @@ export default function AuthMobileMenu() {
 
             {NAV_LINKS.map((link) => (
               <Link
-                key={link.title}
+                key={t(link.title)}
                 href={link.href}
                 className="
                 rounded-lg
@@ -65,7 +67,7 @@ export default function AuthMobileMenu() {
                 hover:text-blue-600
                 "
               >
-                {link.title}
+                {t(link.title)}
               </Link>
             ))}
 

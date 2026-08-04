@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Paperclip, Mic } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useStoredUser } from "@/hooks/useStoredUser";
 
 export default function SearchBar() {
+  const t = useTranslations("hero");
   const router = useRouter();
   const user = useStoredUser();
   const [question, setQuestion] = useState("");
@@ -43,7 +45,7 @@ export default function SearchBar() {
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100">
             <Sparkles className="h-3.5 w-3.5 text-orange-500" />
           </span>
-          <span className="text-sm font-bold text-gray-800">Ask ReadAM</span>
+          <span className="text-sm font-bold text-gray-800">{t("askLabel")}</span>
           <span className="ml-auto rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600">
             AI
           </span>
@@ -60,8 +62,8 @@ export default function SearchBar() {
             onKeyDown={(e) => {
               if (e.key === "Enter") ask();
             }}
-            aria-label="Ask ReadAM a question"
-            placeholder="Explain the theory of relativity..."
+            aria-label={t("askAria")}
+            placeholder={t("askPlaceholder")}
             className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none sm:text-base"
           />
 
@@ -70,7 +72,7 @@ export default function SearchBar() {
           {/* CTA — brighter, bigger, with glow shadow */}
           <button
             type="button"
-            aria-label="Ask ReadAM"
+            aria-label={t("askLabel")}
             onClick={ask}
             disabled={!question.trim()}
             className="

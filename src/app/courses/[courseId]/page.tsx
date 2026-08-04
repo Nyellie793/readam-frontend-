@@ -6,6 +6,7 @@ import { BookOpen, Lock, PlayCircle, FileText, ArrowLeft, Check } from "lucide-r
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
+import { initialsOf } from "@/hooks/useStoredUser";
 
 /**
  * Public course detail. The catalogue used to link here from /courses even
@@ -82,15 +83,28 @@ export default async function PublicCoursePage({
               </h1>
 
               {course.tutor_name && (
-                <p className="mt-3 text-sm text-gray-500">
-                  Taught by{" "}
-                  <Link
-                    href={`/tutors/${course.tutor_id}`}
-                    className="font-semibold text-blue-600 hover:underline"
-                  >
-                    {course.tutor_name}
-                  </Link>
-                </p>
+                <Link
+                  href={`/tutors/${course.tutor_id}`}
+                  className="mt-4 inline-flex items-center gap-2.5 rounded-full border border-gray-100 bg-white py-1.5 pl-1.5 pr-4 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50/40"
+                >
+                  {course.tutor_avatar_url ? (
+                    <Image
+                      src={course.tutor_avatar_url}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="size-8 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-600">
+                      {initialsOf(course.tutor_name)}
+                    </span>
+                  )}
+                  <span className="text-sm">
+                    <span className="text-gray-400">Taught by </span>
+                    <span className="font-semibold text-gray-900">{course.tutor_name}</span>
+                  </span>
+                </Link>
               )}
 
               <div className="mt-5 flex flex-wrap gap-2">

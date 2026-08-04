@@ -32,32 +32,33 @@ export type SocialKey = keyof typeof SOCIAL_LINKS;
  * destination does not exist yet, leave the entry out rather than pointing it
  * at "#".
  */
+/** `heading` and `label` are i18n keys under the `footer` namespace. */
 export const FOOTER_NAV: { heading: string; links: { label: string; href: string }[] }[] = [
   {
-    heading: "PLATFORM",
+    heading: "platform",
     links: [
-      { label: "AI Assistant",   href: "/features#ai-tutor" },
-      { label: "Past Questions", href: "/features#past-questions" },
-      { label: "PDF Library",    href: "/courses" },
-      { label: "Video Courses",  href: "/courses" },
+      { label: "aiAssistant",   href: "/features#ai-tutor" },
+      { label: "pastQuestions", href: "/features#past-questions" },
+      { label: "pdfLibrary",    href: "/courses" },
+      { label: "videoCourses",  href: "/courses" },
     ],
   },
   {
-    heading: "COMPANY",
+    heading: "company",
     links: [
-      { label: "About Us",       href: "/about" },
-      { label: "Become a Tutor", href: "/signup?role=tutor" },
-      { label: "Blog",           href: "/blog" },
-      { label: "Contact",        href: "/contact" },
+      { label: "aboutUs",       href: "/about" },
+      { label: "becomeTutor", href: "/signup?role=tutor" },
+      { label: "blog",           href: "/blog" },
+      { label: "contact",        href: "/contact" },
     ],
   },
   {
-    heading: "SUPPORT",
+    heading: "support",
     links: [
-      { label: "Help Center",    href: "/help" },
-      { label: "Terms of Use",   href: "/terms" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "FAQ",            href: "/faq" },
+      { label: "helpCenter",    href: "/help" },
+      { label: "termsOfUse",   href: "/terms" },
+      { label: "privacyPolicy", href: "/privacy" },
+      { label: "faq",            href: "/faq" },
     ],
   },
 ];

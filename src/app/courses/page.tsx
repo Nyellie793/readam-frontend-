@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourses } from "@/lib/public-api";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
+import { initialsOf } from "@/hooks/useStoredUser";
 import type { CourseListItem } from "@/types/api.types";
 
 /**
@@ -49,7 +50,22 @@ function CourseCard({ course }: { course: CourseListItem }) {
       <div className="flex flex-1 flex-col p-4">
         <h3 className="line-clamp-2 text-sm font-bold text-gray-900">{course.title}</h3>
         {course.tutor_name && (
-          <p className="mt-1 text-xs text-gray-400">{course.tutor_name}</p>
+          <div className="mt-2 flex items-center gap-2">
+            {course.tutor_avatar_url ? (
+              <Image
+                src={course.tutor_avatar_url}
+                alt=""
+                width={20}
+                height={20}
+                className="size-5 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[9px] font-bold text-blue-600">
+                {initialsOf(course.tutor_name)}
+              </span>
+            )}
+            <span className="truncate text-xs text-gray-500">{course.tutor_name}</span>
+          </div>
         )}
 
         <div className="mt-auto flex items-center justify-between gap-2 pt-4">

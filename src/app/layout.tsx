@@ -5,6 +5,8 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { Toaster } from "@/components/ui/sonner";
 import NetworkProvider from "@/components/shared/NetworkProvider";
 import { SITE_URL } from "@/lib/constants";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,26 +68,28 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Resolved from the locale cookie, so the served HTML is already in the
+  // chosen language and <html lang> matches it for screen readers and search.
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <NextIntlClientProvider>
+          <NetworkProvider />
 
-        <NetworkProvider/>
+          {children}
 
-        {children}
-        <Toaster 
-         richColors
-         position = "top-right"
-         closeButton
-        />
+          <Toaster richColors position="top-right" closeButton />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, LayoutDashboard, LogIn, UserPlus, LogOut, Settings, User, CreditCard } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { NAV_LINKS } from "@/constants/navigation";
 import LanguageToggle from "../shared/LanguageToggle";
 import ThemeToggle from "../shared/ThemeToggle";
@@ -13,6 +14,7 @@ import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function MobileMenu() {
+  const t = useTranslations("nav");
   const user = useStoredUser();
   const initials = initialsOf(user?.full_name, "--");
   const router = useRouter();
@@ -98,7 +100,7 @@ export default function MobileMenu() {
                   link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
                 return (
                   <Link
-                    key={link.title}
+                    key={t(link.title)}
                     href={link.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
@@ -108,7 +110,7 @@ export default function MobileMenu() {
                         : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                     )}
                   >
-                    {link.title}
+                    {t(link.title)}
                   </Link>
                 );
               })}
