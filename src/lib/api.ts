@@ -156,15 +156,22 @@ export async function putToPresigned(uploadUrl: string, file: File): Promise<voi
       body: file,
     });
   } catch {
-    // Network failure or a CORS rejection — fetch throws rather than resolving.
-    throw new ApiRequestError(0, "Upload failed. Check your connection and try again.");
+    // fetch() throws rather than resolving when the preflight is blocked, so a
+    // CORS misconfiguration is indistinguishable here from being offline.
+    throw new ApiRequestError(
+      0,
+      "Could not reach file storage. If you are online, this is a server configuration issue — please report it."
+    );
   }
 
   if (!res.ok) {
-    throw new ApiRequestError(
-      res.status,
-      `Upload failed (${res.status}). Please try again, or pick a different file.`
-    );
+    // 403 from storage almost always means the bucket's CORS policy does not
+    // list this origin, or the presigned URL has expired — not a bad file.
+    const detail =
+      res.status === 403
+        ? "Upload was rejected by storage. This is usually a configuration issue rather than a problem with your file — please report it."
+        : `Upload failed (${res.status}). Please try again, or pick a different file.`;
+    throw new ApiRequestError(res.status, detail);
   }
 }
 
