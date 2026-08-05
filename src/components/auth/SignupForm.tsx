@@ -8,6 +8,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import { useGoogleRedirectResult } from "@/hooks/useGoogleRedirectResult";
 import Link from "next/link";
 
 type FormData = { full_name: string; email: string; password: string; terms: true };
@@ -22,6 +23,11 @@ interface SignupFormProps {
 export default function SignupForm({ role }: SignupFormProps) {
   const t = useTranslations("auth");
   const { register: registerUser, googleAuth, loading } = useAuth();
+  // The redirect leaves and re-enters the page, so the role chosen on
+  // /select-role has to be re-applied on the way back in.
+  useGoogleRedirectResult((idToken) =>
+    googleAuth(idToken, role === "tutor" ? "tutor" : "student")
+  );
   const [showPw, setShowPw] = useState(false);
 
   const schema = z.object({

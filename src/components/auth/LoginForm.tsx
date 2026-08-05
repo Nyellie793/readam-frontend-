@@ -8,6 +8,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import { useGoogleRedirectResult } from "@/hooks/useGoogleRedirectResult";
 import Link from "next/link";
 
 type FormData = { email: string; password: string; remember?: boolean };
@@ -15,6 +16,8 @@ type FormData = { email: string; password: string; remember?: boolean };
 export default function LoginForm() {
   const t = useTranslations("auth");
   const { login, googleAuth, loading } = useAuth();
+  // Mobile returns through the redirect route rather than the popup callback.
+  useGoogleRedirectResult(googleAuth);
   const [showPw, setShowPw] = useState(false);
   const schema = z.object({
     email: z.email(t("errEmail")),

@@ -12,7 +12,9 @@ declare global {
         id: {
           initialize: (config: {
             client_id: string;
-            callback: (response: { credential: string }) => void;
+            callback?: (response: { credential: string }) => void;
+            ux_mode?: "popup" | "redirect";
+            login_uri?: string;
           }) => void;
           renderButton: (
             parent: HTMLElement,
@@ -55,10 +57,39 @@ export default function GoogleSignInButton({ onCredential }: GoogleSignInButtonP
     if (renderedRef.current) return;
     if (!CLIENT_ID || !containerRef.current || !window.google) return;
 
-    window.google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: (response) => callbackRef.current(response.credential),
-    });
+    /**
+     * Popup mode returns the credential straight to this callback, which is
+     * what we want when it works. On mobile, Safari's tracking prevention
+     * routinely blocks the popup and GIS falls back to redirect mode on its
+     * own — but with no login_uri it POSTed to the current page, which only
+     * answers GET, so sign-up died on a blank gsi/transform screen.
+     *
+     * Choosing redirect explicitly on touch devices means the fallback is a
+     * route we actually own. Desktop keeps the nicer popup.
+     */
+    const preferRedirect =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(hover: none) and (pointer: coarse)").matches === true;
+
+    if (preferRedirect) {
+      // Keep the query string: /signup?role=tutor resolves the role server
+      // side, and dropping it would silently sign every mobile tutor up as a
+      // student.
+      const returnTo = encodeURIComponent(
+        window.location.pathname + window.location.search
+      );
+      window.google.accounts.id.initialize({
+        client_id: CLIENT_ID,
+        ux_mode: "redirect",
+        login_uri: `${window.location.origin}/api/auth/google?return_to=${returnTo}`,
+      });
+    } else {
+      window.google.accounts.id.initialize({
+        client_id: CLIENT_ID,
+        ux_mode: "popup",
+        callback: (response) => callbackRef.current(response.credential),
+      });
+    }
 
     // Match the surrounding form instead of a fixed 300px, which overflowed
     // narrow phones and looked misaligned against full-width inputs.
