@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Topbar from "@/components/admin/Topbar";
 import StatCards from "@/components/admin/StatCards";
 import ADMIN from "@/services/admin.service";
@@ -139,9 +140,12 @@ export default function TutorsPage() {
                   tutors.map((t) => (
                     <tr key={t.id} className="hover:bg-gray-50">
                       <td className="px-5 py-4">
-                        <p className="font-medium text-gray-900">
+                        <Link
+                          href={`/admin/tutors/${t.id}`}
+                          className="font-medium text-blue-600 hover:underline"
+                        >
                           {t.full_name}
-                        </p>
+                        </Link>
                         <p className="text-xs text-gray-400">{t.email}</p>
                       </td>
                       <td className="px-5 py-4 text-gray-600">
@@ -156,16 +160,24 @@ export default function TutorsPage() {
                         </Badge>
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <button
-                          onClick={() => toggleVerified(t)}
-                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                            t.is_verified
-                              ? "bg-red-50 text-red-600 hover:bg-red-100"
-                              : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                          }`}
-                        >
-                          {t.is_verified ? "Unverify" : "Verify"}
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/tutors/${t.id}`}
+                            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+                          >
+                            Review
+                          </Link>
+                          <button
+                            onClick={() => toggleVerified(t)}
+                            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                              t.is_verified
+                                ? "bg-red-50 text-red-600 hover:bg-red-100"
+                                : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                            }`}
+                          >
+                            {t.is_verified ? "Unverify" : "Verify"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

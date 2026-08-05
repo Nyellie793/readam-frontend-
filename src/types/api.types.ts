@@ -246,6 +246,85 @@ export interface CourseListItem {
     created_at: string;
   }
   
+  export interface AdminLessonBrief {
+    id: string;
+    title: string;
+    type: "video" | "pdf" | "quiz" | "text";
+    order: number;
+    duration_seconds: number | null;
+    is_preview: boolean;
+  }
+
+  export interface AdminCourseModule {
+    id: string;
+    title: string;
+    order: number;
+    lessons: AdminLessonBrief[];
+  }
+
+  export interface AdminCourseInstructor {
+    user_id: string;
+    full_name: string;
+    avatar_url: string | null;
+    is_verified: boolean;
+    subject: string | null;
+    bio: string | null;
+  }
+
+  /** GET /v1/admin/courses/{id} — the full course, for the approval decision. */
+  export interface AdminCourseDetail {
+    id: string;
+    title: string;
+    description: string | null;
+    category: string;
+    price: number;
+    is_premium: boolean;
+    thumbnail_url: string | null;
+    status: "draft" | "pending_review" | "published" | "rejected";
+    tags: string[];
+    avg_rating: number | null;
+    review_count: number;
+    total_lessons: number;
+    modules: AdminCourseModule[];
+    instructor: AdminCourseInstructor;
+    created_at: string;
+    updated_at: string;
+  }
+
+  export interface AdminTutorCourse {
+    id: string;
+    title: string;
+    status: "draft" | "pending_review" | "published" | "rejected";
+    price: number;
+    total_lessons: number;
+    enrollment_count: number;
+    created_at: string;
+  }
+
+  /** GET /v1/admin/tutors/{id} — everything needed to decide on verification. */
+  export interface AdminTutorDetail {
+    id: string;
+    email: string;
+    full_name: string;
+    avatar_url: string | null;
+    is_active: boolean;
+    created_at: string;
+    is_verified: boolean;
+    profile_completed: boolean;
+    display_name: string | null;
+    title: string | null;
+    phone: string | null;
+    city: string | null;
+    subject: string | null;
+    teaching_level: string | null;
+    experience_years: string | null;
+    bio: string | null;
+    student_count: number;
+    course_count: number;
+    published_course_count: number;
+    courses: AdminTutorCourse[];
+  }
+
   export interface AdminTutorListResponse {
     items: AdminTutorListItem[];
     total: number;

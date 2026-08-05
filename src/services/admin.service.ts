@@ -22,6 +22,9 @@ const ADMIN = {
   getTutors: (page = 1, filter: "all" | "verified" | "pending_verification" = "all") =>
     api.get(`/v1/admin/tutors?page=${page}&filter_by=${filter}`),
 
+  /** GET /v1/admin/tutors/{tutor_id} — full profile + their courses */
+  getTutorDetail: (tutorId: string) => api.get(`/v1/admin/tutors/${tutorId}`),
+
   /** PATCH /v1/admin/tutors/{tutor_id}/verify */
   verifyTutor: (tutorId: string, is_verified: boolean) =>
     api.patch(`/v1/admin/tutors/${tutorId}/verify`, { is_verified }),

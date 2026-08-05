@@ -113,9 +113,12 @@ export default function CoursesPage() {
                   : courses.map((c) => (
                       <tr key={c.id} className="hover:bg-gray-50">
                         <td className="px-5 py-4">
-                          <p className="font-medium text-gray-900 line-clamp-1">
+                          <Link
+                            href={`/admin/courses/${c.id}`}
+                            className="line-clamp-1 font-medium text-blue-600 hover:underline"
+                          >
                             {c.title}
-                          </p>
+                          </Link>
                           <p className="text-xs text-gray-400 mt-0.5">
                             {c.category} · {c.total_lessons} lessons
                           </p>
@@ -139,22 +142,30 @@ export default function CoursesPage() {
                           </Badge>
                         </td>
                         <td className="px-5 py-4 text-right">
-                          {c.status === "pending_review" && (
-                            <div className="flex justify-end gap-2">
-                              <button
-                                onClick={() => handleApprove(c.id)}
-                                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => handleReject(c.id)}
-                                className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100"
-                              >
-                                Reject
-                              </button>
-                            </div>
-                          )}
+                          <div className="flex justify-end gap-2">
+                            <Link
+                              href={`/admin/courses/${c.id}`}
+                              className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+                            >
+                              Review
+                            </Link>
+                            {c.status === "pending_review" && (
+                              <>
+                                <button
+                                  onClick={() => handleApprove(c.id)}
+                                  className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleReject(c.id)}
+                                  className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
