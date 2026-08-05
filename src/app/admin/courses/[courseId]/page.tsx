@@ -12,7 +12,6 @@ import {
   Video,
   FileText,
   HelpCircle,
-  Type,
   Eye,
   Loader2,
   Star,
@@ -20,6 +19,7 @@ import {
 import Topbar from "@/components/admin/Topbar";
 import { Badge } from "@/components/ui/Badge";
 import ADMIN from "@/services/admin.service";
+import LessonPreview from "@/components/admin/course/LessonPreview";
 import type { AdminCourseDetail } from "@/types/api.types";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "muted"> = {
@@ -40,7 +40,6 @@ const LESSON_ICON: Record<string, React.ComponentType<{ className?: string }>> =
   video: Video,
   pdf: FileText,
   quiz: HelpCircle,
-  text: Type,
 };
 
 function duration(seconds: number | null): string {
@@ -57,6 +56,9 @@ export default function AdminCourseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [acting, setActing] = useState<"approve" | "reject" | null>(null);
+  // Only one lesson is open at a time, so reviewing does not spawn a wall of
+  // players all buffering at once.
+  const [openLessonId, setOpenLessonId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -308,26 +310,48 @@ export default function AdminCourseDetailPage() {
                               .slice()
                               .sort((a, b) => a.order - b.order)
                               .map((l) => {
-                                const Icon = LESSON_ICON[l.type] ?? Type;
+                                const Icon = LESSON_ICON[l.type] ?? FileText;
+                                const isOpen = openLessonId === l.id;
                                 return (
-                                  <li
-                                    key={l.id}
-                                    className="flex flex-wrap items-center gap-2 rounded-lg bg-gray-50/70 px-3 py-2 text-sm"
-                                  >
-                                    <Icon className="size-3.5 shrink-0 text-gray-400" />
-                                    <span className="min-w-0 flex-1 truncate text-gray-700">
-                                      {l.title}
-                                    </span>
-                                    {l.is_preview && (
-                                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600">
-                                        <Eye className="size-3" />
-                                        Preview
+                                  <li key={l.id}>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setOpenLessonId(isOpen ? null : l.id)
+                                      }
+                                      aria-expanded={isOpen}
+                                      className={`flex w-full flex-wrap items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition ${
+                                        isOpen
+                                          ? "bg-blue-50 ring-1 ring-blue-200"
+                                          : "bg-gray-50/70 hover:bg-gray-100"
+                                      }`}
+                                    >
+                                      <Icon className="size-3.5 shrink-0 text-gray-400" />
+                                      <span className="min-w-0 flex-1 truncate text-gray-700">
+                                        {l.title}
                                       </span>
-                                    )}
-                                    {l.duration_seconds != null && (
-                                      <span className="text-xs tabular-nums text-gray-400">
-                                        {duration(l.duration_seconds)}
+                                      {l.is_preview && (
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600">
+                                          <Eye className="size-3" />
+                                          Preview
+                                        </span>
+                                      )}
+                                      {l.duration_seconds != null && (
+                                        <span className="text-xs tabular-nums text-gray-400">
+                                          {duration(l.duration_seconds)}
+                                        </span>
+                                      )}
+                                      <span className="text-[11px] font-semibold text-blue-600">
+                                        {isOpen ? "Hide" : "View"}
                                       </span>
+                                    </button>
+
+                                    {isOpen && (
+                                      <LessonPreview
+                                        courseId={course.id}
+                                        lessonId={l.id}
+                                        onClose={() => setOpenLessonId(null)}
+                                      />
                                     )}
                                   </li>
                                 );

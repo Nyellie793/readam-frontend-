@@ -78,12 +78,23 @@ export default function AdminDashboardPage() {
           <div className="divide-y divide-gray-50">
             {pendingCourses.map(course => (
               <div key={course.id} className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">{course.title}</p>
+                <div className="min-w-0">
+                  <Link
+                    href={`/admin/courses/${course.id}`}
+                    className="text-sm font-semibold text-blue-600 hover:underline"
+                  >
+                    {course.title}
+                  </Link>
                   <p className="text-xs text-gray-400">{course.tutor_name} · {course.category}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="warning">Pending</Badge>
+                  <Link
+                    href={`/admin/courses/${course.id}`}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+                  >
+                    Review
+                  </Link>
                   <button
                     onClick={() => handleApprove(course.id)}
                     className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"

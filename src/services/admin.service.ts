@@ -38,6 +38,10 @@ const ADMIN = {
   getCourseDetail: (courseId: string) =>
     api.get(`/v1/admin/courses/${courseId}`),
 
+  /** GET /v1/admin/courses/{course_id}/lessons/{lesson_id} — playable content for review */
+  getLessonForReview: (courseId: string, lessonId: string) =>
+    api.get(`/v1/admin/courses/${courseId}/lessons/${lessonId}`),
+
   /** POST /v1/admin/courses/{course_id}/approve */
   approveCourse: (courseId: string) =>
     api.post(`/v1/admin/courses/${courseId}/approve`, {}, true),

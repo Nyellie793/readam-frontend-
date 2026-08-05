@@ -249,7 +249,7 @@ export interface CourseListItem {
   export interface AdminLessonBrief {
     id: string;
     title: string;
-    type: "video" | "pdf" | "quiz" | "text";
+    type: "video" | "pdf" | "quiz";
     order: number;
     duration_seconds: number | null;
     is_preview: boolean;
