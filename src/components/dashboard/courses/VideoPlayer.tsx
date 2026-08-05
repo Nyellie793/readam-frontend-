@@ -75,6 +75,14 @@ export default function VideoPlayer({
    * and let the browser silently drop any track that fails to load.
    */
   const ready = captions?.status === "ready";
+  /**
+   * Only tracks with a real URL are offered. In practice this is a single
+   * track in the language actually spoken: Cloudflare's caption `language` is
+   * a hint for Whisper's decoding, not a translation target, so asking for a
+   * second language returned the same words under a different label. The
+   * switcher below therefore only appears if a video genuinely has more than
+   * one track.
+   */
   const tracks = ready
     ? ([
         { lang: "en", label: "English", src: captions?.en },
