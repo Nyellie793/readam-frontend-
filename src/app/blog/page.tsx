@@ -73,12 +73,16 @@ export default async function BlogPage() {
       <div className="mt-8 rounded-2xl border border-orange-200 bg-orange-50 p-6">
         <h3 className="text-sm font-bold text-orange-900">{t("writeTitle")}</h3>
         <p className="mt-1.5 text-sm leading-relaxed text-orange-900/80">
-          If you teach the Cameroonian curriculum and have something useful to say to students, we
-          will publish it and credit you. Email{" "}
-          <a className="font-semibold text-orange-900 hover:underline" href={`mailto:${CONTACT.email}`}>
-            {CONTACT.email}
-          </a>{" "}
-          with a short pitch.
+          {t.rich("writeBody", {
+            mail: () => (
+              <a
+                className="font-semibold text-orange-900 hover:underline"
+                href={`mailto:${CONTACT.email}`}
+              >
+                {CONTACT.email}
+              </a>
+            ),
+          })}
         </p>
       </div>
     </PageShell>

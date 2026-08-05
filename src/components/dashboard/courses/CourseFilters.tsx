@@ -29,6 +29,7 @@ export default function CourseFilters({
   showLogo = true,
 }: CourseFiltersProps) {
   const t = useTranslations("dash");
+  const tc = useTranslations("cat");
   const CATEGORIES = [{ value: "", label: t("allCategories") }, ...COURSE_CATEGORIES];
   const pathname = usePathname();
   const router = useRouter();
@@ -142,7 +143,7 @@ export default function CourseFilters({
             className="w-full appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30"
           >
             {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
+              <option key={c.value} value={c.value}>{c.value ? tc(c.value) : c.label}</option>
             ))}
           </select>
           <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />

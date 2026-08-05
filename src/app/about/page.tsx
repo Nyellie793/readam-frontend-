@@ -116,7 +116,7 @@ export default async function AboutPage() {
 
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link
-                    href="/signup"
+                    href="/select-role"
                     className="rounded-xl bg-blue-600 px-7 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition shadow-sm"
                   >
                     {t("joinFree")}
@@ -125,7 +125,7 @@ export default async function AboutPage() {
                     href="/features"
                     className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-7 py-3 text-sm font-semibold text-gray-700 hover:border-blue-300 hover:text-blue-600 transition"
                   >
-                    See Features <ChevronRight className="h-4 w-4" />
+                    {t("seeFeatures")} <ChevronRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
@@ -260,7 +260,7 @@ export default async function AboutPage() {
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Link
-                  href="/signup"
+                  href="/select-role"
                   className="rounded-xl bg-orange-500 px-8 py-3 text-sm font-semibold text-white hover:bg-orange-600 transition shadow-lg shadow-orange-500/30"
                 >
                   {t("ctaPrimary")}

@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 export default function CreateCourseDialog() {
   const t = useTranslations("tutor");
+  const tc = useTranslations("cat");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -101,7 +102,7 @@ export default function CreateCourseDialog() {
               >
                 {COURSE_CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label}
+                    {tc(c.value)}
                   </option>
                 ))}
               </select>

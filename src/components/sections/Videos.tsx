@@ -12,7 +12,7 @@ const videos = [
     tutor: "Mr. Tabi Samuel",
     tutorAvatar: "/Background.png",
     rating: 4.8,
-    count: "12 Videos",
+    count: 12,
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const videos = [
     tutor: "Dr. Micheal Une",
     tutorAvatar: "/Background 2.png",
     rating: 4.9,
-    count: "9 Videos",
+    count: 9,
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ const videos = [
     tutor: "Mr. Tolowei Matt",
     tutorAvatar: "/Background 3.png",
     rating: 4.7,
-    count: "15 Videos",
+    count: 15,
   },
 ];
 
@@ -81,13 +81,13 @@ export default async function Videos() {
                 <div className="flex items-center gap-1">
                   <Star className="h-3 w-3 fill-orange-400 text-orange-400" />
                   <span className="text-[11px] sm:text-xs font-semibold text-gray-700">{video.rating}</span>
-                  <span className="text-[11px] sm:text-xs text-gray-400">· {video.count}</span>
+                  <span className="text-[11px] sm:text-xs text-gray-400">· {t("videosCount", { count: video.count })}</span>
                 </div>
               </div>
 
               <Link href="/courses" className="mt-3 sm:mt-4 block">
                 <Button className="w-full rounded-lg sm:rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-xs sm:text-sm h-8 sm:h-9">
-                  View Courses
+                  {t("viewCourses")}
                 </Button>
               </Link>
             </div>

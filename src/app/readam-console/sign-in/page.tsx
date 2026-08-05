@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useTranslations } from "next-intl";
 
 const schema = z.object({
   email: z.email("Enter a valid email"),
@@ -13,6 +14,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function AdminLoginPage() {
+  const tm = useTranslations("misc");
   const { login, loading } = useAuth();
   const [showPw, setShowPw] = useState(false);
   const { register, handleSubmit, formState: { errors } } =
@@ -26,14 +28,14 @@ export default function AdminLoginPage() {
             <ShieldCheck className="h-7 w-7 text-white" />
           </span>
           <div className="text-center">
-            <h1 className="text-2xl font-black text-white">Admin Portal</h1>
-            <p className="mt-1 text-sm text-white/40">ReadAM Management System</p>
+            <h1 className="text-2xl font-black text-white">{tm("adminPortal")}</h1>
+            <p className="mt-1 text-sm text-white/40">{tm("adminSystem")}</p>
           </div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
           <form onSubmit={handleSubmit(login)} className="space-y-5">
             <div>
-              <label className="text-sm font-medium text-white/70">Admin Email</label>
+              <label className="text-sm font-medium text-white/70">{tm("adminEmail")}</label>
               <input type="email" autoComplete="email" {...register("email")} placeholder="admin@readam.ai"
                 className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-blue-500" />
               {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>}

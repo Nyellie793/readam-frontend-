@@ -1,13 +1,16 @@
-import { HelpCircle, BookOpen, Users, GraduationCap } from "lucide-react";
+"use client";
 
-const stats = [
-  { value: "50k+", label: "Solved Questions", icon: HelpCircle },
-  { value: "10k+", label: "Study Notes", icon: BookOpen },
-  { value: "150+", label: "Expert Tutors", icon: GraduationCap },
-  { value: "20k+", label: "Active Students", icon: Users },
-];
+import { HelpCircle, BookOpen, Users, GraduationCap } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function Stats() {
+  const t = useTranslations("home");
+  const stats = [
+    { value: "50k+", label: t("statSolved"), icon: HelpCircle },
+    { value: "10k+", label: t("statNotes"), icon: BookOpen },
+    { value: "150+", label: t("statTutorsN"), icon: GraduationCap },
+    { value: "20k+", label: t("statActive"), icon: Users },
+  ];
   return (
     <section className="border-y border-gray-100 bg-white py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-6">

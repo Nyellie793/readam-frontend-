@@ -131,7 +131,7 @@ export default function MobileMenu() {
                   className="flex items-center justify-center gap-2 w-full rounded-xl border border-blue-600 px-6 py-3 font-semibold text-blue-600 hover:bg-blue-50">
                   <LogIn className="size-4" /> Sign In
                 </Link>
-                <Link href="/signup"
+                <Link href="/select-role"
                   className="flex items-center justify-center gap-2 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
                   <UserPlus className="size-4" /> Sign Up
                 </Link>

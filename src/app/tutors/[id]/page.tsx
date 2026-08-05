@@ -250,7 +250,7 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
                                     )}
                                 </div>
                                 <hr className="my-5 border-gray-100" />
-                                <Link href="/signup" className="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold text-white hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 shadow-sm">
+                                <Link href="/select-role" className="block w-full rounded-xl bg-blue-600 py-3.5 text-center text-sm font-bold text-white hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 shadow-sm">
                                     Enroll Now
                                 </Link>
                             </div>

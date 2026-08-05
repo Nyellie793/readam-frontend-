@@ -162,16 +162,16 @@ export default async function FeaturesPage() {
 
                         <div className="mt-8 flex flex-wrap justify-center gap-4">
                             <Link
-                                href="/signup"
+                                href="/select-role"
                                 className="rounded-xl bg-blue-600 px-7 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition"
                             >
-                                Get Started Free
+                                {t("getStartedFree")}
                             </Link>
                             <Link
                                 href="/courses"
                                 className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-7 py-3 text-sm font-semibold text-gray-700 hover:border-blue-300 hover:text-blue-600 transition"
                             >
-                                Browse Courses <ChevronRight className="h-4 w-4" />
+                                {t("browseCourses")} <ChevronRight className="h-4 w-4" />
                             </Link>
                         </div>
 
@@ -280,16 +280,16 @@ export default async function FeaturesPage() {
                             </p>
                             <div className="mt-8 flex flex-wrap justify-center gap-4">
                                 <Link
-                                    href="/signup"
+                                    href="/select-role"
                                     className="rounded-xl bg-orange-500 px-8 py-3 text-sm font-semibold text-white hover:bg-orange-600 transition shadow-lg shadow-orange-500/30"
                                 >
-                                    Sign Up Free
+                                    {t("signUpFree")}
                                 </Link>
                                 <Link
                                     href="/courses"
                                     className="rounded-xl border border-white/20 px-8 py-3 text-sm font-semibold text-white hover:border-white/40 hover:bg-white/5 transition"
                                 >
-                                    Explore Courses
+                                    {t("exploreCourses")}
                                 </Link>
                             </div>
                         </div>

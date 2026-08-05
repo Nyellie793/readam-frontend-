@@ -42,13 +42,13 @@ export default function ForgotPasswordForm() {
         </div>
         <h1 className="mt-5 text-2xl font-black text-gray-900">{t("checkEmail")}</h1>
         <p className="mt-3 text-base text-gray-500">
-          If that email is registered, we&apos;ve sent a link to reset your password. It expires in 30 minutes.
+          {t("checkEmailBody")}
         </p>
         <Link
           href="/login"
           className="mt-8 inline-block rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700"
         >
-          Back to Login
+          {t("backToLogin")}
         </Link>
       </div>
     );
@@ -61,7 +61,7 @@ export default function ForgotPasswordForm() {
         <span className="text-gray-900">{t("forgotAccent")}</span>
       </h1>
       <p className="mt-3 text-center text-base text-gray-500">
-        Enter your email and we&apos;ll send you a link to reset your password.
+        {t("forgotIntroShort")}
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
@@ -83,12 +83,12 @@ export default function ForgotPasswordForm() {
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 text-base font-bold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading && <Loader2 className="size-4 animate-spin" />}
-          Send Reset Link
+          {t("sendResetLink")}
         </button>
 
         <p className="text-center text-sm text-gray-500">
           <Link href="/login" className="font-semibold text-blue-600 hover:underline">
-            Back to Login
+            {t("backToLogin")}
           </Link>
         </p>
       </form>

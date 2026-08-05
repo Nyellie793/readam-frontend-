@@ -92,6 +92,7 @@ export default async function CoursesPage({
   searchParams: Promise<{ q?: string; category?: string }>;
 }) {
   const t = await getTranslations("courses");
+  const tc = await getTranslations("cat");
   const { q, category } = await searchParams;
   const { items, total } = await getPublicCourses({
     search: q,
@@ -137,7 +138,7 @@ export default async function CoursesPage({
                 type="submit"
                 className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
               >
-                Search
+                {t("search")}
               </button>
             </form>
 
@@ -162,7 +163,7 @@ export default async function CoursesPage({
                       : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
                   }`}
                 >
-                  {c.label}
+                  {tc(c.value)}
                 </Link>
               ))}
             </div>
@@ -205,7 +206,7 @@ export default async function CoursesPage({
                     </Link>
                   ) : (
                     <Link
-                      href="/signup"
+                      href="/select-role"
                       className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
                     >
                       Try the AI tutor

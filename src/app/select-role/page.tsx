@@ -49,7 +49,7 @@ export default function SelectRolePage() {
         </div>
         <button type="button" onClick={() => router.push(`/signup?role=${selected}`)}
           className="mt-10 rounded-xl bg-blue-600 px-16 py-4 text-base font-bold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700">
-          Continue
+          {t("continue")}
         </button>
       </div>
     </main>

@@ -52,14 +52,13 @@ export default async function TutorsPage({
         <main>
           <section className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-20">
             <span className="inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-orange-500">
-              Our Tutors
+              {t("eyebrow")}
             </span>
             <h1 className="mt-5 text-4xl font-black leading-tight text-gray-900 sm:text-5xl">
-              Learn from <span className="text-blue-600">verified Cameroonian teachers</span>
+              {t("titleLead")} <span className="text-blue-600">{t("titleAccent")}</span>
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-gray-500">
-              Every tutor listed here has had their identity and teaching
-              background checked before being allowed to publish a course.
+              {t("intro")}
             </p>
 
             {/* Plain GET form, so search works without JavaScript */}
@@ -78,7 +77,7 @@ export default async function TutorsPage({
                 type="submit"
                 className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
               >
-                Search
+                {t("search")}
               </button>
             </form>
           </section>

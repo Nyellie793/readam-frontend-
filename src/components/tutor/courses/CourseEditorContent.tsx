@@ -28,6 +28,7 @@ interface CourseEditorContentProps {
 
 export default function CourseEditorContent({ courseId }: CourseEditorContentProps) {
   const t = useTranslations("tutor");
+  const tc = useTranslations("cat");
   const STATUS_LABELS: Record<string, string> = {
     draft: "Draft",
     pending_review: t("pendingReview"),
@@ -266,7 +267,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
               >
                 {COURSE_CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label}
+                    {tc(c.value)}
                   </option>
                 ))}
               </select>
