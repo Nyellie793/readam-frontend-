@@ -79,6 +79,9 @@ function CourseCard({ course }: { course: CourseListItem }) {
               </span>
             )}
             <span>{course.total_lessons} lessons</span>
+            <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-gray-500">
+              {course.language === "fr" ? "FR" : course.language === "bilingual" ? "EN/FR" : "EN"}
+            </span>
           </div>
         </div>
       </div>
@@ -89,18 +92,19 @@ function CourseCard({ course }: { course: CourseListItem }) {
 export default async function CoursesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; language?: string }>;
 }) {
   const t = await getTranslations("courses");
   const tc = await getTranslations("cat");
-  const { q, category } = await searchParams;
+  const { q, category, language } = await searchParams;
   const { items, total } = await getPublicCourses({
     search: q,
     category,
+    language,
     pageSize: 48,
   });
 
-  const filtered = !!(q || category);
+  const filtered = !!(q || category || language);
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -143,6 +147,37 @@ export default async function CoursesPage({
             </form>
 
             <div className="mt-5 flex flex-wrap gap-2">
+              {/* Cameroon runs GCE in English and Baccalaureat in French, so
+                  which language a course is taught in decides whether a student
+                  can use it at all. */}
+              {[
+                { value: undefined, label: t("allLanguages") },
+                { value: "en", label: t("langEn") },
+                { value: "fr", label: t("langFr") },
+              ].map((l) => {
+                const params = new URLSearchParams();
+                if (q) params.set("q", q);
+                if (category) params.set("category", category);
+                if (l.value) params.set("language", l.value);
+                const href = `/courses${params.size ? `?${params}` : ""}`;
+                const active = language === l.value || (!language && !l.value);
+                return (
+                  <Link
+                    key={l.label}
+                    href={href}
+                    className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                      active
+                        ? "border-gray-800 bg-gray-800 text-white"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-400"
+                    }`}
+                  >
+                    {l.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
               <Link
                 href="/courses"
                 className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${

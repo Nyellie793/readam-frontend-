@@ -6,6 +6,7 @@ export interface CourseListItem {
     title: string;
     description: string | null;
     category: string;
+    language: CourseLanguage;
     price: number;
     is_premium: boolean;
     thumbnail_url: string | null;
@@ -277,6 +278,7 @@ export interface CourseListItem {
     title: string;
     description: string | null;
     category: string;
+    language: CourseLanguage;
     price: number;
     is_premium: boolean;
     thumbnail_url: string | null;
@@ -660,10 +662,13 @@ export interface CourseListItem {
     marketing_tips: boolean;
   }
 
+  export type CourseLanguage = "en" | "fr" | "bilingual";
+
   export interface CreateCourseRequest {
     title: string;
     description?: string | null;
     category: string;
+    language?: CourseLanguage;
     price: number;
     is_premium?: boolean;
     thumbnail_url?: string | null;

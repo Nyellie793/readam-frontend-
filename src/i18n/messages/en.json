@@ -49,7 +49,12 @@
     "signInFirst": "You will be asked to sign in first.",
     "modulesOne": "{count} module",
     "modulesOther": "{count} modules",
-    "outlinePending": "The outline for this course is being finalised."
+    "outlinePending": "The outline for this course is being finalised.",
+    "langEn": "English",
+    "langFr": "French",
+    "langBilingual": "Bilingual",
+    "allLanguages": "All languages",
+    "language": "Language"
   },
   "tutors": {
     "eyebrow": "Our Tutors",
@@ -828,7 +833,13 @@
     "levelALevel": "GCE A-Level",
     "levelUniversity": "University",
     "levelProfessional": "Professional / Adult Education",
-    "levelMedium": "Medium"
+    "levelMedium": "Medium",
+    "language": "Language",
+    "langEn": "English",
+    "langFr": "French",
+    "langBilingual": "Bilingual",
+    "langHelp": "The language this course is taught in. It decides which students find it, and which language the video transcripts are generated in.",
+    "allLanguages": "All languages"
   },
   "contact": {
     "eyebrow": "Contact",

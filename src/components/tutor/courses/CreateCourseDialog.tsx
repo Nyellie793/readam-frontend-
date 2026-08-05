@@ -9,6 +9,7 @@ import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import type { CourseLanguage } from "@/types/api.types";
 
 export default function CreateCourseDialog() {
   const t = useTranslations("tutor");
@@ -21,6 +22,7 @@ export default function CreateCourseDialog() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>(COURSE_CATEGORIES[0].value);
   const [price, setPrice] = useState("");
+  const [language, setLanguage] = useState<CourseLanguage>("en");
 
   function reset() {
     setTitle("");
@@ -40,6 +42,7 @@ export default function CreateCourseDialog() {
         title: title.trim(),
         description: description.trim() || undefined,
         category,
+        language,
         price: Number(price) || 0,
         is_premium: Number(price) > 0,
       });
@@ -90,6 +93,20 @@ export default function CreateCourseDialog() {
               placeholder={t("descriptionPh")}
               className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-700">{t("language")}</label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as CourseLanguage)}
+              className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            >
+              <option value="en">{t("langEn")}</option>
+              <option value="fr">{t("langFr")}</option>
+              <option value="bilingual">{t("langBilingual")}</option>
+            </select>
+            <p className="text-[11px] leading-relaxed text-gray-400">{t("langHelp")}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

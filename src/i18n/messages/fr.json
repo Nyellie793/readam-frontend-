@@ -49,7 +49,12 @@
     "signInFirst": "Vous devrez d'abord vous connecter.",
     "modulesOne": "{count} module",
     "modulesOther": "{count} modules",
-    "outlinePending": "Le plan de ce cours est en cours de finalisation."
+    "outlinePending": "Le plan de ce cours est en cours de finalisation.",
+    "langEn": "Anglais",
+    "langFr": "Français",
+    "langBilingual": "Bilingue",
+    "allLanguages": "Toutes les langues",
+    "language": "Langue"
   },
   "tutors": {
     "eyebrow": "Nos tuteurs",
@@ -828,7 +833,13 @@
     "levelALevel": "GCE A-Level",
     "levelUniversity": "Université",
     "levelProfessional": "Formation professionnelle / adultes",
-    "levelMedium": "Collège"
+    "levelMedium": "Collège",
+    "language": "Langue",
+    "langEn": "Anglais",
+    "langFr": "Français",
+    "langBilingual": "Bilingue",
+    "langHelp": "La langue d'enseignement de ce cours. Elle détermine quels élèves le trouvent, et dans quelle langue les transcriptions vidéo sont générées.",
+    "allLanguages": "Toutes les langues"
   },
   "contact": {
     "eyebrow": "Contact",

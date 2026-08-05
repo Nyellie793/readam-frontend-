@@ -56,12 +56,14 @@ const EMPTY_TUTORS: PaginatedTutorsResponse = { items: [], total: 0, page: 1, pa
 export async function getPublicCourses(params?: {
   search?: string;
   category?: string;
+  language?: string;
   page?: number;
   pageSize?: number;
 }): Promise<PaginatedCoursesResponse> {
   const q = new URLSearchParams();
   if (params?.search) q.set("search", params.search);
   if (params?.category) q.set("category", params.category);
+  if (params?.language) q.set("language", params.language);
   q.set("page", String(params?.page ?? 1));
   q.set("page_size", String(params?.pageSize ?? 24));
 
