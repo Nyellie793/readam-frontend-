@@ -6,9 +6,12 @@ const ADMIN = {
   getStats: () => api.get("/v1/admin/stats"),
 
   /* ── Users ───────────────────────────────────────────────────────────────── */
-  /** GET /v1/admin/users?role=student|tutor|admin&page=1&page_size=20 */
-  getUsers: (page = 1, role?: string) =>
-    api.get(`/v1/admin/users?page=${page}${role ? `&role=${role}` : ""}`),
+  /** GET /v1/admin/users?role=student|tutor|admin&search=&page=1&page_size=20 */
+  getUsers: (page = 1, role?: string, search?: string) =>
+    api.get(
+      `/v1/admin/users?page=${page}${role ? `&role=${role}` : ""}` +
+        (search ? `&search=${encodeURIComponent(search)}` : "")
+    ),
 
   /** PATCH /v1/admin/users/{user_id} — suspend/reactivate or change role */
   updateUser: (userId: string, body: { is_active?: boolean; role?: string }) =>
