@@ -113,15 +113,3 @@ export const COURSES: CourseRow[] = [
   { id: "c5", title: "Modern Cybersecurity Foundations", category: "Technology", tutor: "Tabi Samuel", updated: "Sep 12, 2025", status: "Published" },
 ];
 
-export const TOP_QUESTIONS = [
-  { id: "q1", text: "Explain integration by parts step by step", subject: "Mathematics", count: "3,841 asks" },
-  { id: "q2", text: "What is Newton's second law with examples?", subject: "Physics", count: "1,702 asks" },
-  { id: "q3", text: "Summarize the key causes of the French Revolution", subject: "History", count: "1,130 asks" },
-];
-
-export const STRUGGLE_TOPICS = [
-  { id: "st1", topic: "Calculus", percent: 78 },
-  { id: "st2", topic: "Organic Chemistry", percent: 64 },
-  { id: "st3", topic: "Mechanical Physics", percent: 52 },
-  { id: "st4", topic: "Macroeconomics", percent: 41 },
-];
