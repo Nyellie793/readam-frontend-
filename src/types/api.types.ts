@@ -283,6 +283,7 @@ export interface CourseListItem {
     is_premium: boolean;
     thumbnail_url: string | null;
     status: "draft" | "pending_review" | "published" | "rejected";
+    rejection_reason: string | null;
     tags: string[];
     avg_rating: number | null;
     review_count: number;

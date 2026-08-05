@@ -47,11 +47,6 @@ export default function CoursesPage() {
     setCourses((p) => p.filter((c) => c.id !== id));
   }
 
-  async function handleReject(id: string) {
-    await ADMIN.rejectCourse(id);
-    setCourses((p) => p.filter((c) => c.id !== id));
-  }
-
   return (
     <>
       <Topbar
@@ -157,12 +152,16 @@ export default function CoursesPage() {
                                 >
                                   Approve
                                 </button>
-                                <button
-                                  onClick={() => handleReject(c.id)}
+                                {/* Rejecting needs a written reason, and a
+                                    reason needs the context of the review
+                                    screen, so this routes there rather than
+                                    rejecting blind from a table row. */}
+                                <Link
+                                  href={`/admin/courses/${c.id}`}
                                   className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                                 >
                                   Reject
-                                </button>
+                                </Link>
                               </>
                             )}
                           </div>

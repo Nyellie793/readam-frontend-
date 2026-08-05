@@ -41,11 +41,6 @@ export default function AdminDashboardPage() {
     setPendingCourses(p => p.filter(c => c.id !== id));
   }
 
-  async function handleReject(id: string) {
-    await ADMIN.rejectCourse(id);
-    setPendingCourses(p => p.filter(c => c.id !== id));
-  }
-
   return (
     <>
       <Topbar title="System Overview" description="Real-time platform stats." />
@@ -101,12 +96,12 @@ export default function AdminDashboardPage() {
                   >
                     Approve
                   </button>
-                  <button
-                    onClick={() => handleReject(course.id)}
+                  <Link
+                    href={`/admin/courses/${course.id}`}
                     className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100"
                   >
                     Reject
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

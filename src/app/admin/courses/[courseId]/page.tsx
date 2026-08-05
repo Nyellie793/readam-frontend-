@@ -20,6 +20,7 @@ import Topbar from "@/components/admin/Topbar";
 import { Badge } from "@/components/ui/Badge";
 import ADMIN from "@/services/admin.service";
 import LessonPreview from "@/components/admin/course/LessonPreview";
+import RejectCourseDialog from "@/components/admin/course/RejectCourseDialog";
 import type { AdminCourseDetail } from "@/types/api.types";
 
 const STATUS_VARIANT: Record<string, "success" | "warning" | "destructive" | "muted"> = {
@@ -59,6 +60,7 @@ export default function AdminCourseDetailPage() {
   // Only one lesson is open at a time, so reviewing does not spawn a wall of
   // players all buffering at once.
   const [openLessonId, setOpenLessonId] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -76,22 +78,30 @@ export default function AdminCourseDetailPage() {
     void load();
   }, [load]);
 
-  async function decide(action: "approve" | "reject") {
+  async function approve() {
     if (!course) return;
-    if (action === "reject") {
-      const ok = window.confirm(
-        `Reject "${course.title}"?\n\nIt returns to the tutor for revision.`
-      );
-      if (!ok) return;
-    }
-    setActing(action);
+    setActing("approve");
     try {
-      if (action === "approve") await ADMIN.approveCourse(course.id);
-      else await ADMIN.rejectCourse(course.id);
-      toast.success(action === "approve" ? "Course published" : "Course sent back to the tutor");
+      await ADMIN.approveCourse(course.id);
+      toast.success("Course published, the tutor has been emailed");
       await load();
     } catch (e) {
-      toast.error((e as { detail?: string })?.detail ?? `Could not ${action} this course`);
+      toast.error((e as { detail?: string })?.detail ?? "Could not approve this course");
+    } finally {
+      setActing(null);
+    }
+  }
+
+  async function reject(reason: string) {
+    if (!course) return;
+    setActing("reject");
+    try {
+      await ADMIN.rejectCourse(course.id, reason);
+      toast.success("Sent back to the tutor with your feedback");
+      setRejecting(false);
+      await load();
+    } catch (e) {
+      toast.error((e as { detail?: string })?.detail ?? "Could not reject this course");
     } finally {
       setActing(null);
     }
@@ -176,7 +186,7 @@ export default function AdminCourseDetailPage() {
                 {pending && (
                   <div className="flex shrink-0 gap-2">
                     <button
-                      onClick={() => decide("reject")}
+                      onClick={() => setRejecting(true)}
                       disabled={acting !== null}
                       className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -188,7 +198,7 @@ export default function AdminCourseDetailPage() {
                       Reject
                     </button>
                     <button
-                      onClick={() => decide("approve")}
+                      onClick={() => void approve()}
                       disabled={acting !== null}
                       className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
@@ -202,6 +212,17 @@ export default function AdminCourseDetailPage() {
                   </div>
                 )}
               </div>
+
+              {course.status === "rejected" && course.rejection_reason && (
+                <div className="mt-5 rounded-xl border border-red-200 bg-red-50/60 p-4">
+                  <p className="text-xs font-semibold text-red-700">
+                    Rejected with this feedback
+                  </p>
+                  <p className="mt-1.5 whitespace-pre-line text-sm text-red-900/80">
+                    {course.rejection_reason}
+                  </p>
+                </div>
+              )}
 
               {course.description && (
                 <div className="mt-6 border-t border-gray-50 pt-5">
@@ -366,6 +387,16 @@ export default function AdminCourseDetailPage() {
           </>
         )}
       </div>
+
+      {course && (
+        <RejectCourseDialog
+          open={rejecting}
+          courseTitle={course.title}
+          submitting={acting === "reject"}
+          onCancel={() => setRejecting(false)}
+          onConfirm={(reason) => void reject(reason)}
+        />
+      )}
     </>
   );
 }

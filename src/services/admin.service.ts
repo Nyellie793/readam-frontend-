@@ -47,8 +47,8 @@ const ADMIN = {
     api.post(`/v1/admin/courses/${courseId}/approve`, {}, true),
 
   /** POST /v1/admin/courses/{course_id}/reject */
-  rejectCourse: (courseId: string) =>
-    api.post(`/v1/admin/courses/${courseId}/reject`, {}, true),
+  rejectCourse: (courseId: string, reason?: string) =>
+    api.post(`/v1/admin/courses/${courseId}/reject`, { reason: reason ?? null }, true),
 
   /* ── Students ────────────────────────────────────────────────────────────── */
   /** GET /v1/admin/students?search=&page=1&page_size=20 */
