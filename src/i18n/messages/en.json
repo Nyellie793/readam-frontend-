@@ -669,7 +669,17 @@
     "pdfGuides": "PDF Guides",
     "practiceTests": "Practice Tests",
     "retry": "Retry",
-    "tryAgain": "Try again"
+    "tryAgain": "Try again",
+    "transcript": "Transcript",
+    "transcriptLines": "{count, plural, one {# line} other {# lines}}",
+    "transcriptLoading": "Loading the transcript…",
+    "transcriptFailed": "The transcript could not be loaded. Try again in a moment.",
+    "transcriptEmpty": "No transcript is available for this lesson yet.",
+    "transcriptSearch": "Search the transcript",
+    "transcriptNoMatch": "No line matches your search.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "clear": "Clear"
   },
   "tutor": {
     "dashboard": "Dashboard",

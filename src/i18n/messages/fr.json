@@ -669,7 +669,17 @@
     "pdfGuides": "Guides PDF",
     "practiceTests": "Tests d'entraînement",
     "retry": "Réessayer",
-    "tryAgain": "Réessayer"
+    "tryAgain": "Réessayer",
+    "transcript": "Transcription",
+    "transcriptLines": "{count, plural, one {# ligne} other {# lignes}}",
+    "transcriptLoading": "Chargement de la transcription…",
+    "transcriptFailed": "La transcription n'a pas pu être chargée. Réessayez dans un instant.",
+    "transcriptEmpty": "Aucune transcription n'est encore disponible pour cette leçon.",
+    "transcriptSearch": "Rechercher dans la transcription",
+    "transcriptNoMatch": "Aucune ligne ne correspond à votre recherche.",
+    "copy": "Copier",
+    "copied": "Copié",
+    "clear": "Effacer"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

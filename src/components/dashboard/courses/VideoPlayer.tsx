@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { Captions, CaptionsOff } from "lucide-react";
 import { useTranslations } from "next-intl";
+import TranscriptPanel from "./TranscriptPanel";
 
 export interface VideoCaptions {
   en: string | null;
@@ -35,6 +36,9 @@ export default function VideoPlayer({
   // hides it behind the overflow menu — so subtitles get an explicit toggle.
   const [showCaptions, setShowCaptions] = useState(true);
   const [activeLang, setActiveLang] = useState<string | null>(null);
+  // Drives the transcript highlight. Kept separate from progress reporting so
+  // the panel updates every tick while the API is still written every 15s.
+  const [position, setPosition] = useState(0);
 
   function reportProgress(completed = false) {
     const video = videoRef.current;
@@ -46,10 +50,22 @@ export default function VideoPlayer({
   function handleTimeUpdate() {
     const video = videoRef.current;
     if (!video) return;
+    setPosition(video.currentTime);
     // Persist progress at most once every 15s of playback, not on every tick.
     if (video.currentTime - lastReportedRef.current >= 15) {
       reportProgress();
     }
+  }
+
+  function seekTo(seconds: number) {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = seconds;
+    setPosition(seconds);
+    void video.play().catch(() => {
+      // Autoplay can be refused if the user has not interacted yet; seeking
+      // still worked, so there is nothing to report.
+    });
   }
 
   /**
@@ -99,8 +115,13 @@ export default function VideoPlayer({
     applyTracks(lang, true);
   }
 
+  // The transcript follows whichever subtitle language is selected, and stays
+  // available when subtitles are switched off.
+  const transcriptSrc = tracks.find((t) => t.lang === activeLang)?.src ?? tracks[0]?.src ?? null;
+
   return (
-    <div className="overflow-hidden rounded-2xl bg-gray-950 shadow-lg">
+    <>
+      <div className="overflow-hidden rounded-2xl bg-gray-950 shadow-lg">
       <video
         ref={videoRef}
         key={src}
@@ -163,6 +184,9 @@ export default function VideoPlayer({
           {t("subtitlesPending")}
         </p>
       )}
-    </div>
+      </div>
+
+      <TranscriptPanel src={transcriptSrc} currentTime={position} onSeek={seekTo} />
+    </>
   );
 }
