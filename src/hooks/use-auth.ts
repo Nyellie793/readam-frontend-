@@ -113,13 +113,22 @@ export function useAuth() {
       saveSession(data);
 
       if (!data.user.role) {
-        // Brand new account — finish role selection, then onboarding.
-        const assignedRole = role ?? "student";
-        const roleData = await AUTH.setRole({ role: assignedRole });
-        saveSession(roleData);
-        sessionStorage.setItem("login_type", "signup");
-        toast.success("Account created! Let's personalise your experience.");
-        router.push(assignedRole === "tutor" ? "/tutor/onboarding" : ROUTES.onboarding1);
+        // Brand new account
+        if (role) {
+          // Role was pre-selected (e.g. from signup page)
+          const roleData = await AUTH.setRole({ role });
+          saveSession(roleData);
+          sessionStorage.setItem("login_type", "signup");
+          toast.success("Account created! Let's personalise your experience.");
+          router.push(role === "tutor" ? "/tutor/onboarding" : ROUTES.onboarding1);
+        } else {
+          // No role pre-selected (e.g. Google Sign-In from login page)
+          // Save session first, then redirect to select-role page to choose role.
+          saveSession(data);
+          sessionStorage.setItem("login_type", "signup");
+          toast.success("Account created! Please choose your role to continue.");
+          router.push(ROUTES.selectRole);
+        }
         return;
       }
 

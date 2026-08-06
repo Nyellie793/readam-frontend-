@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { User, Bot } from "lucide-react";
+import { User, Bot, Loader2 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
+import { useStoredUser } from "@/hooks/useStoredUser";
+import AUTH from "@/services/auth.service";
+import { saveSession } from "@/lib/auth";
+import { toast } from "sonner";
 
 const ROLES = [
   { id: "student", titleKey: "roleStudent", descKey: "roleStudentDesc", Icon: User },
@@ -16,6 +20,26 @@ export default function SelectRolePage() {
   const t = useTranslations("auth");
   const router = useRouter();
   const [selected, setSelected] = useState<Role>("student");
+  const user = useStoredUser();
+  const [loading, setLoading] = useState(false);
+
+  const handleContinue = async () => {
+    if (user) {
+      setLoading(true);
+      try {
+        const roleData = await AUTH.setRole({ role: selected });
+        saveSession(roleData);
+        toast.success(t("profileUpdated") || "Role saved successfully!");
+        router.push(selected === "tutor" ? "/tutor/onboarding" : "/onboarding-1");
+      } catch (err) {
+        toast.error("Failed to save role. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      router.push(`/signup?role=${selected}`);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#F4F6FB]">
@@ -47,8 +71,9 @@ export default function SelectRolePage() {
             );
           })}
         </div>
-        <button type="button" onClick={() => router.push(`/signup?role=${selected}`)}
-          className="mt-10 rounded-xl bg-blue-600 px-16 py-4 text-base font-bold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700">
+        <button type="button" onClick={handleContinue} disabled={loading}
+          className="mt-10 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-16 py-4 text-base font-bold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed">
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {t("continue")}
         </button>
       </div>

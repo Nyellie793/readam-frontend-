@@ -31,6 +31,14 @@ export function proxy(req: NextRequest) {
   const role = req.cookies.get("readam_role")?.value ?? "";
   const isAdminRole = (ADMIN_ROLES as readonly string[]).includes(role);
 
+  // Redirect authenticated users without a role to /select-role
+  if (isAuth && !role) {
+    if (pathname !== "/select-role") {
+      return NextResponse.redirect(new URL("/select-role", req.url));
+    }
+    return NextResponse.next();
+  }
+
   /* ── Admin sign-in — guest-only, never gated by its own rule below ─────── */
   if (pathname === ADMIN_LOGIN) {
     if (isAuth && isAdminRole) {

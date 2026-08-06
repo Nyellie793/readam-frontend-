@@ -20,13 +20,16 @@ interface SignupFormProps {
   role: string;
 }
 
-export default function SignupForm({ role }: SignupFormProps) {
+export default function SignupForm({ role: initialRole }: SignupFormProps) {
   const t = useTranslations("auth");
   const { register: registerUser, googleAuth, loading } = useAuth();
+  const [role, setRole] = useState<"student" | "tutor">(
+    initialRole === "tutor" ? "tutor" : "student"
+  );
   // The redirect leaves and re-enters the page, so the role chosen on
   // /select-role has to be re-applied on the way back in.
   useGoogleRedirectResult((idToken) =>
-    googleAuth(idToken, role === "tutor" ? "tutor" : "student")
+    googleAuth(idToken, role)
   );
   const [showPw, setShowPw] = useState(false);
 
@@ -53,10 +56,23 @@ export default function SignupForm({ role }: SignupFormProps) {
       <p className="mt-3 text-center text-base text-gray-500">
         {t("signupIntro")}
       </p>
-      <div className="mt-3 flex justify-center">
-        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 capitalize">
-          {t("signingUpAs", { role })}
-        </span>
+      <div className="mt-3 flex justify-center items-center gap-2 text-sm text-gray-500">
+        <span>{t("signingUpAsLabel") || "Signing up as:"}</span>
+        <div className="relative inline-block">
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value as "student" | "tutor")}
+            className="appearance-none rounded-full bg-blue-50 pl-4 pr-9 py-1.5 text-xs font-bold text-blue-600 outline-none cursor-pointer border border-transparent hover:border-blue-200 focus:ring-2 focus:ring-blue-100 transition-all capitalize"
+          >
+            <option value="student">{t("roleStudent")}</option>
+            <option value="tutor">{t("roleTutor")}</option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <svg className="h-3 w-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-5">
@@ -117,7 +133,7 @@ export default function SignupForm({ role }: SignupFormProps) {
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
-        <GoogleSignInButton onCredential={(idToken) => googleAuth(idToken, role === "tutor" ? "tutor" : "student")} />
+        <GoogleSignInButton onCredential={(idToken) => googleAuth(idToken, role)} />
         {/* Mobile only — visible when navbar auth link is hidden */}
         <p className="mt-6 text-center text-sm text-gray-500 sm:hidden">
           {t("haveAccount")}{" "}
