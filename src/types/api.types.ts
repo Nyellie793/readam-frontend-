@@ -773,3 +773,49 @@ export interface CourseListItem {
     upload_url: string;
     file_url: string;
   }
+export interface RevenueSummary {
+  this_month: number;
+  last_month: number;
+  /** Null when last month was zero — growth from nothing is not a percentage. */
+  change_pct: number | null;
+  all_time: number;
+}
+
+export interface MoneyFlow {
+  platform_earned: number;
+  tutor_net: number;
+  pending_payouts: number;
+  paid_out: number;
+}
+
+export interface RevenueBySource {
+  source: string;
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface PaymentHealth {
+  medium: string;
+  successful: number;
+  failed: number;
+  success_rate: number;
+}
+
+export interface CoursePerformance {
+  id: string;
+  title: string;
+  tutor_name: string | null;
+  price: number;
+  students: number;
+  revenue: number;
+}
+
+export interface AdminAnalyticsResponse {
+  revenue: RevenueSummary;
+  flow: MoneyFlow;
+  by_source: RevenueBySource[];
+  by_medium: PaymentHealth[];
+  top_courses: CoursePerformance[];
+  currency: string;
+}

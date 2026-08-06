@@ -59,6 +59,10 @@ const ADMIN = {
   /** GET /v1/admin/payments/stats */
   getPaymentStats: () => api.get("/v1/admin/payments/stats"),
 
+  /** GET /v1/admin/analytics — revenue, money flow, sources, payment health, top courses */
+  getAnalytics: (topCourses = 10) =>
+    api.get(`/v1/admin/analytics?top_courses_limit=${topCourses}`),
+
   /** GET /v1/admin/payments/revenue-trend?days=7 */
   getRevenueTrend: (days = 7) => api.get(`/v1/admin/payments/revenue-trend?days=${days}`),
 
