@@ -6,6 +6,7 @@ import { BookOpen, Lock, PlayCircle, FileText, ArrowLeft, Check } from "lucide-r
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
+import { TutorInitials } from "@/components/sections/TutorInitial";
 import { initialsOf } from "@/hooks/useStoredUser";
 import { getTranslations } from "next-intl/server";
 
@@ -99,7 +100,7 @@ export default async function PublicCoursePage({
                     />
                   ) : (
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-600">
-                      {initialsOf(course.tutor_name)}
+                      <TutorInitials name={course.tutor_name} />
                     </span>
                   )}
                   <span className="text-sm">
