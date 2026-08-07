@@ -8,6 +8,7 @@
  * Rules
  * ─────
  *   /admin/*    → must be authenticated AND have role admin|super_admin
+ *   /tutor/*    → tutor, or admin (they share the course editor)
  *   /onboarding-* /welcome-back /dashboard/* /notifications /settings
  *   /checkout /payment/* → must be authenticated
  *   /login /signup → redirect to home if already authenticated
@@ -70,7 +71,9 @@ export function proxy(req: NextRequest) {
     if (!isAuth) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
-    if (role !== "tutor") {
+    // Admins share the tutor course editor rather than a duplicate of it, so
+    // they are allowed in here too. The API enforces the same rule.
+    if (role !== "tutor" && !isAdminRole) {
       return NextResponse.redirect(new URL("/", req.url));
     }
   }

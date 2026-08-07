@@ -840,7 +840,9 @@
     "langFr": "French",
     "langBilingual": "Bilingual",
     "langHelp": "The language this course is taught in. It decides which students find it, and which language the video transcripts are generated in.",
-    "allLanguages": "All languages"
+    "allLanguages": "All languages",
+    "editContent": "Edit content",
+    "viewCourse": "View course"
   },
   "contact": {
     "eyebrow": "Contact",

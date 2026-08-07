@@ -15,6 +15,7 @@ import {
   Eye,
   Loader2,
   Star,
+  Pencil,
 } from "lucide-react";
 import Topbar from "@/components/admin/Topbar";
 import { Badge } from "@/components/ui/Badge";
@@ -181,6 +182,21 @@ export default function AdminCourseDetailPage() {
                       </p>
                     )}
                   </div>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  {/* Published courses stay editable on purpose: syllabuses
+                      change and material goes stale. Only pending_review is
+                      frozen, since it is being reviewed right now. */}
+                  {course.status !== "pending_review" && (
+                    <Link
+                      href={`/tutor/courses/${course.id}`}
+                      className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                    >
+                      <Pencil className="size-4" />
+                      Edit content
+                    </Link>
+                  )}
                 </div>
 
                 {pending && (
