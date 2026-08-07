@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import { getPublicCourses } from "@/lib/public-api";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import { initialsOf } from "@/hooks/useStoredUser";
+import { TutorInitials } from "@/components/sections/TutorInitial";
 import type { CourseListItem } from "@/types/api.types";
 import { getTranslations } from "next-intl/server";
 
@@ -62,7 +63,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
                             />
                         ) : (
                             <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[9px] font-bold text-blue-600">
-                                {initialsOf(course.tutor_name)}
+                                <TutorInitials name={course.tutor_name} />
                             </span>
                         )}
                         <span className="truncate text-xs text-gray-500">{course.tutor_name}</span>
@@ -166,8 +167,8 @@ export default async function CoursesPage({
                                         key={l.label}
                                         href={href}
                                         className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${active
-                                                ? "border-gray-800 bg-gray-800 text-white"
-                                                : "border-gray-200 bg-white text-gray-600 hover:border-gray-400"
+                                            ? "border-gray-800 bg-gray-800 text-white"
+                                            : "border-gray-200 bg-white text-gray-600 hover:border-gray-400"
                                             }`}
                                     >
                                         {l.label}
@@ -180,8 +181,8 @@ export default async function CoursesPage({
                             <Link
                                 href="/courses"
                                 className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${!category
-                                        ? "border-blue-600 bg-blue-600 text-white"
-                                        : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                                    ? "border-blue-600 bg-blue-600 text-white"
+                                    : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
                                     }`}
                             >
                                 All
@@ -191,8 +192,8 @@ export default async function CoursesPage({
                                     key={c.value}
                                     href={`/courses?category=${encodeURIComponent(c.value)}`}
                                     className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${category === c.value
-                                            ? "border-blue-600 bg-blue-600 text-white"
-                                            : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
+                                        ? "border-blue-600 bg-blue-600 text-white"
+                                        : "border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600"
                                         }`}
                                 >
                                     {tc(c.value)}
