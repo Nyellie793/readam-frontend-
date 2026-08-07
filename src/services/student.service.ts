@@ -162,8 +162,11 @@ const STUDENT = {
   // POST /v1/subscriptions/purchase — buy an AI session product via MTN MoMo / Orange Money
   purchaseSubscription: (body: {
     product_code: string;
-    phone: string;
+    phone?: string;
     medium?: "mobile money" | "orange money";
+    /** "link" returns a hosted Fapshi page; "direct" pushes USSD to the phone
+     *  but needs direct-pay activated on the Fapshi account. */
+    method?: "direct" | "link";
   }) => api.post<SubscriptionPaymentResponse>("/v1/subscriptions/purchase", body, true),
 
   // GET /v1/notifications — the in-app notification feed

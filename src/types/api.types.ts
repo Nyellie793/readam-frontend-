@@ -563,7 +563,9 @@ export interface CourseListItem {
     amount: number;
     status: "pending" | "successful" | "failed" | "expired";
     created_at: string;
-  }
+  /** Hosted checkout URL — set only when method was "link". */
+  payment_link?: string | null;
+}
 
   export interface PaymentResponse {
     id: string;

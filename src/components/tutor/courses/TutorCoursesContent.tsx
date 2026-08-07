@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Layers } from "lucide-react";
+import { BookOpen, Layers, Pencil, Eye } from "lucide-react";
 import SkeletonTable from "@/components/skeletons/SkeletonTable";
 import CreateCourseDialog from "./CreateCourseDialog";
 import TUTOR from "@/services/tutor.service";
@@ -85,6 +85,23 @@ export default function TutorCoursesContent() {
                 {course.total_lessons} lesson{course.total_lessons === 1 ? "" : "s"} ·{" "}
                 {course.price === 0 ? "Free" : `${course.price.toLocaleString()} XAF`}
               </p>
+
+              {/* A published course stays editable, which is not obvious from
+                  a card that just shows "Published". Only pending_review is
+                  frozen, while an admin is reviewing it. */}
+              <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600">
+                {course.status === "pending_review" ? (
+                  <>
+                    <Eye className="size-3.5" />
+                    {t("viewCourse")}
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="size-3.5" />
+                    {t("editContent")}
+                  </>
+                )}
+              </span>
             </Link>
           ))}
         </div>

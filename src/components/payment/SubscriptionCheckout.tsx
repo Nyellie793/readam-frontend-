@@ -83,6 +83,18 @@ export default function SubscriptionCheckout({ productCode }: { productCode: str
         medium: method === "mtn" ? "mobile money" : "orange money",
       });
       setPaymentId(payment.id);
+
+      /**
+       * Direct pay pushes a USSD prompt to the handset and returns no link.
+       * The hosted flow returns one, and the payment cannot complete unless
+       * the student actually opens it, so send them straight there. The
+       * webhook still confirms the payment either way, and the pending screen
+       * is waiting when they come back.
+       */
+      if (payment.payment_link) {
+        window.location.href = payment.payment_link;
+        return;
+      }
       setStage("pending");
     } catch (err) {
       setErrorText(errorMessage(err, t("couldNotStart")));
