@@ -25,7 +25,7 @@ const AUTH_REQUIRED =
   /^\/(onboarding-\d|welcome-back|dashboard|notifications|settings|checkout|payment)(\/|$)/;
 const GUEST_ONLY = /^\/(login|signup)(\/|$)/;
 
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const isAuth = req.cookies.get("readam_auth")?.value === "1";

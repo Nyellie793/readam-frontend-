@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   LogOut,
   User,
@@ -88,28 +89,22 @@ export default function UserDropdown() {
 
         <DropdownMenuSeparator/>
 
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
-
-          <User className="mr-2 h-4 w-4"/>
-
-          Profile
-
+        <DropdownMenuItem asChild>
+          <Link href="/settings">
+            <User className="mr-2 h-4 w-4" /> Profile
+          </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
-
-          <CreditCard className="mr-2 h-4 w-4"/>
-
-          Subscription
-
+        <DropdownMenuItem asChild>
+          <Link href="/settings">
+            <CreditCard className="mr-2 h-4 w-4" /> Subscription
+          </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
-
-          <Settings className="mr-2 h-4 w-4"/>
-
-          Settings
-
+        <DropdownMenuItem asChild>
+          <Link href="/settings">
+            <Settings className="mr-2 h-4 w-4" /> Settings
+          </Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator/>

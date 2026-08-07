@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
 import TUTOR from "@/services/tutor.service";
 import Image from "next/image";
+import Link from "next/link";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import ModuleList from "./ModuleList";
@@ -164,14 +165,13 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
 
   return (
     <div className="space-y-6">
-      <button
-        type="button"
-        onClick={() => router.push("/tutor/courses")}
+      <Link
+        href="/tutor/courses"
         className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-700"
       >
         <ArrowLeft className="size-4" />
         Back to My Courses
-      </button>
+      </Link>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
