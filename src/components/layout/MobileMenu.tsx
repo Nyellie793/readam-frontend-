@@ -9,7 +9,7 @@ import { NAV_LINKS } from "@/constants/navigation";
 import LanguageToggle from "../shared/LanguageToggle";
 import ThemeToggle from "../shared/ThemeToggle";
 import Logo from "../shared/Logo";
-import { clearSession } from "@/lib/auth";
+import { clearSession, homePathFor } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
 import { usePathname, useRouter } from "next/navigation";
@@ -74,7 +74,7 @@ export default function MobileMenu() {
                   cards, and Payments goes where the sidebar sends it. */}
               <nav className="flex flex-1 flex-col gap-0.5 p-3">
                 {[
-                  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+                  { href: homePathFor(user), icon: LayoutDashboard, label: "Dashboard" },
                   { href: "/settings#profile", icon: User, label: "Profile" },
                   { href: "/payment", icon: CreditCard, label: "Subscription" },
                   { href: "/settings", icon: Settings, label: "Settings" },

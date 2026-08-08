@@ -50,3 +50,19 @@ export function isAdmin(user: User | null): boolean {
   if (!user || !user.role) return false;
   return (ADMIN_ROLES as readonly string[]).includes(user.role);
 }
+
+/**
+ * Where "Dashboard" should take this user.
+ *
+ * Every menu hardcoded /dashboard, so a tutor clicking Dashboard from the
+ * landing page landed in the student area — a place they have no reason to be
+ * and, for an admin, one the middleware bounces them straight out of.
+ *
+ * Returns the student dashboard for a signed-out user too, since the
+ * middleware will send them to sign in from there anyway.
+ */
+export function homePathFor(user: User | null): string {
+  if (isAdmin(user)) return "/admin";
+  if (user?.role === "tutor") return "/tutor";
+  return "/dashboard";
+}

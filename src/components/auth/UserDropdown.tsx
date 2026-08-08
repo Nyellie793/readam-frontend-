@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { homePathFor } from "@/lib/auth";
+import { useStoredUser } from "@/hooks/useStoredUser";
 import { User, Settings, LayoutDashboard } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
@@ -13,6 +15,9 @@ export default function UserDropdown({
   email = "Student",
 }: UserDropdownProps) {
   const [open, setOpen] = useState(false);
+  // Dashboard is role-dependent: a tutor belongs in /tutor, an admin in
+  // /admin, and the middleware bounces them out of the student area anyway.
+  const user = useStoredUser();
 
   return (
     <div className="relative">
@@ -50,7 +55,7 @@ export default function UserDropdown({
 
 
           <Link
-            href="/dashboard"
+            href={homePathFor(user)}
             className="
               flex items-center gap-3 rounded-lg
               px-3 py-2 text-sm
