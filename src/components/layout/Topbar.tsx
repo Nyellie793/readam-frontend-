@@ -21,6 +21,8 @@ export default function Topbar({
   searchValue = "",
 }: TopbarProps) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  // Without this the sheet stayed open over the page it had just navigated to.
+  const [navOpen, setNavOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
 
   useEffect(() => {
@@ -33,14 +35,14 @@ export default function Topbar({
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-100 bg-white/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
       {/* Mobile: Hamburger menu to open Sidebar in a Sheet */}
       <div className="flex items-center gap-2 lg:hidden">
-        <Sheet>
+        <Sheet open={navOpen} onOpenChange={setNavOpen}>
           <SheetTrigger asChild>
             <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100">
               <Menu className="h-5 w-5 text-gray-600" />
             </button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
-            <Sidebar />
+            <Sidebar onNavigate={() => setNavOpen(false)} />
           </SheetContent>
         </Sheet>
         <Link href="/dashboard" className="text-lg font-bold text-blue-600 lg:hidden">

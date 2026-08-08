@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import {
   Sheet,
@@ -18,9 +19,12 @@ import ThemeToggle from "../shared/ThemeToggle";
 import Logo from "../shared/Logo";
 
 export default function AuthMobileMenu() {
+  // Uncontrolled, tapping a link navigated but left the panel covering the
+  // screen, so the menu looked like it had ignored the tap.
+  const [open, setOpen] = useState(false);
   const t = useTranslations("nav");
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         className="
         rounded-lg
@@ -52,6 +56,7 @@ export default function AuthMobileMenu() {
               <Link
                 key={t(link.title)}
                 href={link.href}
+                onClick={() => setOpen(false)}
                 className="
                 rounded-lg
                 px-4
@@ -94,6 +99,7 @@ export default function AuthMobileMenu() {
 
             <Link
               href="/login"
+        onClick={() => setOpen(false)}
               className="
               w-full
               rounded-xl

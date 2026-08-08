@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { ChevronDown, Menu } from "lucide-react";
 import {
   DropdownMenu,
@@ -21,6 +22,9 @@ interface TopbarProps {
 }
 
 export default function Topbar({ title, description }: TopbarProps) {
+  // The sheet stayed open after tapping a nav link, covering the page that
+  // had just loaded, so the admin menu looked unresponsive on mobile.
+  const [navOpen, setNavOpen] = useState(false);
   const router = useRouter();
   const user = useStoredUser();
   const name = user?.full_name ?? "Admin";
@@ -35,12 +39,12 @@ export default function Topbar({ title, description }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-100 bg-white/90 px-4 py-4 backdrop-blur-md sm:px-6">
       {/* Mobile: hamburger opens the same Sidebar in a Sheet */}
-      <Sheet>
+      <Sheet open={navOpen} onOpenChange={setNavOpen}>
         <SheetTrigger className="rounded-lg p-2 transition hover:bg-gray-100 lg:hidden">
           <Menu className="h-5 w-5 text-gray-700" />
         </SheetTrigger>
         <SheetContent side="left" className="w-72 p-0">
-          <Sidebar />
+          <Sidebar onNavigate={() => setNavOpen(false)} />
         </SheetContent>
       </Sheet>
 

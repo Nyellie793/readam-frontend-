@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Menu, Search, Bell, Sparkles, Settings, X } from "lucide-react";
 import DashboardGreeting from "./DashboardGreeting";
 import DashboardMobileSidebar from "./DashboardMobileSidebar";
@@ -36,15 +37,31 @@ export default function DashboardHeader() {
           >
             <Search className="size-5" />
           </button>
-          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label={t("notifications")}>
+          {/* These were <button> elements with no handler, so on mobile the
+              bell, the AI shortcut and settings all did nothing when tapped.
+              They are links, and always were destinations rather than
+              actions. */}
+          <Link
+            href="/notifications"
+            className="rounded-full p-2 text-gray-500 hover:bg-gray-100"
+            aria-label={t("notifications")}
+          >
             <Bell className="size-5" />
-          </button>
-          <button className="rounded-full p-2 text-violet-500 hover:bg-gray-100" aria-label={t("aiAssistant")}>
+          </Link>
+          <Link
+            href="/dashboard/ai-tutor/ai-hub"
+            className="rounded-full p-2 text-violet-500 hover:bg-gray-100"
+            aria-label={t("aiAssistant")}
+          >
             <Sparkles className="size-5" />
-          </button>
-          <button className="rounded-full p-2 text-gray-500 hover:bg-gray-100" aria-label={t("settings")}>
+          </Link>
+          <Link
+            href="/settings"
+            className="rounded-full p-2 text-gray-500 hover:bg-gray-100"
+            aria-label={t("settings")}
+          >
             <Settings className="size-5" />
-          </button>
+          </Link>
         </div>
       </div>
 

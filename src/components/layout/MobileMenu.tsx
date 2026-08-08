@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, LayoutDashboard, LogIn, UserPlus, LogOut, Settings, User, CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -22,7 +23,18 @@ export default function MobileMenu() {
   // The desktop navbar highlighted the current page; the mobile menu did not.
   const pathname = usePathname();
 
+  /**
+   * Both sheets are controlled so they can be closed on navigation.
+   *
+   * Uncontrolled, tapping a link navigated underneath but left the panel
+   * covering the screen, so nothing appeared to happen. That is what made the
+   * mobile menu look like its buttons were dead.
+   */
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+
   function handleLogout() {
+    setAccountOpen(false);
     clearSession();
     router.push("/login");
   }
@@ -31,7 +43,7 @@ export default function MobileMenu() {
     <div className="flex items-center gap-2">
       {/* Authenticated: show avatar with dropdown — same as desktop UserDropdown */}
       {user && (
-        <Sheet>
+        <Sheet open={accountOpen} onOpenChange={setAccountOpen}>
           <SheetTrigger asChild>
             <button
               className="flex size-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white"
@@ -56,23 +68,29 @@ export default function MobileMenu() {
               
 
               {/* Nav links */}
+              {/* Profile, Subscription and Settings all pointed at /settings,
+                  so two of the three did nothing at all once you were on that
+                  page. Profile and Subscription now deep-link to their own
+                  cards, and Payments goes where the sidebar sends it. */}
               <nav className="flex flex-1 flex-col gap-0.5 p-3">
-                <Link href="/dashboard"
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <LayoutDashboard className="size-4 text-gray-400" /> Dashboard
-                </Link>
-                <Link href="/settings"
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <User className="size-4 text-gray-400" /> Profile
-                </Link>
-                <Link href="/settings"
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <CreditCard className="size-4 text-gray-400" /> Subscription
-                </Link>
-                <Link href="/settings"
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <Settings className="size-4 text-gray-400" /> Settings
-                </Link>
+                {[
+                  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+                  { href: "/settings#profile", icon: User, label: "Profile" },
+                  { href: "/payment", icon: CreditCard, label: "Subscription" },
+                  { href: "/settings", icon: Settings, label: "Settings" },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      <Icon className="size-4 text-gray-400" /> {item.label}
+                    </Link>
+                  );
+                })}
               </nav>
 
               <div className="border-t border-gray-100 p-3">
@@ -87,7 +105,7 @@ export default function MobileMenu() {
       )}
 
       {/* Hamburger — opens nav links */}
-      <Sheet>
+      <Sheet open={navOpen} onOpenChange={setNavOpen}>
         <SheetTrigger className="rounded-lg p-2 transition hover:bg-gray-100">
           <Menu className="h-7 w-7 text-gray-800" />
         </SheetTrigger>
@@ -103,6 +121,7 @@ export default function MobileMenu() {
                   <Link
                     key={t(link.title)}
                     href={link.href}
+                    onClick={() => setNavOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "rounded-lg px-4 py-3 text-lg font-medium transition",
@@ -127,11 +146,11 @@ export default function MobileMenu() {
 
             {!user && (
               <div className="flex flex-col gap-2 pb-6">
-                <Link href="/login"
+                <Link href="/login" onClick={() => setNavOpen(false)}
                   className="flex items-center justify-center gap-2 w-full rounded-xl border border-blue-600 px-6 py-3 font-semibold text-blue-600 hover:bg-blue-50">
                   <LogIn className="size-4" /> Sign In
                 </Link>
-                <Link href="/select-role"
+                <Link href="/select-role" onClick={() => setNavOpen(false)}
                   className="flex items-center justify-center gap-2 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
                   <UserPlus className="size-4" /> Sign Up
                 </Link>
