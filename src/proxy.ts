@@ -75,9 +75,9 @@ export function proxy(req: NextRequest) {
     if (!isAuth) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
-    // Admins share the tutor course editor rather than a duplicate of it, so
-    // they are allowed in here too. The API enforces the same rule.
-    if (role !== "tutor" && !isAdminRole) {
+    // Admins edit courses at /admin/courses/[id]/edit, which mounts the same
+    // editor inside the admin panel, so they have no reason to be in here.
+    if (role !== "tutor") {
       return NextResponse.redirect(new URL("/", req.url));
     }
   }

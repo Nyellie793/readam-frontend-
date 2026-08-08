@@ -190,7 +190,7 @@ export default function AdminCourseDetailPage() {
                       frozen, since it is being reviewed right now. */}
                   {course.status !== "pending_review" && (
                     <Link
-                      href={`/tutor/courses/${course.id}`}
+                      href={`/admin/courses/${course.id}/edit`}
                       className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                     >
                       <Pencil className="size-4" />
