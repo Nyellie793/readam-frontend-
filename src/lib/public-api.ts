@@ -21,6 +21,17 @@ import type {
 /** Cache public catalogue reads for 5 minutes. */
 const REVALIDATE_SECONDS = 300;
 
+/**
+ * Give up on the API after this long.
+ *
+ * These fetches happen during render, so the page cannot stream until they
+ * settle. With no timeout a slow or hanging backend held the whole page
+ * hostage until the platform killed the function — the visitor sat on a blank
+ * screen rather than seeing the marketing content, which does not depend on
+ * the API at all. Better to render the empty state in 3s than nothing in 30.
+ */
+const FETCH_TIMEOUT_MS = 3_000;
+
 export interface PaginatedTutorsResponse {
   items: PublicTutorResponse[];
   total: number;
@@ -33,12 +44,14 @@ async function publicGet<T>(path: string): Promise<T | null> {
     const res = await fetch(`${API_BASE_URL}${path}`, {
       next: { revalidate: REVALIDATE_SECONDS },
       headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
-    // Network failure, DNS, or the API being down. The caller renders its
-    // empty state; a marketing page should never 500 because of this.
+    // Network failure, DNS, the API being down, or the timeout above. The
+    // caller renders its empty state; a marketing page should never 500 or
+    // hang because of this.
     return null;
   }
 }

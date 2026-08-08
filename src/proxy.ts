@@ -1,6 +1,10 @@
 /**
  * Next.js Edge Middleware — route protection.
  *
+ * Named proxy.ts, not middleware.ts: Next 16 renamed the convention, and the
+ * old name builds with a deprecation warning today but stops working on a
+ * later upgrade.
+ *
  * Reads two cookies written by src/lib/auth.ts after a successful login:
  *   readam_auth=1          → user is authenticated
  *   readam_role=admin      → user role
@@ -25,7 +29,7 @@ const AUTH_REQUIRED =
   /^\/(onboarding-\d|welcome-back|dashboard|notifications|settings|checkout|payment)(\/|$)/;
 const GUEST_ONLY = /^\/(login|signup)(\/|$)/;
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const isAuth = req.cookies.get("readam_auth")?.value === "1";
