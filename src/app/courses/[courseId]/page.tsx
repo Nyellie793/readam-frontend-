@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { BookOpen, Lock, PlayCircle, FileText, ArrowLeft, Check } from "lucide-react";
+import { BookOpen, Lock, PlayCircle, FileText, ArrowLeft, Check, Eye } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
@@ -154,6 +154,21 @@ export default async function PublicCoursePage({
                                   <FileText className="size-4 shrink-0 text-gray-400" />
                                 )}
                                 <span className="min-w-0 flex-1 truncate">{l.title}</span>
+                                {/* The sample is a two-page extract of this
+                                    lesson, generated server-side. It exists on
+                                    the first PDF lesson only, so this renders
+                                    on exactly one row per course. */}
+                                {l.preview_url && (
+                                  <a
+                                    href={l.preview_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 transition hover:bg-blue-100"
+                                  >
+                                    <Eye className="size-3" />
+                                    Sample
+                                  </a>
+                                )}
                                 {l.is_preview ? (
                                   <span className="shrink-0 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-semibold text-teal-600">
                                     Free preview
