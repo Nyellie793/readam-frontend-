@@ -148,6 +148,15 @@
   background-size: 200% 100%;
 }
 
+/* A sweeping gradient is exactly the kind of motion that triggers vestibular
+   discomfort, so fall back to a static block when the OS asks for less. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="skeleton"] {
+    animation: none;
+    background: var(--muted);
+  }
+}
+
 /* ─── Smooth page transitions (Task 7) ─────────────────────────────────── */
 @layer utilities {
   .transition-page {

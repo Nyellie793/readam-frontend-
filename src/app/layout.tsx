@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import NetworkProvider from "@/components/shared/NetworkProvider";
 import { SITE_URL } from "@/lib/constants";
 import { NextIntlClientProvider } from "next-intl";
+import RouteProgress from "@/components/shared/RouteProgress";
 import { getLocale } from "next-intl/server";
 
 const geistSans = Geist({
@@ -85,6 +86,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>
           <NetworkProvider />
+          <RouteProgress />
 
           {children}
 
