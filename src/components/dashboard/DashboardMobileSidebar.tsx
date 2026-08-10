@@ -20,15 +20,20 @@ export default function DashboardMobileSidebar({ open, onClose }: DashboardMobil
   return (
     <>
       {open && (
-        <div
+        <button
+          type="button"
+          aria-label="Close menu"
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 cursor-pointer bg-black/40 lg:hidden"
         />
       )}
 
+      {/* h-dvh, not h-screen: iOS treats 100vh as the viewport without the
+          browser chrome, so a fixed drawer runs taller than the visible area
+          and its bottom controls sit below the fold, untappable. */}
       <aside
         className={`
-          fixed left-0 top-0 z-50 h-screen w-72
+          fixed left-0 top-0 z-50 h-dvh w-72
           transform bg-white shadow-xl
           transition-transform duration-300 lg:hidden
           ${open ? "translate-x-0" : "-translate-x-full"}

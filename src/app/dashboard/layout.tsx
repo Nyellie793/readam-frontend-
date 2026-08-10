@@ -9,7 +9,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen bg-blue-50">
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-gray-100 lg:block">
-        <div className="fixed h-screen w-64">
+        <div className="fixed h-dvh w-64">
           <DashboardNavigation />
         </div>
       </aside>

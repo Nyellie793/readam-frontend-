@@ -14,7 +14,14 @@ export default function TutorMobileSidebar({ open, isVerified, onClose }: TutorM
   const t = useTranslations("tutor");
   return (
     <>
-      {open && <div onClick={onClose} className="fixed inset-0 z-40 bg-black/40 lg:hidden" />}
+      {open && (
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={onClose}
+          className="fixed inset-0 z-40 cursor-pointer bg-black/40 lg:hidden"
+        />
+      )}
 
       <aside
         className={`fixed left-0 top-0 z-50 flex h-dvh w-72 transform flex-col bg-white shadow-xl transition-transform duration-300 lg:hidden ${

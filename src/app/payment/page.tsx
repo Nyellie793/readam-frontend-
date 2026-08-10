@@ -44,7 +44,7 @@ export default async function PlansPage() {
   return (
     <div className="flex min-h-screen bg-gray-50/50">
       <aside className="hidden w-64 shrink-0 lg:block">
-        <div className="fixed h-screen w-64">
+        <div className="fixed h-dvh w-64">
           <Sidebar />
         </div>
       </aside>

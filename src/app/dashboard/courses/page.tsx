@@ -123,9 +123,13 @@ function CoursesPageContent() {
       {/* Mobile filter drawer */}
       {drawerOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/40 lg:hidden"
-            onClick={() => setDrawerOpen(false)} />
-          <aside className="fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-white shadow-xl lg:hidden">
+          <button
+            type="button"
+            aria-label="Close filters"
+            className="fixed inset-0 z-40 cursor-pointer bg-black/40 lg:hidden"
+            onClick={() => setDrawerOpen(false)}
+          />
+          <aside className="fixed left-0 top-0 z-50 flex h-dvh w-72 flex-col bg-white shadow-xl lg:hidden">
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
               <span className="text-sm font-semibold text-gray-700">Filters</span>
               <button onClick={() => setDrawerOpen(false)} className="rounded-lg p-1.5 hover:bg-gray-100">

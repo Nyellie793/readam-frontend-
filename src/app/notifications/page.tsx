@@ -55,7 +55,7 @@ export default function NotificationsPage() {
   return (
     <div className="flex min-h-screen bg-gray-50/50">
       <aside className="hidden lg:block w-64 shrink-0">
-        <div className="fixed h-screen w-64">
+        <div className="fixed h-dvh w-64">
           <Sidebar />
         </div>
       </aside>

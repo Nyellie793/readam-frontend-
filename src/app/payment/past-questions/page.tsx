@@ -38,7 +38,7 @@ export default function PastQuestionsPricingPage() {
   return (
     <div className="flex min-h-screen bg-gray-50/50">
       <aside className="hidden lg:block w-64 shrink-0">
-        <div className="fixed h-screen w-64"><Sidebar /></div>
+        <div className="fixed h-dvh w-64"><Sidebar /></div>
       </aside>
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar />

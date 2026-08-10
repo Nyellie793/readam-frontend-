@@ -5,7 +5,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex min-h-screen bg-gray-50">
       {/* Desktop sidebar — hidden on mobile (Topbar handles mobile nav via Sheet) */}
       <aside className="hidden w-64 shrink-0 lg:block">
-        <div className="fixed h-screen w-64">
+        <div className="fixed h-dvh w-64">
           <Sidebar />
         </div>
       </aside>
