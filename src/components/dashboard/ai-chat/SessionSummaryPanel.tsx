@@ -9,14 +9,21 @@ import {
   Loader2,
   BookOpen,
   CalendarCheck,
+  Pause,
+  Play,
 } from "lucide-react";
 import type { SessionSummaryResponse, QuizResponse } from "@/types/api.types";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface SessionSummaryPanelProps {
   sessionType: "lesson" | "general";
   isActive: boolean;
   remainingSeconds: number;
+  /** True while the clock is stopped. The countdown freezes, it does not run down. */
+  isPaused: boolean;
+  pauseBusy: boolean;
+  onTogglePause: () => void;
   summary: SessionSummaryResponse | null;
   summaryLoading: boolean;
   generatingRevision: boolean;
@@ -40,6 +47,9 @@ export default function SessionSummaryPanel({
   sessionType,
   isActive,
   remainingSeconds,
+  isPaused,
+  pauseBusy,
+  onTogglePause,
   summary,
   summaryLoading,
   generatingRevision,
@@ -207,14 +217,50 @@ export default function SessionSummaryPanel({
 
       <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-          {isActive ? "Time Remaining" : "Session Ended"}
+          {isPaused ? "Paused" : isActive ? "Time Remaining" : "Session Ended"}
         </p>
         <div className="mt-2 flex items-center gap-2">
-          <Clock className="size-4 text-blue-500" />
-          <p className="text-2xl font-extrabold tabular-nums text-gray-900">
-            {isActive ? formatDuration(remainingSeconds) : "00:00"}
+          <Clock className={cn("size-4", isPaused ? "text-orange-500" : "text-blue-500")} />
+          <p
+            className={cn(
+              "text-2xl font-extrabold tabular-nums",
+              isPaused ? "text-orange-600" : "text-gray-900"
+            )}
+          >
+            {isActive || isPaused ? formatDuration(remainingSeconds) : "00:00"}
           </p>
         </div>
+
+        {/* A credit buys a fixed window, so stepping away used to burn minutes
+            the student paid for. Pausing banks whatever is left. */}
+        {(isActive || isPaused) && (
+          <button
+            type="button"
+            onClick={onTogglePause}
+            disabled={pauseBusy}
+            className={cn(
+              "mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60",
+              isPaused
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "border border-gray-200 text-gray-700 hover:bg-gray-50"
+            )}
+          >
+            {pauseBusy ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : isPaused ? (
+              <Play className="size-4" />
+            ) : (
+              <Pause className="size-4" />
+            )}
+            {isPaused ? "Resume session" : "Pause session"}
+          </button>
+        )}
+
+        {isPaused && (
+          <p className="mt-2 text-[11px] leading-relaxed text-gray-400">
+            Your remaining time is held. Nothing is lost while paused.
+          </p>
+        )}
       </div>
     </aside>
   );

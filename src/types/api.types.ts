@@ -442,12 +442,14 @@ export interface CourseListItem {
     id: string;
     lesson_id: string | null;
     session_type: "lesson" | "general";
-    status: "active" | "expired";
+    status: "active" | "paused" | "expired" | "ended";
     started_at: string;
     expires_at: string;
     message_count: number;
     created_at: string;
-  }
+  /** Set while paused. Freeze the countdown when present. */
+  paused_at?: string | null;
+}
 
   export type AISessionListItem = AISessionResponse;
 
@@ -595,7 +597,7 @@ export interface CourseListItem {
   export interface SessionSummaryResponse {
     session_id: string;
     session_type: "lesson" | "general";
-    status: "active" | "expired";
+    status: "active" | "paused" | "expired" | "ended";
     lesson_id: string | null;
     lesson_title: string | null;
     started_at: string;

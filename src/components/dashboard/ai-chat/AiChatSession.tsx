@@ -197,6 +197,7 @@ export default function AiChatSession() {
   } | null>(null);
 
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [pauseBusy, setPauseBusy] = useState(false);
 
   const [summary, setSummary] = useState<SessionSummaryResponse | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
@@ -316,6 +317,22 @@ export default function AiChatSession() {
 
   useEffect(() => {
     if (!session) return;
+
+    /**
+     * While paused the clock is stopped server-side: expires_at does not move
+     * until resume. Ticking here would count down time the student still owns
+     * and hand them a timer that lies. Freeze on the gap that was banked.
+     */
+    if (session.status === "paused") {
+      const frozen = session.paused_at
+        ? Math.floor(
+            (new Date(session.expires_at).getTime() - new Date(session.paused_at).getTime()) / 1000
+          )
+        : remainingSeconds;
+      setRemainingSeconds(Math.max(0, frozen));
+      return;
+    }
+
     function tick() {
       if (!session) return;
       const secs = Math.floor((new Date(session.expires_at).getTime() - Date.now()) / 1000);
@@ -324,7 +341,29 @@ export default function AiChatSession() {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
+    // remainingSeconds is only read as a fallback when paused_at is absent, so
+    // it is deliberately not a dependency: including it would restart the
+    // interval every second.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
+
+  const isPaused = session?.status === "paused";
+
+  async function handleTogglePause() {
+    if (!session || pauseBusy) return;
+    setPauseBusy(true);
+    try {
+      const updated = isPaused
+        ? await AI.resumeSession(session.id)
+        : await AI.pauseSession(session.id);
+      setSession(updated);
+      toast.success(isPaused ? "Session resumed" : "Session paused, your time is held");
+    } catch (err) {
+      toast.error(errorMessage(err, isPaused ? "Could not resume" : "Could not pause"));
+    } finally {
+      setPauseBusy(false);
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -627,6 +666,9 @@ export default function AiChatSession() {
             sessionType={session.session_type}
             isActive={isActive}
             remainingSeconds={remainingSeconds}
+            isPaused={isPaused}
+            pauseBusy={pauseBusy}
+            onTogglePause={handleTogglePause}
             summary={summary}
             summaryLoading={summaryLoading}
             generatingRevision={generatingRevision}

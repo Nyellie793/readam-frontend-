@@ -26,6 +26,14 @@ const AI = {
   // GET /v1/ai/sessions
   listSessions: () => api.get<AISessionListItem[]>("/v1/ai/sessions"),
 
+  /** POST /v1/ai/sessions/:id/pause — stops the clock, banking the time left */
+  pauseSession: (sessionId: string) =>
+    api.post<AISessionResponse>(`/v1/ai/sessions/${sessionId}/pause`, {}, true),
+
+  /** POST /v1/ai/sessions/:id/resume — hands back exactly the banked time */
+  resumeSession: (sessionId: string) =>
+    api.post<AISessionResponse>(`/v1/ai/sessions/${sessionId}/resume`, {}, true),
+
   // POST /v1/ai/sessions/:id/messages
   sendMessage: (sessionId: string, content: string, attachmentIds: string[] = []) =>
     api.post<SendMessageResponse>(
