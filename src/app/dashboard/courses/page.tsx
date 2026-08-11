@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Menu, Search, Bell, Sparkles, X } from "lucide-react";
 import CourseCard from "@/components/dashboard/courses/CourseCard";
@@ -23,7 +23,9 @@ function CourseCardSkeleton() {
 
 function CoursesPageContent() {
   const t = useTranslations("dash");
+  const tc = useTranslations("cat");
   const searchParams = useSearchParams();
+  const router = useRouter();
   const category = searchParams.get("category") ?? "";
   const contentTypes = searchParams.getAll("content_type");
   const contentTypesKey = contentTypes.join(",");
@@ -75,6 +77,22 @@ function CoursesPageContent() {
    * Recommendations are a guess at that, so leaving them above the results
    * pushes the actual answer down the page and competes with it.
    */
+  function removeParam(key: string, value?: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value !== undefined) {
+      const kept = params.getAll(key).filter((v) => v !== value);
+      params.delete(key);
+      kept.forEach((v) => params.append(key, v));
+    } else {
+      params.delete(key);
+    }
+    router.push(`/dashboard/courses?${params.toString()}`);
+  }
+
+  function clearAllFilters() {
+    router.push("/dashboard/courses");
+  }
+
   const isFiltering =
     !!search || !!category || contentTypes.length > 0 || officialOnly;
 
@@ -189,6 +207,36 @@ function CoursesPageContent() {
           </>
         )}
 
+        {/* An active-filter summary. Content types are OR, but official-only
+            is a separate axis combined with AND, so a result set can be
+            surprisingly small. Showing what is applied — and letting it be
+            removed in one tap — explains why. */}
+        {isFiltering && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-gray-500">{t("activeFilters")}:</span>
+            {search && <FilterChip label={`"${search}"`} onRemove={() => removeParam("search")} />}
+            {category && (
+              <FilterChip label={tc(category)} onRemove={() => removeParam("category")} />
+            )}
+            {contentTypes.map((ct) => (
+              <FilterChip
+                key={ct}
+                label={CONTENT_TYPE_LABELS[ct] ?? ct}
+                onRemove={() => removeParam("content_type", ct)}
+              />
+            ))}
+            {officialOnly && (
+              <FilterChip label={t("officialOnly")} onRemove={() => removeParam("official_only")} />
+            )}
+            <button
+              onClick={clearAllFilters}
+              className="ml-1 text-xs font-semibold text-blue-600 hover:underline"
+            >
+              {t("clearAll")}
+            </button>
+          </div>
+        )}
+
         <div className={isFiltering ? "" : "mt-10"}>
           <h2 className="text-2xl font-bold text-gray-900">
             {search ? `Results for "${search}"` : t("browseAll")}
@@ -217,6 +265,28 @@ function CoursesPageContent() {
         </div>
       </main>
     </div>
+  );
+}
+
+const CONTENT_TYPE_LABELS: Record<string, string> = {
+  video: "Video lessons",
+  pdf: "PDF guides",
+  quiz: "Practice tests",
+};
+
+function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 py-1 pl-3 pr-1.5 text-xs font-medium text-blue-700">
+      {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${label} filter`}
+        className="rounded-full p-0.5 transition hover:bg-blue-100"
+      >
+        <X className="size-3" />
+      </button>
+    </span>
   );
 }
 

@@ -685,7 +685,12 @@
     "transcriptNoMatch": "Aucune ligne ne correspond à votre recherche.",
     "copy": "Copier",
     "copied": "Copié",
-    "clear": "Effacer"
+    "clear": "Effacer",
+    "source": "Source",
+    "officialHelp": "Cours mis en ligne par ReadAM, et non par des tuteurs.",
+    "contentHelp": "Affiche les cours contenant au moins une leçon des types choisis.",
+    "activeFilters": "Filtres actifs",
+    "clearAll": "Tout effacer"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

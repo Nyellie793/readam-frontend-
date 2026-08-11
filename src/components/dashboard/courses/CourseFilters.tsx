@@ -64,6 +64,15 @@ export default function CourseFilters({
     router.push(`/dashboard/courses?${params.toString()}`);
   }
 
+  function clearAll() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("content_type");
+    params.delete("official_only");
+    params.delete("category");
+    params.delete("search");
+    router.push(`/dashboard/courses?${params.toString()}`);
+  }
+
   function toggleOfficialOnly() {
     const params = new URLSearchParams(searchParams.toString());
     if (officialOnly) params.delete("official_only");
@@ -104,6 +113,10 @@ export default function CourseFilters({
 
       <div className="mt-6 border-t border-gray-100 px-6 pt-6">
         <p className="text-sm font-bold text-gray-900">{t("contentType")}</p>
+        {/* Checkboxes, not radios, because these are OR: picking video and PDF
+            means "has a video or has a PDF", which is what a student wants.
+            Saying so removes the guesswork. */}
+        <p className="mt-1 text-[11px] leading-relaxed text-gray-400">{t("contentHelp")}</p>
         <div className="mt-3 flex flex-col gap-2.5">
           {CONTENT_TYPES.map((type) => (
             <label
@@ -122,15 +135,26 @@ export default function CourseFilters({
         </div>
       </div>
 
+      {/* Deliberately its own section. This filters by who authored the
+          course, not by lesson type, and it combines with the group above
+          using AND. Sitting directly under Content Type in an identical
+          checkbox made it read as a fourth content type, so ticking it
+          narrowed results when people expected it to widen them. */}
       <div className="mt-6 border-t border-gray-100 px-6 pt-6">
-        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-gray-700">
+        <p className="text-sm font-bold text-gray-900">{t("source")}</p>
+        <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm text-gray-700">
           <input
             type="checkbox"
             checked={officialOnly}
             onChange={toggleOfficialOnly}
-            className="size-4 rounded border-gray-300 accent-blue-600"
+            className="mt-0.5 size-4 shrink-0 rounded border-gray-300 accent-blue-600"
           />
-          <span className="font-bold text-gray-900">{t("officialOnly")}</span>
+          <span>
+            <span className="font-medium text-gray-900">{t("officialOnly")}</span>
+            <span className="mt-0.5 block text-[11px] leading-relaxed text-gray-400">
+              {t("officialHelp")}
+            </span>
+          </span>
         </label>
       </div>
 

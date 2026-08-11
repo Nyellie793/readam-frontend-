@@ -685,7 +685,12 @@
     "transcriptNoMatch": "No line matches your search.",
     "copy": "Copy",
     "copied": "Copied",
-    "clear": "Clear"
+    "clear": "Clear",
+    "source": "Source",
+    "officialHelp": "Courses uploaded by ReadAM, not by individual tutors.",
+    "contentHelp": "Matches courses containing at least one lesson of the types you pick.",
+    "activeFilters": "Active filters",
+    "clearAll": "Clear all"
   },
   "tutor": {
     "dashboard": "Dashboard",
