@@ -70,6 +70,14 @@ function CoursesPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, category, contentTypesKey, officialOnly]);
 
+  /**
+   * Once a student filters or searches, they have told us what they want.
+   * Recommendations are a guess at that, so leaving them above the results
+   * pushes the actual answer down the page and competes with it.
+   */
+  const isFiltering =
+    !!search || !!category || contentTypes.length > 0 || officialOnly;
+
   const recommendedSubtitle = interests.length > 0
     ? `Based on your interest in ${interests.slice(0, 2).join(" and ")}`
     : t("basedOnInterests");
@@ -160,24 +168,28 @@ function CoursesPageContent() {
 
       {/* Content only — no sidebar here, layout handles it */}
       <main className="min-w-0 px-4 py-8 sm:px-6 lg:px-10">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t("recommended")}</h1>
-            <p className="mt-1 text-sm text-gray-500">{recommendedSubtitle}</p>
-          </div>
-        </div>
+        {!isFiltering && (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{t("recommended")}</h1>
+                <p className="mt-1 text-sm text-gray-500">{recommendedSubtitle}</p>
+              </div>
+            </div>
 
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {recommendedLoading
-            ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)
-            : recommended.length === 0
-            ? <p className="text-sm text-gray-500">{t("noRecommendations")}</p>
-            : recommended.map(course => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-        </div>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {recommendedLoading
+                ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)
+                : recommended.length === 0
+                ? <p className="text-sm text-gray-500">{t("noRecommendations")}</p>
+                : recommended.map(course => (
+                    <CourseCard key={course.id} course={course} />
+                  ))}
+            </div>
+          </>
+        )}
 
-        <div className="mt-10">
+        <div className={isFiltering ? "" : "mt-10"}>
           <h2 className="text-2xl font-bold text-gray-900">
             {search ? `Results for "${search}"` : t("browseAll")}
           </h2>

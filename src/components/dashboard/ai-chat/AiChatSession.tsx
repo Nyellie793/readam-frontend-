@@ -375,7 +375,7 @@ export default function AiChatSession() {
     const text = input.trim();
     if (!text || !session || sending) return;
     if (!isActive) {
-      toast.error(t("sessionExpired"));
+      toast.error(isPaused ? "Resume the session to keep chatting" : t("sessionExpired"));
       return;
     }
 
@@ -580,7 +580,17 @@ export default function AiChatSession() {
 
           {/* Input */}
           <div className="mt-3 shrink-0">
-            {!isActive && (
+            {/* Paused is not expired. isActive is false for both, so without
+                this a student who paused was told their session had ended and
+                to start a new one — which would spend another credit for no
+                reason. */}
+            {isPaused && (
+              <p className="mb-2 text-center text-xs font-semibold text-orange-500">
+                Session paused. Your remaining time is held.
+              </p>
+            )}
+
+            {!isActive && !isPaused && (
               <p className="mb-2 text-center text-xs font-semibold text-orange-500">
                 This session has expired.{" "}
                 <Link href="/dashboard/ai-tutor/ai-hub" className="underline">
