@@ -8,9 +8,11 @@ export default function AiHubPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-10">
       <AiHubHeader />
-      <AiHubSuggestions />
-      <AiHubFeatureCards />
 
+      {/* Starting a session is what students come here to do, so it leads.
+          It used to sit below the suggestions and the feature cards, which
+          meant scrolling past everything else to reach the one action that
+          matters. */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <AiHubBanner />
@@ -19,6 +21,9 @@ export default function AiHubPage() {
           <AiHubLearningStreak />
         </div>
       </div>
+
+      <AiHubSuggestions />
+      <AiHubFeatureCards />
     </div>
   );
 }
