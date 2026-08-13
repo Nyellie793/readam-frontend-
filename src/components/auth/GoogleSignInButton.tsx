@@ -72,16 +72,35 @@ export default function GoogleSignInButton({ onCredential }: GoogleSignInButtonP
       window.matchMedia?.("(hover: none) and (pointer: coarse)").matches === true;
 
     if (preferRedirect) {
-      // Keep the query string: /signup?role=tutor resolves the role server
-      // side, and dropping it would silently sign every mobile tutor up as a
-      // student.
-      const returnTo = encodeURIComponent(
-        window.location.pathname + window.location.search
-      );
+      /**
+       * The return path travels in a cookie, not the login_uri.
+       *
+       * Google matches redirect_uri against the registered value exactly. A
+       * login_uri carrying ?return_to=… changes on every page, so it could
+       * never match anything registered and every attempt failed with
+       * redirect_uri_mismatch. The URI has to be one fixed, registerable
+       * string.
+       *
+       * The path still has to survive the round trip: /signup?role=tutor
+       * resolves the role server side, and losing it would silently sign
+       * every mobile tutor up as a student.
+       */
+      document.cookie = [
+        `readam_google_return=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`,
+        "path=/",
+        "max-age=600",
+        "samesite=lax",
+        window.location.protocol === "https:" ? "secure" : "",
+      ]
+        .filter(Boolean)
+        .join("; ");
+
       window.google.accounts.id.initialize({
         client_id: CLIENT_ID,
         ux_mode: "redirect",
-        login_uri: `${window.location.origin}/api/auth/google?return_to=${returnTo}`,
+        login_uri: `${window.location.origin}/api/auth/google`,
       });
     } else {
       window.google.accounts.id.initialize({
