@@ -1,6 +1,12 @@
 import { TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY, ADMIN_ROLES } from "@/lib/constants";
 import type { User, AuthResponse } from "@/types/user.types";
 
+function notifyAuthChange(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("readam_auth_change"));
+  }
+}
+
 export function saveSession(data: AuthResponse): void {
   // Tokens are nested under data.tokens in the actual API response
   localStorage.setItem(TOKEN_KEY, data.tokens.access_token);
@@ -13,12 +19,14 @@ export function saveSession(data: AuthResponse): void {
   const role = data.user.role ?? "";
   document.cookie = `readam_role=${role}; path=/; max-age=${maxAge}`;
   document.cookie = `readam_auth=1; path=/; max-age=${maxAge}`;
+  notifyAuthChange();
 }
 
 export function updateStoredUser(user: User): void {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   const role = user.role ?? "";
   document.cookie = `readam_role=${role}; path=/; max-age=${60 * 60 * 24 * 7}`;
+  notifyAuthChange();
 }
 
 export function clearSession(): void {
@@ -27,6 +35,10 @@ export function clearSession(): void {
   localStorage.removeItem(USER_KEY);
   document.cookie = "readam_role=; path=/; max-age=0";
   document.cookie = "readam_auth=; path=/; max-age=0";
+  if (typeof window !== "undefined") {
+    sessionStorage.clear();
+  }
+  notifyAuthChange();
 }
 
 export function getStoredUser(): User | null {

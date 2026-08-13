@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clock, BookOpen, CheckCircle2, FileEdit, Wallet, PlusCircle } from "lucide-react";
+import { Clock, BookOpen, CheckCircle2, FileEdit, Wallet, PlusCircle, Sparkles, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { CourseListItem, EarningsSummaryResponse } from "@/types/api.types";
 import { useTranslations } from "next-intl";
+import { useStoredUser } from "@/hooks/useStoredUser";
 
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-gray-100 text-gray-600",
@@ -20,6 +21,8 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function TutorDashboardOverview() {
   const t = useTranslations("tutor");
+  const tOnboarding = useTranslations("onboarding");
+  const user = useStoredUser();
   const STATUS_LABELS: Record<string, string> = {
     draft: "Draft",
     pending_review: t("pendingReview"),
@@ -30,6 +33,20 @@ export default function TutorDashboardOverview() {
   const [earnings, setEarnings] = useState<EarningsSummaryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !sessionStorage.getItem("tutor_dashboard_welcomed") && user) {
+      setShowWelcome(true);
+    }
+  }, [user]);
+
+  const handleDismissWelcome = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("tutor_dashboard_welcomed", "true");
+    }
+    setShowWelcome(false);
+  };
 
   useEffect(() => {
     Promise.all([TUTOR.listMyCourses(), TUTOR.getEarningsSummary()])
@@ -76,11 +93,19 @@ export default function TutorDashboardOverview() {
     .sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())
     .slice(0, 5);
 
+  const loginType = typeof window !== "undefined" ? sessionStorage.getItem("login_type") : null;
+  const isNewSignUp = loginType === "signup";
+  const firstName = user?.full_name ? user.full_name.split(" ")[0] : "";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900">{t("dashboard")}</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900">
+            {user?.full_name
+              ? `Welcome back, ${user.full_name.split(" ")[0]}`
+              : t("dashboard")}
+          </h1>
           <p className="text-sm text-gray-500">Here&apos;s how your courses and earnings are doing.</p>
         </div>
         <Link
@@ -91,6 +116,42 @@ export default function TutorDashboardOverview() {
           New Course
         </Link>
       </div>
+
+      {showWelcome && (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 p-6 text-white shadow-xl shadow-blue-100/50 transition-all animate-in fade-in slide-in-from-top-4 duration-500">
+          {/* Decorative background glows */}
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+          <div className="absolute -left-10 -bottom-10 h-40 w-40 rounded-full bg-indigo-500/20 blur-2xl pointer-events-none" />
+          
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md">
+                <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
+                  {isNewSignUp ? tOnboarding("welcomeNew") : tOnboarding("welcomeBack")}{" "}
+                  <span className="text-yellow-300">{firstName || "Tutor"}!</span>
+                </h2>
+                <p className="text-sm text-blue-50/95 leading-relaxed max-w-2xl font-medium">
+                  {isNewSignUp 
+                    ? t("welcomeNewSubtitle")
+                    : t("welcomeBackSubtitle")
+                  }
+                </p>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleDismissWelcome}
+              className="rounded-lg p-1.5 text-white/80 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              aria-label="Dismiss welcome message"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((stat) => (

@@ -480,7 +480,7 @@ export default function AiChatSession() {
   // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-dvh items-center justify-center">
         <Loader2 className="size-6 animate-spin text-blue-600" />
       </div>
     );
@@ -490,7 +490,7 @@ export default function AiChatSession() {
   if (initError) {
     const noCredits = initError.status === 402;
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-3 px-6 text-center">
+      <div className="flex h-dvh flex-col items-center justify-center gap-3 px-6 text-center">
         <p className="text-lg font-bold text-gray-900">
           {noCredits ? t("noCredits") : t("sessionStartFailed")}
         </p>

@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { homePathFor } from "@/lib/auth";
+import { homePathFor, clearSession } from "@/lib/auth";
 import { useStoredUser } from "@/hooks/useStoredUser";
-import { User, Settings, LayoutDashboard } from "lucide-react";
-import LogoutButton from "./LogoutButton";
+import { User, Settings, LayoutDashboard, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 interface UserDropdownProps {
   email?: string;
@@ -14,79 +21,74 @@ interface UserDropdownProps {
 export default function UserDropdown({
   email = "Student",
 }: UserDropdownProps) {
-  const [open, setOpen] = useState(false);
-  // Dashboard is role-dependent: a tutor belongs in /tutor, an admin in
-  // /admin, and the middleware bounces them out of the student area anyway.
   const user = useStoredUser();
+  const router = useRouter();
+
+  function handleLogout() {
+    clearSession();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
-    <div className="relative">
-
-      <button
-        onClick={() => setOpen(!open)}
-        className="
-          flex size-10 items-center justify-center
-          rounded-full bg-blue-600 text-white
-          hover:bg-blue-700 transition
-        "
-      >
-        <User size={20} />
-      </button>
-
-
-      {open && (
-        <div
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
           className="
-            absolute right-0 mt-3 w-64
-            rounded-xl border bg-white
-            p-3 shadow-lg
+            flex size-10 items-center justify-center
+            rounded-full bg-blue-600 text-white
+            hover:bg-blue-700 transition cursor-pointer
           "
+          aria-label="User Account Menu"
         >
+          <User size={20} />
+        </button>
+      </DropdownMenuTrigger>
 
-          <div className="mb-3 border-b pb-3">
-            <p className="text-sm font-semibold">
-              Account
-            </p>
-
-            <p className="truncate text-xs text-gray-500">
-              {email}
-            </p>
+      <DropdownMenuContent
+        className="w-64"
+        align="end"
+      >
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-semibold">Account</p>
+            <p className="text-xs text-gray-500 truncate">{email}</p>
           </div>
+        </DropdownMenuLabel>
 
+        <DropdownMenuSeparator />
 
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link
             href={homePathFor(user)}
-            className="
-              flex items-center gap-3 rounded-lg
-              px-3 py-2 text-sm
-              hover:bg-gray-100
-            "
+            className="flex w-full items-center gap-3"
           >
-            <LayoutDashboard size={17}/>
-            Dashboard
+            <LayoutDashboard size={17} />
+            <span>Dashboard</span>
           </Link>
+        </DropdownMenuItem>
 
-
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link
             href="/settings"
-            className="
-              flex items-center gap-3 rounded-lg
-              px-3 py-2 text-sm
-              hover:bg-gray-100
-            "
+            className="flex w-full items-center gap-3"
           >
-            <Settings size={17}/>
-            Profile Settings
+            <Settings size={17} />
+            <span>Profile Settings</span>
           </Link>
+        </DropdownMenuItem>
 
+        <DropdownMenuSeparator />
 
-          <div className="mt-2 border-t pt-2">
-            <LogoutButton />
-          </div>
-
-        </div>
-      )}
-
-    </div>
+        <DropdownMenuItem
+          className="text-red-600 cursor-pointer flex items-center gap-3"
+          onClick={handleLogout}
+        >
+          <LogOut size={17} />
+          <span>Logout</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

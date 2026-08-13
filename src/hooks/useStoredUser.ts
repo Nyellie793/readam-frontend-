@@ -17,19 +17,16 @@ import type { User } from "@/types/user.types";
  * mismatch. It also re-renders on `storage` events, so signing out in one tab
  * updates the others.
  */
-
 const EMPTY_SNAPSHOT: User | null = null;
 
-let cachedRaw: string | null = null;
 let cachedUser: User | null = null;
+let initialized = false;
 
 function getSnapshot(): User | null {
-  // Called on every render, so the parsed object is memoised against the raw
-  // string. Returning a fresh object each time would loop forever.
-  const raw = typeof window === "undefined" ? null : localStorage.getItem("readam_user");
-  if (raw !== cachedRaw) {
-    cachedRaw = raw;
+  // Memoize user retrieval in memory to prevent slow localStorage reads during React render passes
+  if (!initialized && typeof window !== "undefined") {
     cachedUser = getStoredUser();
+    initialized = true;
   }
   return cachedUser;
 }
@@ -39,8 +36,18 @@ function getServerSnapshot(): User | null {
 }
 
 function subscribe(onChange: () => void): () => void {
-  window.addEventListener("storage", onChange);
-  return () => window.removeEventListener("storage", onChange);
+  const handleAuthChange = () => {
+    cachedUser = getStoredUser();
+    onChange();
+  };
+
+  window.addEventListener("storage", handleAuthChange);
+  window.addEventListener("readam_auth_change", handleAuthChange);
+
+  return () => {
+    window.removeEventListener("storage", handleAuthChange);
+    window.removeEventListener("readam_auth_change", handleAuthChange);
+  };
 }
 
 export function useStoredUser(): User | null {
