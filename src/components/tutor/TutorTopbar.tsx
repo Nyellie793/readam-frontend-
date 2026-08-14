@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import TutorMobileSidebar from "./TutorMobileSidebar";
 import { useTranslations } from "next-intl";
+import { startMeasure, endMeasure } from "@/lib/performance";
 
 interface TutorTopbarProps {
   greeting: string;
@@ -14,12 +15,32 @@ export default function TutorTopbar({ greeting, isVerified }: TutorTopbarProps) 
   const t = useTranslations("tutor");
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (open) {
+      const frame = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          endMeasure("tutor-sidebar-open", 100);
+        });
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [open]);
+
+  const handlePreload = () => {
+    import("./TutorSidebar");
+  };
+
   return (
     <>
       <div className="mb-4 flex items-center gap-2 lg:hidden">
         <button
-          onClick={() => setOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100"
+          onPointerEnter={handlePreload}
+          onTouchStart={handlePreload}
+          onClick={() => {
+            startMeasure("tutor-sidebar-open");
+            setOpen(true);
+          }}
+          className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100 touch-manipulation"
           aria-label={t("openMenu")}
         >
           <Menu size={22} />

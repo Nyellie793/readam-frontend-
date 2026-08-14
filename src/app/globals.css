@@ -171,3 +171,13 @@
   .safe-bottom { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
   .safe-top    { padding-top:    max(0px,     env(safe-area-inset-top));    }
 }
+
+/* ─── Mobile Safari touch-action (Task 2) ────────────────────────────────── */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* ─── Performance enhancements (Task 4) ──────────────────────────────────── */
+.will-change-transform {
+  will-change: transform;
+}

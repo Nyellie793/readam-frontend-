@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Logo from "../shared/Logo";
 import MobileMenu from "./MobileMenu";
 import LanguageToggle from "../shared/LanguageToggle";
@@ -10,6 +9,7 @@ import { NAV_LINKS } from "@/constants/navigation";
 import { usePathname } from "next/navigation";
 import UserDropdown from "../auth/UserDropdown";
 import { useStoredUser } from "@/hooks/useStoredUser";
+import OptimizedLink from "../ui/OptimizedLink";
 
 export default function Navbar() {
   const t = useTranslations("nav");
@@ -36,7 +36,7 @@ export default function Navbar() {
               const active = pathname === link.href;
 
               return (
-                <Link
+                <OptimizedLink
                   key={t(link.title)}
                   href={link.href}
                   className={`
@@ -53,7 +53,7 @@ export default function Navbar() {
                   {active && (
                     <span className="absolute left-0 bottom-0 h-[3px] w-full rounded-full bg-orange-500" />
                   )}
-                </Link>
+                </OptimizedLink>
               );
             })}
           </nav>
@@ -68,14 +68,14 @@ export default function Navbar() {
             {isAuthenticated ? (
               <UserDropdown email={user?.email}/>
             ) : (
-              <Link 
+              <OptimizedLink 
                 href="/login"
                 className="
                   rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white
                   transition hover:bg-blue-700
                   ">
                     {t("logIn")}
-                  </Link>
+                  </OptimizedLink>
             )}
           </div>
         ) : (

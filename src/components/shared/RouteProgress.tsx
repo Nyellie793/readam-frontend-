@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { startMeasure, endMeasure } from "@/lib/performance";
 
 /**
  * Thin progress bar across the top of the viewport during navigation.
@@ -44,6 +45,7 @@ export default function RouteProgress() {
       // bar would never be completed by the pathname effect below.
       if (href === pathname) return;
 
+      startMeasure("navigation");
       clearTimers();
       setVisible(true);
       setProgress(8);
@@ -66,6 +68,7 @@ export default function RouteProgress() {
       firstRender.current = false;
       return;
     }
+    endMeasure("navigation", 200);
     clearTimers();
     setProgress(100);
     const hide = setTimeout(() => {

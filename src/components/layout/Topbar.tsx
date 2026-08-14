@@ -5,9 +5,14 @@ import { useEffect, useState } from "react";
 import UserDropdown from "@/components/dashboard/UserDropdown";
 import { Input } from "@/components/ui/Input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import Sidebar from "./Sidebar";
 import Link from "next/link";
 import STUDENT from "@/services/student.service";
+import dynamic from "next/dynamic";
+import { startMeasure, endMeasure } from "@/lib/performance";
+
+const Sidebar = dynamic(() => import("./Sidebar"), {
+  ssr: false,
+});
 
 interface TopbarProps {
   searchPlaceholder?: string;
@@ -31,13 +36,37 @@ export default function Topbar({
       .catch(() => null);
   }, []);
 
+  useEffect(() => {
+    if (navOpen) {
+      const frame = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          endMeasure("sidebar-open", 100);
+        });
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [navOpen]);
+
+  const handlePreloadSidebar = () => {
+    import("./Sidebar");
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-100 bg-white/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
       {/* Mobile: Hamburger menu to open Sidebar in a Sheet */}
       <div className="flex items-center gap-2 lg:hidden">
         <Sheet open={navOpen} onOpenChange={setNavOpen}>
           <SheetTrigger asChild>
-            <button className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100">
+            <button
+              onPointerEnter={handlePreloadSidebar}
+              onTouchStart={handlePreloadSidebar}
+              onClick={() => {
+                startMeasure("sidebar-open");
+                setNavOpen(true);
+              }}
+              className="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100 touch-manipulation"
+              aria-label="Open menu"
+            >
               <Menu className="h-5 w-5 text-gray-600" />
             </button>
           </SheetTrigger>

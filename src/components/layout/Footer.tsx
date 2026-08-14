@@ -1,4 +1,4 @@
-import Link from "next/link";
+import OptimizedLink from "../ui/OptimizedLink";
 
 import { Mail } from "lucide-react";
 
@@ -80,9 +80,9 @@ export default async function Footer() {
 
               <nav aria-label={t(column.heading)} className="flex flex-col gap-4">
                 {column.links.map((link) => (
-                  <Link key={link.label} href={link.href} className={linkClass}>
+                  <OptimizedLink key={link.label} href={link.href} className={linkClass}>
                     {t(link.label)}
-                  </Link>
+                  </OptimizedLink>
                 ))}
               </nav>
             </div>
@@ -95,18 +95,18 @@ export default async function Footer() {
           <p>{t("rights", { year: new Date().getFullYear() })}</p>
 
           <div className="flex gap-8">
-            <Link
+            <OptimizedLink
               href="/privacy"
               className="transition hover:text-orange-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400"
             >
               {t("privacyPolicy")}
-            </Link>
-            <Link
+            </OptimizedLink>
+            <OptimizedLink
               href="/terms"
               className="transition hover:text-orange-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-400"
             >
               {t("termsOfService")}
-            </Link>
+            </OptimizedLink>
           </div>
         </div>
       </div>
