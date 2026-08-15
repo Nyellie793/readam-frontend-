@@ -6,18 +6,27 @@ import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { clearSession, homePathFor } from "@/lib/auth";
 import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
+
+/**
+ * Imported statically, deliberately.
+ *
+ * These were next/dynamic with ssr:false and no loading fallback, so tapping
+ * the hamburger opened the sheet while the menu's chunk was still downloading
+ * — an empty sidebar, and taps landing on nothing. A preload fired on
+ * touchstart, but that only starts the fetch about 50ms before the sheet
+ * opens, so on a slow connection the chunk loses the race.
+ *
+ * They are roughly 4KB of source each. Splitting them saved a couple of
+ * kilobytes and cost a network round trip on the one interaction the user is
+ * actually waiting for.
+ */
+import MobileNavMenu from "./MobileNavMenu";
+import MobileAccountMenu from "./MobileAccountMenu";
 import { usePathname, useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import { startMeasure, endMeasure } from "@/lib/performance";
 
 // Dynamic imports for sub-menus
-const MobileAccountMenu = dynamic(() => import("./MobileAccountMenu"), {
-  ssr: false,
-});
 
-const MobileNavMenu = dynamic(() => import("./MobileNavMenu"), {
-  ssr: false,
-});
 
 export default function MobileMenu() {
   const t = useTranslations("nav");
@@ -57,14 +66,6 @@ export default function MobileMenu() {
     }
   }, [sheet]);
 
-  const handlePreloadAccount = () => {
-    import("./MobileAccountMenu");
-  };
-
-  const handlePreloadNav = () => {
-    import("./MobileNavMenu");
-  };
-
   function handleLogout() {
     close();
     clearSession();
@@ -77,8 +78,6 @@ export default function MobileMenu() {
       {user && (
         <button
           type="button"
-          onPointerEnter={handlePreloadAccount}
-          onTouchStart={handlePreloadAccount}
           onClick={() => {
             startMeasure("mobile-menu-account-open");
             setSheet("account");
@@ -93,8 +92,6 @@ export default function MobileMenu() {
       {/* Hamburger */}
       <button
         type="button"
-        onPointerEnter={handlePreloadNav}
-        onTouchStart={handlePreloadNav}
         onClick={() => {
           startMeasure("mobile-menu-nav-open");
           setSheet("nav");
