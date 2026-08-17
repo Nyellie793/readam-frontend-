@@ -7,7 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
 import { TutorInitials } from "@/components/sections/TutorInitial";
-import { initialsOf } from "@/hooks/useStoredUser";
+import { initialsOf } from "@/lib/initials";
 import { getTranslations } from "next-intl/server";
 
 /**

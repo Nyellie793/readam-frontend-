@@ -55,14 +55,6 @@ export function useStoredUser(): User | null {
 }
 
 /** Two-letter initials for an avatar fallback. */
-export function initialsOf(fullName: string | null | undefined, fallback = "ST"): string {
-  if (!fullName) return fallback;
-  const letters = fullName
-    .split(" ")
-    .map((n) => n[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-  return letters || fallback;
-}
+
+// Lives in a plain module so server components can call it too.
+export { initialsOf } from "@/lib/initials";

@@ -297,7 +297,8 @@
     "statSolved": "Questions résolues",
     "statNotes": "Fiches de révision",
     "statTutorsN": "Tuteurs experts",
-    "statActive": "Élèves actifs"
+    "statActive": "Élèves actifs",
+    "noCoursesYet": "Aucun cours n'a encore été publié. Revenez bientôt."
   },
   "subjects": {
     "geography": "Géographie",

@@ -5,7 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourses } from "@/lib/public-api";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
-import { initialsOf } from "@/hooks/useStoredUser";
+import { initialsOf } from "@/lib/initials";
 import { TutorInitials } from "@/components/sections/TutorInitial";
 import type { CourseListItem } from "@/types/api.types";
 import { getTranslations } from "next-intl/server";
