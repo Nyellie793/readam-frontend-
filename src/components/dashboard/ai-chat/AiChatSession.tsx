@@ -13,9 +13,13 @@ import {
   FileText,
   X,
   Loader2,
+  Clock,
+  Pause,
+  Play,
 } from "lucide-react";
 import { useStoredUser } from "@/hooks/useStoredUser";
 import { cn } from "@/lib/utils";
+import { formatDuration } from "@/lib/duration";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import AI from "@/services/ai.service";
@@ -577,6 +581,51 @@ export default function AiChatSession() {
               <div ref={bottomRef} />
             </div>
           </div>
+
+          {/* Session status, mobile only.
+
+              SessionSummaryPanel — which carries the countdown and the pause
+              control — is `hidden lg:block`, so on a phone a student could see
+              neither how long they had left nor any way to stop the clock. */}
+          {session && (isActive || isPaused) && (
+            <div className="mt-3 flex shrink-0 items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white px-3 py-2 lg:hidden">
+              <div className="flex items-center gap-2">
+                <Clock className={cn("size-4", isPaused ? "text-orange-500" : "text-blue-500")} />
+                <span
+                  className={cn(
+                    "text-sm font-bold tabular-nums",
+                    isPaused ? "text-orange-600" : "text-gray-900"
+                  )}
+                >
+                  {formatDuration(remainingSeconds)}
+                </span>
+                <span className="text-[11px] text-gray-400">
+                  {isPaused ? t("paused") : t("timeRemaining")}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleTogglePause}
+                disabled={pauseBusy}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-60",
+                  isPaused
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "border border-gray-200 text-gray-700 hover:bg-gray-50"
+                )}
+              >
+                {pauseBusy ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : isPaused ? (
+                  <Play className="size-3.5" />
+                ) : (
+                  <Pause className="size-3.5" />
+                )}
+                {isPaused ? t("resume") : t("pause")}
+              </button>
+            </div>
+          )}
 
           {/* Input */}
           <div className="mt-3 shrink-0">

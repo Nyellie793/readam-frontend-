@@ -1,4 +1,5 @@
 import { BookOpen, Sparkles, Clock, Video, BarChart2 } from "lucide-react";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 export default async function Features() {
@@ -21,6 +22,10 @@ export default async function Features() {
 
         {/* PDF Library — spans 2 cols on large */}
         <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 lg:col-span-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+          {/* Stretched link: the whole card is the target, and the
+              card is already `relative`. Keeps the hover styling and
+              the JSX structure exactly as they were. */}
+          <Link href="/courses?content_type=pdf" className="absolute inset-0 z-10" aria-label={tf("pdfTitle")} />
           {/* Ghost watermark — animates on hover */}
           <div className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.07] group-hover:opacity-[0.12] group-hover:scale-110 transition-all duration-500">
             <BookOpen className="h-36 w-36 text-gray-900" />
@@ -49,6 +54,10 @@ export default async function Features() {
 
         {/* AI Study Assistant — dark navy */}
         <div className="group relative overflow-hidden rounded-2xl bg-[#0f1b35] p-6 lg:col-span-1 hover:shadow-xl hover:shadow-blue-900/30 hover:-translate-y-0.5 transition-all duration-300">
+          {/* Stretched link: the whole card is the target, and the
+              card is already `relative`. Keeps the hover styling and
+              the JSX structure exactly as they were. */}
+          <Link href="/dashboard/ai-tutor/ai-hub" className="absolute inset-0 z-10" aria-label={tf("aiTitle")} />
           {/* Subtle glow on hover */}
           <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
             style={{ background: "radial-gradient(ellipse at top right, rgba(251,146,60,0.08) 0%, transparent 70%)" }}
@@ -72,6 +81,10 @@ export default async function Features() {
 
         {/* Past Questions — purple gradient */}
         <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-purple-700 p-6 lg:col-span-1 hover:shadow-xl hover:shadow-purple-500/30 hover:-translate-y-0.5 transition-all duration-300">
+          {/* Stretched link: the whole card is the target, and the
+              card is already `relative`. Keeps the hover styling and
+              the JSX structure exactly as they were. */}
+          <Link href="/courses?official_only=true" className="absolute inset-0 z-10" aria-label={tf("pastTitle")} />
           {/* Shimmer overlay */}
           <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
             style={{ background: "radial-gradient(ellipse at bottom left, rgba(255,255,255,0.08) 0%, transparent 70%)" }}
@@ -88,6 +101,10 @@ export default async function Features() {
 
         {/* Video Courses */}
         <div className="group relative overflow-hidden rounded-2xl border border-orange-200 bg-white p-6 lg:col-span-1 hover:shadow-lg hover:shadow-orange-100 hover:-translate-y-0.5 transition-all duration-300">
+          {/* Stretched link: the whole card is the target, and the
+              card is already `relative`. Keeps the hover styling and
+              the JSX structure exactly as they were. */}
+          <Link href="/courses?content_type=video" className="absolute inset-0 z-10" aria-label={tf("videoTitle")} />
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-300">
             <Video className="h-5 w-5 text-orange-400" />
           </div>
@@ -99,6 +116,10 @@ export default async function Features() {
 
         {/* Progress Tracking */}
         <div className="group relative overflow-hidden rounded-2xl border border-teal-200 bg-white p-6 lg:col-span-1 hover:shadow-lg hover:shadow-teal-100 hover:-translate-y-0.5 transition-all duration-300">
+          {/* Stretched link: the whole card is the target, and the
+              card is already `relative`. Keeps the hover styling and
+              the JSX structure exactly as they were. */}
+          <Link href="/dashboard" className="absolute inset-0 z-10" aria-label={tf("progressTitle")} />
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 group-hover:bg-teal-200 group-hover:scale-110 transition-all duration-300">
             <BarChart2 className="h-5 w-5 text-teal-500" />
           </div>

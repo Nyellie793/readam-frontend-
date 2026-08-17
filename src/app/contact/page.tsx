@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Mail, Phone, MapPin, LifeBuoy, GraduationCap, CreditCard } from "lucide-react";
+import { Mail, MapPin, LifeBuoy, GraduationCap, CreditCard } from "lucide-react";
 import PageShell from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
 import { getTranslations } from "next-intl/server";
@@ -8,7 +8,7 @@ import { getTranslations } from "next-intl/server";
 export const metadata: Metadata = {
   title: "Contact ReadAM",
   description:
-    "Reach the ReadAM team about your account, a payment, becoming a tutor, or anything else. Email and phone support for students across Cameroon.",
+    "Reach the ReadAM team about your account, a payment, becoming a tutor, or anything else. Email support for students across Cameroon.",
 };
 
 
@@ -23,14 +23,6 @@ export default async function ContactPage() {
       href: `mailto:${CONTACT.email}`,
       note: t("emailNote"),
       tone: "bg-blue-50 text-blue-600",
-    },
-    {
-      icon: Phone,
-      label: t("callUs"),
-      value: CONTACT.phone,
-      href: `tel:${CONTACT.phoneHref}`,
-      note: t("callNote"),
-      tone: "bg-orange-50 text-orange-500",
     },
     {
       icon: MapPin,

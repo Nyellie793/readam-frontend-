@@ -691,7 +691,10 @@
     "officialHelp": "Courses uploaded by ReadAM, not by individual tutors.",
     "contentHelp": "Matches courses containing at least one lesson of the types you pick.",
     "activeFilters": "Active filters",
-    "clearAll": "Clear all"
+    "clearAll": "Clear all",
+    "paused": "paused",
+    "pause": "Pause",
+    "resume": "Resume"
   },
   "tutor": {
     "dashboard": "Dashboard",

@@ -15,6 +15,7 @@ import {
 import type { SessionSummaryResponse, QuizResponse } from "@/types/api.types";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { formatDuration } from "@/lib/duration";
 
 interface SessionSummaryPanelProps {
   sessionType: "lesson" | "general";
@@ -34,13 +35,6 @@ interface SessionSummaryPanelProps {
   onGenerateStudyPlan: () => void;
   onOpenQuiz: (quiz: QuizResponse) => void;
   cachedQuizzesById: Record<string, QuizResponse>;
-}
-
-function formatDuration(totalSeconds: number): string {
-  const s = Math.max(0, totalSeconds);
-  const mins = Math.floor(s / 60);
-  const secs = s % 60;
-  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
 export default function SessionSummaryPanel({

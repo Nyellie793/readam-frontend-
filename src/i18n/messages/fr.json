@@ -691,7 +691,10 @@
     "officialHelp": "Cours mis en ligne par ReadAM, et non par des tuteurs.",
     "contentHelp": "Affiche les cours contenant au moins une leçon des types choisis.",
     "activeFilters": "Filtres actifs",
-    "clearAll": "Tout effacer"
+    "clearAll": "Tout effacer",
+    "paused": "en pause",
+    "pause": "Pause",
+    "resume": "Reprendre"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

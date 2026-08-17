@@ -7,9 +7,9 @@ export const BRAND = {
 /** Where to reach us. Rendered as real mailto:/tel: links, not plain text. */
 export const CONTACT = {
   email: "support@readamcm.com",
-  phone: "+237 679 545 186",
+  // Removed at the owner's request — it was a personal number, and a
+  // support line should never be one.
   /** tel: needs the number with no spaces or separators. */
-  phoneHref: "+237679545186",
   location: "Douala, Cameroon",
 } as const;
 
