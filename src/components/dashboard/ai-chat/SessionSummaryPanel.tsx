@@ -11,6 +11,7 @@ import {
   CalendarCheck,
   Pause,
   Play,
+  History,
 } from "lucide-react";
 import type { SessionSummaryResponse, QuizResponse } from "@/types/api.types";
 import { useTranslations } from "next-intl";
@@ -25,6 +26,7 @@ interface SessionSummaryPanelProps {
   isPaused: boolean;
   pauseBusy: boolean;
   onTogglePause: () => void;
+  onOpenHistory: () => void;
   summary: SessionSummaryResponse | null;
   summaryLoading: boolean;
   generatingRevision: boolean;
@@ -44,6 +46,7 @@ export default function SessionSummaryPanel({
   isPaused,
   pauseBusy,
   onTogglePause,
+  onOpenHistory,
   summary,
   summaryLoading,
   generatingRevision,
@@ -249,6 +252,17 @@ export default function SessionSummaryPanel({
             {isPaused ? "Resume session" : "Pause session"}
           </button>
         )}
+
+        {/* Sessions were only reachable via whatever id was in localStorage,
+            so one already paid for could be lost by closing the tab. */}
+        <button
+          type="button"
+          onClick={onOpenHistory}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+        >
+          <History className="size-3.5" />
+          {t("historyTitle")}
+        </button>
 
         {isPaused && (
           <p className="mt-2 text-[11px] leading-relaxed text-gray-400">

@@ -698,7 +698,15 @@
     "planFocus": "Points à privilégier",
     "planFocusPh": "Les notions les plus difficiles, les matières prioritaires…",
     "planSkip": "Générer directement",
-    "planGenerate": "Créer mon plan"
+    "planGenerate": "Créer mon plan",
+    "historyTitle": "Vos sessions IA",
+    "historyEmpty": "Aucune session pour l'instant. Démarrez-en une pour la voir ici.",
+    "historyFailed": "Impossible de charger vos sessions.",
+    "historySessions": "sessions",
+    "historyMessages": "messages",
+    "historyLesson": "Session de leçon",
+    "historyGeneral": "Session générale",
+    "historyCurrent": "en cours"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

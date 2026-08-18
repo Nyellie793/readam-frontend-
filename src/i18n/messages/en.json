@@ -698,7 +698,15 @@
     "planFocus": "Anything to focus on",
     "planFocusPh": "Topics you find hardest, subjects to prioritise…",
     "planSkip": "Just generate one",
-    "planGenerate": "Build my plan"
+    "planGenerate": "Build my plan",
+    "historyTitle": "Your AI sessions",
+    "historyEmpty": "No sessions yet. Start one to see it here.",
+    "historyFailed": "Could not load your sessions.",
+    "historySessions": "sessions",
+    "historyMessages": "messages",
+    "historyLesson": "Lesson session",
+    "historyGeneral": "General session",
+    "historyCurrent": "current"
   },
   "tutor": {
     "dashboard": "Dashboard",

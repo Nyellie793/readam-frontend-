@@ -16,10 +16,12 @@ import {
   Clock,
   Pause,
   Play,
+  History,
 } from "lucide-react";
 import { useStoredUser } from "@/hooks/useStoredUser";
 import { cn } from "@/lib/utils";
 import StudyPlanDialog, { type StudyBrief } from "./StudyPlanDialog";
+import SessionHistoryDialog from "./SessionHistoryDialog";
 import { formatDuration } from "@/lib/duration";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -210,6 +212,7 @@ export default function AiChatSession() {
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
   const [generatingStudyPlan, setGeneratingStudyPlan] = useState(false);
   const [planDialogOpen, setPlanDialogOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [activeQuiz, setActiveQuiz] = useState<QuizResponse | null>(null);
   const [cachedQuizzesById, setCachedQuizzesById] = useState<Record<string, QuizResponse>>({});
 
@@ -618,6 +621,15 @@ export default function AiChatSession() {
                 </span>
               </div>
 
+              <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setHistoryOpen(true)}
+                aria-label={t("historyTitle")}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                <History className="size-3.5" />
+              </button>
               <button
                 type="button"
                 onClick={handleTogglePause}
@@ -638,6 +650,7 @@ export default function AiChatSession() {
                 )}
                 {isPaused ? t("resume") : t("pause")}
               </button>
+              </div>
             </div>
           )}
 
@@ -742,6 +755,7 @@ export default function AiChatSession() {
             isPaused={isPaused}
             pauseBusy={pauseBusy}
             onTogglePause={handleTogglePause}
+            onOpenHistory={() => setHistoryOpen(true)}
             summary={summary}
             summaryLoading={summaryLoading}
             generatingRevision={generatingRevision}
@@ -777,6 +791,12 @@ export default function AiChatSession() {
           </Link>
         </div>
       </div>
+
+      <SessionHistoryDialog
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        currentSessionId={session?.id}
+      />
 
       <StudyPlanDialog
         open={planDialogOpen}
