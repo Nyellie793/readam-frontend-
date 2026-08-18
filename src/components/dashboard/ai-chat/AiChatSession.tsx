@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useStoredUser } from "@/hooks/useStoredUser";
 import { cn } from "@/lib/utils";
+import StudyPlanDialog, { type StudyBrief } from "./StudyPlanDialog";
 import { formatDuration } from "@/lib/duration";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -208,6 +209,7 @@ export default function AiChatSession() {
   const [generatingRevision, setGeneratingRevision] = useState(false);
   const [generatingQuiz, setGeneratingQuiz] = useState(false);
   const [generatingStudyPlan, setGeneratingStudyPlan] = useState(false);
+  const [planDialogOpen, setPlanDialogOpen] = useState(false);
   const [activeQuiz, setActiveQuiz] = useState<QuizResponse | null>(null);
   const [cachedQuizzesById, setCachedQuizzesById] = useState<Record<string, QuizResponse>>({});
 
@@ -467,11 +469,23 @@ export default function AiChatSession() {
     }
   }
 
-  async function handleGenerateStudyPlanClick() {
+  // Ask first. The stored profile is not enough to schedule anything, and a
+  // plan that ignores how much time the student actually has gets abandoned.
+  function handleGenerateStudyPlanClick() {
+    if (!session) return;
+    setPlanDialogOpen(true);
+  }
+
+  async function runStudyPlan(brief: StudyBrief) {
     if (!session) return;
     setGeneratingStudyPlan(true);
     try {
-      await AI.generateStudyPlan(session.id);
+      // Blank answers are dropped so they do not reach the model as noise.
+      const filled = Object.fromEntries(
+        Object.entries(brief).filter(([, v]) => v && v.trim())
+      ) as Record<string, string>;
+      await AI.generateStudyPlan(session.id, filled);
+      setPlanDialogOpen(false);
       toast.success(t("planGenerated"));
       await refreshSummary(session.id);
     } catch (err) {
@@ -763,6 +777,13 @@ export default function AiChatSession() {
           </Link>
         </div>
       </div>
+
+      <StudyPlanDialog
+        open={planDialogOpen}
+        onOpenChange={setPlanDialogOpen}
+        onGenerate={runStudyPlan}
+        busy={generatingStudyPlan}
+      />
 
       <QuizModal
         quiz={activeQuiz}

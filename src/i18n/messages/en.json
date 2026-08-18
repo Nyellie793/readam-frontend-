@@ -686,7 +686,19 @@
     "paused": "paused",
     "pause": "Pause",
     "resume": "Resume",
-    "search": "Search"
+    "search": "Search",
+    "planTitle": "Build my study plan",
+    "planIntro": "A few details so the plan fits your actual time. Skip any you are not sure about.",
+    "planExam": "Exam or deadline",
+    "planExamPh": "e.g. GCE in June",
+    "planHours": "Hours you can study weekly",
+    "planHoursPh": "e.g. 6",
+    "planGrade": "Target grade",
+    "planGradePh": "e.g. A in Physics",
+    "planFocus": "Anything to focus on",
+    "planFocusPh": "Topics you find hardest, subjects to prioritise…",
+    "planSkip": "Just generate one",
+    "planGenerate": "Build my plan"
   },
   "tutor": {
     "dashboard": "Dashboard",

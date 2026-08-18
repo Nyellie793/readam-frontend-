@@ -686,7 +686,19 @@
     "paused": "en pause",
     "pause": "Pause",
     "resume": "Reprendre",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "planTitle": "Créer mon plan d'étude",
+    "planIntro": "Quelques précisions pour que le plan corresponde à votre temps réel. Ignorez ce dont vous n'êtes pas sûr.",
+    "planExam": "Examen ou échéance",
+    "planExamPh": "ex. GCE en juin",
+    "planHours": "Heures d'étude par semaine",
+    "planHoursPh": "ex. 6",
+    "planGrade": "Note visée",
+    "planGradePh": "ex. A en physique",
+    "planFocus": "Points à privilégier",
+    "planFocusPh": "Les notions les plus difficiles, les matières prioritaires…",
+    "planSkip": "Générer directement",
+    "planGenerate": "Créer mon plan"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

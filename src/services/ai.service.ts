@@ -76,8 +76,8 @@ const AI = {
     api.post<QuizAttemptResponse>(`/v1/ai/quizzes/${quizId}/attempt`, { answers }, true),
 
   // POST /v1/ai/sessions/:id/study-plan
-  generateStudyPlan: (sessionId: string) =>
-    api.post<StudyPlanResponse>(`/v1/ai/sessions/${sessionId}/study-plan`, {}, true),
+  generateStudyPlan: (sessionId: string, brief: Record<string, string> = {}) =>
+    api.post<StudyPlanResponse>(`/v1/ai/sessions/${sessionId}/study-plan`, brief, true),
 
   // GET /v1/ai/hub/topics
   getSuggestedTopics: () => api.get<SuggestedTopicsResponse>("/v1/ai/hub/topics"),
