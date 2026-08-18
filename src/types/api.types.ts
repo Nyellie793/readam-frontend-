@@ -686,6 +686,7 @@ export interface CourseListItem {
     title?: string;
     description?: string | null;
     category?: string;
+    language?: CourseLanguage;
     price?: number;
     is_premium?: boolean;
     thumbnail_url?: string | null;

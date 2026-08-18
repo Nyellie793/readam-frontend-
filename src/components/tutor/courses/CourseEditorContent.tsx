@@ -10,6 +10,7 @@ import TUTOR from "@/services/tutor.service";
 import Image from "next/image";
 import Link from "next/link";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
+import type { CourseLanguage } from "@/types/api.types";
 import { cn } from "@/lib/utils";
 import ModuleList from "./ModuleList";
 import type { CourseDetailResponse } from "@/types/api.types";
@@ -47,6 +48,13 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  /**
+   * Language was collected when the course was created but could not be
+   * changed afterwards, so a course entered in the wrong language stayed that
+   * way. It also decides which students find the course and which language the
+   * video transcripts are generated in, so getting it wrong is not cosmetic.
+   */
+  const [language, setLanguage] = useState<CourseLanguage>("en");
   const [uploadingThumb, setUploadingThumb] = useState(false);
   const thumbInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +65,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
     setCategory(c.category);
     setPrice(String(c.price));
     setThumbnailUrl(c.thumbnail_url ?? null);
+    setLanguage((c.language as CourseLanguage) ?? "en");
   }
 
   function reload() {
@@ -97,6 +106,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
         title: title.trim(),
         description: description.trim() || null,
         category,
+        language,
         price: Number(price) || 0,
         is_premium: Number(price) > 0,
         thumbnail_url: thumbnailUrl,
@@ -257,6 +267,20 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
               className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-700">{t("language")}</label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as CourseLanguage)}
+              className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            >
+              <option value="en">{t("langEn")}</option>
+              <option value="fr">{t("langFr")}</option>
+              <option value="bilingual">{t("langBilingual")}</option>
+            </select>
+            <p className="text-[11px] leading-relaxed text-gray-400">{t("langHelp")}</p>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-gray-700">{t("category")}</label>

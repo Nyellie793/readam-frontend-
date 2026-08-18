@@ -340,20 +340,11 @@
   "pricing": {
     "perYear": "XAF/an",
     "mostPopular": "LE PLUS POPULAIRE",
-    "p1": "Matière unique",
-    "p1f1": "Anciens sujets et corrigés pour 1 matière",
-    "p1f2": "Explications détaillées",
-    "p2": "Petit pack",
-    "p2f1": "Anciens sujets et corrigés pour 3 matières",
-    "p2f2": "Accès aux fiches essentielles",
-    "p3": "Pack intermédiaire",
-    "p3f1": "Anciens sujets et corrigés pour 5 matières",
-    "p3f2": "Assistant d'étude IA (50 requêtes/jour)",
-    "p3f3": "Assistance prioritaire sur le forum",
-    "p4": "Pack accès complet",
-    "p4f1": "Anciens sujets et corrigés pour toutes les matières",
-    "p4f2": "Accès hors ligne à tous les supports",
-    "p4f3": "Accompagnement individuel par un tuteur"
+    "p1": "Accès GCE complet",
+    "p1f1": "Annales et corrigés pour toutes les matières du GCE",
+    "p1f2": "Explications détaillées et fiches de révision",
+    "p1f3": "Accès hors ligne à tous les documents",
+    "p1f4": "Assistant d'étude IA"
   },
   "about": {
     "eyebrow": "À propos de ReadAM",
@@ -694,7 +685,8 @@
     "clearAll": "Tout effacer",
     "paused": "en pause",
     "pause": "Pause",
-    "resume": "Reprendre"
+    "resume": "Reprendre",
+    "search": "Rechercher"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

@@ -340,20 +340,11 @@
   "pricing": {
     "perYear": "XAF/year",
     "mostPopular": "MOST POPULAR",
-    "p1": "Single Subject",
-    "p1f1": "Past questions & answers for 1 subject",
-    "p1f2": "Detailed study explanations",
-    "p2": "Small Bundle",
-    "p2f1": "Past questions & answers for 3 subjects",
-    "p2f2": "Access to core study notes",
-    "p3": "Medium Bundle",
-    "p3f1": "Past questions & answers for 5 subjects",
-    "p3f2": "AI Study Assistant (50 queries/day)",
-    "p3f3": "Priority forum support",
-    "p4": "Full Access Bundle",
-    "p4f1": "Past questions & answers for all subjects",
-    "p4f2": "Offline access to all materials",
-    "p4f3": "1-on-1 tutor support"
+    "p1": "Full GCE Access",
+    "p1f1": "Past questions & answers for every GCE subject",
+    "p1f2": "Detailed study explanations and notes",
+    "p1f3": "Offline access to all materials",
+    "p1f4": "AI Study Assistant"
   },
   "about": {
     "eyebrow": "About ReadAM",
@@ -694,7 +685,8 @@
     "clearAll": "Clear all",
     "paused": "paused",
     "pause": "Pause",
-    "resume": "Resume"
+    "resume": "Resume",
+    "search": "Search"
   },
   "tutor": {
     "dashboard": "Dashboard",

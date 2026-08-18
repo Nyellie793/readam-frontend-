@@ -6,51 +6,18 @@ import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useStoredUser } from "@/hooks/useStoredUser";
 
+/**
+ * A single plan, at the owner's direction: 5,000 XAF a year for all GCE
+ * content. This replaced four tiers (3,000 / 7,500 / 11,000 / 18,000) split by
+ * subject count. One price, everything included.
+ */
 const plans = [
   {
     nameKey: "p1",
-    price: "3,000",
+    price: "5,000",
     color: "blue",
     popular: false,
-    features: [
-      "p1f1",
-      "p1f2",
-    ],
-  },
-
-  {
-    nameKey: "p2",
-    price: "7,500",
-    color: "orange",
-    popular: false,
-    features: [
-      "p2f1",
-      "p2f2",
-    ],
-  },
-
-  {
-    nameKey: "p3",
-    price: "11,000",
-    color: "purple",
-    popular: true,
-    features: [
-      "p3f1",
-      "p3f2",
-      "p3f3",
-    ],
-  },
-
-  {
-    nameKey: "p4",
-    price: "18,000",
-    color: "green",
-    popular: false,
-    features: [
-      "p4f1",
-      "p4f2",
-      "p4f3",
-    ],
+    features: ["p1f1", "p1f2", "p1f3", "p1f4"],
   },
 ];
 
@@ -78,7 +45,7 @@ export default function Pricing() {
         </div>
 
         {/* Cards */}
-        <div className="grid gap-6 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-md gap-6">
 
           {/*
             Every card's CTA was a bare <Button> with no handler, so the whole
