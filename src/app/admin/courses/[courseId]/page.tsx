@@ -21,6 +21,7 @@ import Topbar from "@/components/admin/Topbar";
 import { Badge } from "@/components/ui/Badge";
 import ADMIN from "@/services/admin.service";
 import LessonPreview from "@/components/admin/course/LessonPreview";
+import CourseSalesPanel from "@/components/admin/course/CourseSalesPanel";
 import RejectCourseDialog from "@/components/admin/course/RejectCourseDialog";
 import type { AdminCourseDetail } from "@/types/api.types";
 
@@ -310,6 +311,8 @@ export default function AdminCourseDetailPage() {
                 </p>
               )}
             </div>
+
+            <CourseSalesPanel courseId={course.id} />
 
             {/* Curriculum */}
             <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">

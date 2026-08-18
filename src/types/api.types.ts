@@ -826,3 +826,22 @@ export interface AdminAnalyticsResponse {
   top_courses: CoursePerformance[];
   currency: string;
 }
+
+export interface CourseSalesPoint {
+  date: string;
+  revenue: number;
+  sales: number;
+}
+
+export interface CourseSalesReport {
+  course_id: string;
+  title: string;
+  tutor_name: string | null;
+  price: number;
+  currency: string;
+  total_revenue: number;
+  total_sales: number;
+  /** Can exceed total_sales: bundle buyers enrol without a per-course payment. */
+  total_enrollments: number;
+  points: CourseSalesPoint[];
+}
