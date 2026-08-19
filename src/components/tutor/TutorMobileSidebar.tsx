@@ -2,9 +2,7 @@
 
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import dynamic from "next/dynamic";
-
-const TutorSidebar = dynamic(() => import("./TutorSidebar"), { ssr: false });
+import TutorSidebar from "./TutorSidebar";
 
 interface TutorMobileSidebarProps {
   open: boolean;

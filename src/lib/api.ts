@@ -34,6 +34,27 @@ function getRefreshToken(): string | null {
   return localStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
+// Browser fetch has no built-in timeout, so a cold/unreachable backend hangs
+// indefinitely instead of failing visibly. Bounded generously above Railway's
+// observed cold-start connect time (~4s) so it doesn't fire on a healthy but
+// slow first request.
+const REQUEST_TIMEOUT_MS = 15000;
+
+async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiRequestError(0, "The server is taking too long to respond. Please try again.");
+    }
+    throw new ApiRequestError(0, "Could not reach the server. Check your connection and try again.");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function parseError(res: Response): Promise<string> {
   try {
     const body = (await res.json()) as ApiError;
@@ -51,7 +72,7 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   if (!refreshPromise) {
-    refreshPromise = fetch(`${API_BASE_URL}/v1/auth/refresh`, {
+    refreshPromise = fetchWithTimeout(`${API_BASE_URL}/v1/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -85,7 +106,7 @@ async function request<T>(
     const token = getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
-  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const res = await fetchWithTimeout(`${API_BASE_URL}${path}`, { ...options, headers });
 
   if (res.status === 401 && auth && !retried) {
     const newToken = await refreshAccessToken();

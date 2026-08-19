@@ -2,17 +2,14 @@
 
 import { Bell, Menu, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import UserDropdown from "@/components/dashboard/UserDropdown";
 import { Input } from "@/components/ui/Input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Link from "next/link";
 import STUDENT from "@/services/student.service";
-import dynamic from "next/dynamic";
+import Sidebar from "./Sidebar";
 import { startMeasure, endMeasure } from "@/lib/performance";
-
-const Sidebar = dynamic(() => import("./Sidebar"), {
-  ssr: false,
-});
 
 interface TopbarProps {
   searchPlaceholder?: string;
@@ -28,13 +25,8 @@ export default function Topbar({
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   // Without this the sheet stayed open over the page it had just navigated to.
   const [navOpen, setNavOpen] = useState(false);
-  const [hasUnread, setHasUnread] = useState(false);
-
-  useEffect(() => {
-    STUDENT.getNotifications()
-      .then((data) => setHasUnread(data.unread_count > 0))
-      .catch(() => null);
-  }, []);
+  const { data: notifications } = useSWR("notifications-unread", () => STUDENT.getNotifications());
+  const hasUnread = (notifications?.unread_count ?? 0) > 0;
 
   useEffect(() => {
     if (navOpen) {
@@ -47,10 +39,6 @@ export default function Topbar({
     }
   }, [navOpen]);
 
-  const handlePreloadSidebar = () => {
-    import("./Sidebar");
-  };
-
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-100 bg-white/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
       {/* Mobile: Hamburger menu to open Sidebar in a Sheet */}
@@ -58,8 +46,6 @@ export default function Topbar({
         <Sheet open={navOpen} onOpenChange={setNavOpen}>
           <SheetTrigger asChild>
             <button
-              onPointerEnter={handlePreloadSidebar}
-              onTouchStart={handlePreloadSidebar}
               onClick={() => {
                 startMeasure("sidebar-open");
                 setNavOpen(true);

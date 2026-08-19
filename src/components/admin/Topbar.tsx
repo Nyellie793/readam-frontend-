@@ -14,13 +14,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { clearSession } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import { useStoredUser, initialsOf } from "@/hooks/useStoredUser";
-import dynamic from "next/dynamic";
+import Sidebar from "@/components/admin/Sidebar";
 import { startMeasure, endMeasure } from "@/lib/performance";
 import { useEffect } from "react";
-
-const Sidebar = dynamic(() => import("@/components/admin/Sidebar"), {
-  ssr: false,
-});
 
 interface TopbarProps {
   title: string;
@@ -48,10 +44,6 @@ export default function Topbar({ title, description }: TopbarProps) {
     }
   }, [navOpen]);
 
-  const handlePreloadSidebar = () => {
-    import("@/components/admin/Sidebar");
-  };
-
   function handleLogout() {
     clearSession();
     router.push(ROUTES.adminLogin);
@@ -62,8 +54,6 @@ export default function Topbar({ title, description }: TopbarProps) {
       {/* Mobile: hamburger opens the same Sidebar in a Sheet */}
       <Sheet open={navOpen} onOpenChange={setNavOpen}>
         <SheetTrigger
-          onPointerEnter={handlePreloadSidebar}
-          onTouchStart={handlePreloadSidebar}
           onClick={() => {
             startMeasure("admin-sidebar-open");
             setNavOpen(true);
