@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import { Sparkles, Bell } from "lucide-react";
 import { useStoredUser } from "@/hooks/useStoredUser";
@@ -18,14 +18,9 @@ export default function AiHubHeader() {
   const user = useStoredUser();
   const name = user?.full_name ?? "Student";
   const avatarUrl = user?.avatar_url ?? null;
-  const [hasUnread, setHasUnread] = useState(false);
+  const { data: notifications } = useSWR("notifications-unread", () => STUDENT.getNotifications());
+  const hasUnread = (notifications?.unread_count ?? 0) > 0;
   const greeting = useGreeting();
-
-  useEffect(() => {
-    STUDENT.getNotifications()
-      .then((data) => setHasUnread(data.unread_count > 0))
-      .catch(() => null);
-  }, []);
 
   const firstName = name.split(" ")[0];
   const initials = name

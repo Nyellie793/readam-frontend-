@@ -1,29 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { Flame } from "lucide-react";
 import STUDENT from "@/services/student.service";
-import type { DailyActivityItem } from "@/types/api.types";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
+// Same SWR keys as WeeklyActivity/StudyProgress/CourseFilters, so this reuses
+// their cached response instead of firing its own request when both are
+// mounted around the same time.
 export default function AiHubLearningStreak() {
   const t = useTranslations("dash");
-  const [streakDays, setStreakDays] = useState(0);
-  const [totalXp, setTotalXp] = useState(0);
-  const [days, setDays] = useState<DailyActivityItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: gamification, isLoading: gLoading } = useSWR("gamification", () => STUDENT.getGamification());
+  const { data: weekly, isLoading: wLoading } = useSWR("weekly-activity-7", () => STUDENT.getWeeklyActivity(7));
 
-  useEffect(() => {
-    Promise.all([STUDENT.getGamification(), STUDENT.getWeeklyActivity(7)])
-      .then(([gamification, weekly]) => {
-        setStreakDays(gamification.current_streak_days);
-        setTotalXp(gamification.total_xp);
-        setDays(weekly.days);
-      })
-      .catch(() => null)
-      .finally(() => setLoading(false));
-  }, []);
+  const loading = gLoading || wLoading;
+  const streakDays = gamification?.current_streak_days ?? 0;
+  const totalXp = gamification?.total_xp ?? 0;
+  const days = weekly?.days ?? [];
 
   const activeDaysThisWeek = days.filter((d) => d.active).length;
   const weeklyGoalPct = days.length > 0 ? Math.round((activeDaysThisWeek / days.length) * 100) : 0;

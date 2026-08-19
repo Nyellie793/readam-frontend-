@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import RecentlyViewedItem from "./RecentlyViewedItem";
 import ReadAmTutorBannerDashboard from "./ReadAmTutorBannerDashboard";
 import STUDENT from "@/services/student.service";
-import type { RecentlyViewedItem as RecentlyViewedItemData } from "@/types/api.types";
 
 function formatRemaining(seconds: number): string {
   if (seconds <= 0) return "0 mins left";
@@ -13,15 +12,8 @@ function formatRemaining(seconds: number): string {
 }
 
 export default function RecentlyViewed() {
-  const [items, setItems] = useState<RecentlyViewedItemData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    STUDENT.getRecentlyViewed()
-      .then((data) => setItems(data.items))
-      .catch(() => null)
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, isLoading: loading } = useSWR("recently-viewed", () => STUDENT.getRecentlyViewed());
+  const items = data?.items ?? [];
 
   return (
     <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">

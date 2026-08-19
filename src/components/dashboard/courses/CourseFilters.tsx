@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Flame } from "lucide-react";
 import Logo from "@/components/shared/Logo";
@@ -40,13 +40,8 @@ export default function CourseFilters({
   const checkedTypes = searchParams.getAll("content_type");
   const officialOnly = searchParams.get("official_only") === "true";
 
-  const [streakDays, setStreakDays] = useState<number | null>(null);
-
-  useEffect(() => {
-    STUDENT.getGamification()
-      .then((data) => setStreakDays(data.current_streak_days))
-      .catch(() => null);
-  }, []);
+  const { data: gamification } = useSWR("gamification", () => STUDENT.getGamification());
+  const streakDays = gamification?.current_streak_days ?? null;
 
   function toggleType(id: string) {
     const params = new URLSearchParams(searchParams.toString());
