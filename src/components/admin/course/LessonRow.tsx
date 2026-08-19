@@ -105,38 +105,21 @@ export default function LessonRow({
                         </button>
                     </div>
 
-                    {/* Title + duration */}
-                    <div className="grid gap-3 sm:grid-cols-2">
-                        <input
-                            type="text"
-                            placeholder="Lesson title"
-                            value={lesson.title}
-                            onChange={(e) =>
-                                onUpdate({
-                                    title: e.target.value,
-                                })
-                            }
-                            className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none placeholder:text-gray-400 focus:border-blue-400 transition"
-                        />
+                    {/* Title.
 
-                        {lesson.type !== "quiz" && (
-                            <input
-                                type="text"
-                                placeholder={
-                                    lesson.type === "video"
-                                        ? "Duration (e.g. 12:30)"
-                                        : "Duration (optional)"
-                                }
-                                value={lesson.duration}
-                                onChange={(e) =>
-                                    onUpdate({
-                                        duration: e.target.value,
-                                    })
-                                }
-                                className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none placeholder:text-gray-400 focus:border-blue-400 transition"
-                            />
-                        )}
-                    </div>
+                        There used to be a duration field beside this, labelled
+                        "Duration (e.g. 12:30)" as though it were required. It
+                        was never read: video length comes back from Cloudflare
+                        once the upload finishes, and PDFs have no duration at
+                        all. Asking for a number that is then thrown away only
+                        made people think it was why they could not continue. */}
+                    <input
+                        type="text"
+                        placeholder="Lesson title"
+                        value={lesson.title}
+                        onChange={(e) => onUpdate({ title: e.target.value })}
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:border-blue-400"
+                    />
 
                     {/* File upload */}
                     {lesson.type !== "quiz" && (

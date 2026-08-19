@@ -8,6 +8,7 @@ import {
     ArrowRight,
     Check,
     Loader2,
+    AlertCircle,
 } from "lucide-react";
 
 import Topbar from "@/components/admin/Topbar";
@@ -94,28 +95,58 @@ export default function NewCoursePage() {
         setThumbnailPreview(URL.createObjectURL(file));
     }
 
-    function canAdvance() {
+    /**
+     * Why the Continue button is disabled, or null when it is not.
+     *
+     * It used to be a bare boolean, so a disabled button gave no clue what was
+     * missing. A new module arrives with an empty lesson already inside, which
+     * means the lesson-count check always passed and the only thing that could
+     * ever block you was an unnamed module — with nothing on screen saying so.
+     * Admins uploaded a video, saw Continue stay grey, and reasonably assumed
+     * the upload had failed.
+     */
+    function blockingReason(): string | null {
         if (step === 0) {
-            return (
-                !!form.title &&
-                !!form.description &&
-                !!form.category
-            );
+            if (!form.title) return "Add a course title.";
+            if (!form.description) return "Add a course description.";
+            if (!form.category) return "Choose a category.";
+            return null;
         }
 
         if (step === 1) {
-            return !!thumbnail;
+            return thumbnail ? null : "Upload a cover image.";
         }
 
         if (step === 2) {
-            return (
-                modules.length > 0 &&
-                modules.every((module) => module.title) &&
-                modules.flatMap((module) => module.lessons).length > 0
-            );
+            if (modules.length === 0) return "Add at least one module.";
+
+            const unnamed = modules.findIndex((m) => !m.title.trim());
+            if (unnamed !== -1) return `Name module ${unnamed + 1}.`;
+
+            const lessons = modules.flatMap((m) => m.lessons);
+            if (lessons.length === 0) return "Add at least one lesson.";
+
+            // Caught here rather than at submit: the backend rejects an empty
+            // title, and failing after the course has already been created
+            // leaves a half-built course behind.
+            for (const [mi, m] of modules.entries()) {
+                for (const [li, lesson] of m.lessons.entries()) {
+                    if (!lesson.title.trim()) {
+                        return `Name lesson ${li + 1} in module ${mi + 1}.`;
+                    }
+                    if (lesson.type !== "quiz" && !lesson.file) {
+                        return `Upload a file for "${lesson.title.trim()}".`;
+                    }
+                }
+            }
+            return null;
         }
 
-        return true;
+        return null;
+    }
+
+    function canAdvance() {
+        return blockingReason() === null;
     }
 
     async function uploadThumbnail(): Promise<string | undefined> {
@@ -347,6 +378,16 @@ export default function NewCoursePage() {
                             <ArrowLeft className="h-4 w-4" />
                             Back
                         </button>
+
+                        {/* A disabled button with no explanation is the whole
+                            complaint: people uploaded a video, saw Continue
+                            stay grey, and assumed the upload had failed. */}
+                        {step < STEPS.length - 1 && blockingReason() && (
+                            <p className="mr-3 flex items-center gap-1.5 text-xs font-medium text-orange-600">
+                                <AlertCircle className="size-3.5 shrink-0" />
+                                {blockingReason()}
+                            </p>
+                        )}
 
                         {step < STEPS.length - 1 ? (
                             <button
