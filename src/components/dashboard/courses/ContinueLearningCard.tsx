@@ -28,7 +28,7 @@ export default function ContinueLearningCard({
     <button type="button" onClick={onClick} className="text-left">
       <div className="relative aspect-video overflow-hidden rounded-xl bg-gray-100">
         {image ? (
-          <Image src={image} alt={title} fill className="object-cover" />
+          <Image src={image} alt={title} fill sizes="(min-width: 640px) 33vw, 100vw" className="object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center bg-blue-50 text-blue-300">
             <span className="text-xs font-semibold">{t("noPreview")}</span>
