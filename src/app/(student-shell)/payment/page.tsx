@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { Sparkles, FileText, BookOpen, ArrowRight, ShieldCheck } from "lucide-react";
-import Sidebar from "@/components/layout/Sidebar";
-import Topbar from "@/components/layout/Topbar";
 import { getTranslations } from "next-intl/server";
 
 /**
@@ -42,16 +40,6 @@ const OPTIONS = [
 export default async function PlansPage() {
   const t = await getTranslations("payment");
   return (
-    <div className="flex min-h-screen bg-gray-50/50">
-      <aside className="hidden w-64 shrink-0 lg:block">
-        <div className="fixed h-dvh w-64">
-          <Sidebar />
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar />
-
         <main className="max-w-6xl flex-1 space-y-8 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-2xl space-y-2 text-center">
             <h1 className="text-2xl font-black text-gray-900 sm:text-3xl">{t("plansTitle")}</h1>
@@ -98,7 +86,5 @@ export default async function PlansPage() {
             </p>
           </div>
         </main>
-      </div>
-    </div>
   );
 }
