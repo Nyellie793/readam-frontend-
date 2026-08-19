@@ -8,12 +8,14 @@ import { getStoredUser } from "@/lib/auth";
 
 export default function WelcomeBack() {
   const [interests, setInterests] = useState<string[]>([]);
+  const [loading, setLoading] = useState(getStoredUser()?.role === "student");
 
   useEffect(() => {
     if (getStoredUser()?.role === "student") {
       STUDENT.getProfile()
         .then((profile) => setInterests(profile.interests))
-        .catch(() => null);
+        .catch(() => null)
+        .finally(() => setLoading(false));
     }
   }, []);
 
@@ -21,7 +23,7 @@ export default function WelcomeBack() {
 
   return (
     <OnboardingShell currentStep={2}>
-      <Welcome interests={interests} userName={name} onBack={() => window.history.back()} />
+      <Welcome interests={interests} loading={loading} userName={name} onBack={() => window.history.back()} />
     </OnboardingShell>
   );
 }
