@@ -15,7 +15,6 @@ import {
     ChevronRight,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -141,7 +140,6 @@ export default async function FeaturesPage() {
             <div className="pointer-events-none absolute right-0 top-0 z-0 h-[60vh] w-[60vw] rounded-full bg-blue-100/40 blur-[120px]" />
 
             <div className="relative z-10">
-                <Navbar />
 
                 <main>
 

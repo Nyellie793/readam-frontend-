@@ -12,7 +12,6 @@ import {
   Trophy,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -88,7 +87,6 @@ export default async function AboutPage() {
       <div className="pointer-events-none absolute right-0 top-0 z-0 h-[60vh] w-[60vw] rounded-full bg-blue-100/40 blur-[120px]" />
 
       <div className="relative z-10">
-        <Navbar />
 
         <main>
 
@@ -136,6 +134,8 @@ export default async function AboutPage() {
                   src="/Students celebrating learning.png"
                   alt="ReadAM students"
                   fill
+                  priority
+                  sizes="(min-width: 1024px) 50vw, 100vw"
                   className="object-cover"
                 />
                 {/* Overlay badge */}
@@ -236,6 +236,7 @@ export default async function AboutPage() {
                       src={member.image}
                       alt={member.name}
                       fill
+                      sizes="(min-width: 640px) 33vw, 100vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>

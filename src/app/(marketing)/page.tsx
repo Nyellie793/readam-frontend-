@@ -1,4 +1,3 @@
-import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/sections/Hero";
 import Banner from "@/components/sections/Banner";
 import Features from "@/components/sections/Features";
@@ -17,7 +16,6 @@ export default function Home() {
     <div className="relative min-h-screen overflow-hidden bg-white">
       <div className="pointer-events-none absolute right-0 top-0 z-0 h-[70vh] w-[70vw] rounded-full bg-blue-100/40 blur-[120px]" />
       <div className="relative z-10">
-        <Navbar />
         <main>
           <Hero />
           <Banner />
