@@ -27,6 +27,33 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "picsum.photos" },
     ],
   },
+
+  // Baseline security headers (Next.js's own PWA guide). Deliberately no
+  // site-wide Content-Security-Policy here — Google OAuth and the payment
+  // provider flows aren't audited against one yet, so a blanket CSP risks
+  // silently breaking them. /sw.js gets a narrow same-origin-script CSP
+  // since a service worker script has no legitimate reason to load anything
+  // else, plus no-cache so clients always fetch the latest version.
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self'" },
+        ],
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
