@@ -92,7 +92,7 @@ export default async function Videos() {
                 <div className="flex min-w-0 items-center gap-1.5">
                   {course.tutor_avatar_url ? (
                     <div className="relative size-5 shrink-0 overflow-hidden rounded-full bg-gray-200 ring-1 ring-gray-100 sm:size-6">
-                      <Image src={course.tutor_avatar_url} alt="" fill className="object-cover" />
+                      <Image src={course.tutor_avatar_url} alt="" fill sizes="24px" className="object-cover" />
                     </div>
                   ) : (
                     <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[9px] font-bold text-blue-600 sm:size-6">

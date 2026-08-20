@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { RotateCw } from "lucide-react";
 import Chart from "@/components/shared/Chart";
 import STUDENT from "@/services/student.service";
-import type { DailyActivityItem } from "@/types/api.types";
 import DailyStreak from "./DailyStreak";
 import RecentBadges from "./RecentBadges";
 import { useTranslations } from "next-intl";
@@ -17,45 +17,34 @@ function dayOfMonth(isoDate: string): string {
  * Owns the activity data for this row and passes it to DailyStreak, which used
  * to fetch the same two endpoints itself. That removed two duplicate requests
  * from every dashboard load.
+ *
+ * The 7-day strip and the streak count use the same SWR keys ("weekly-activity-7"
+ * and "gamification") as AiHubLearningStreak/StudyProgress/CourseFilters, so
+ * navigating between those and this component reuses one cached response
+ * instead of firing a fresh request per mount.
  */
 export default function WeeklyActivity() {
   const t = useTranslations("dash");
   const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
-  const [days, setDays] = useState<DailyActivityItem[]>([]);
-  const [weekDays, setWeekDays] = useState<DailyActivityItem[]>([]);
-  const [streakDays, setStreakDays] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
 
-  // The fixed 7-day streak strip and the streak count never change with the
-  // chart's period toggle, so they are fetched once.
-  const loadStatic = useCallback(() => {
-    Promise.allSettled([STUDENT.getWeeklyActivity(7), STUDENT.getGamification()]).then(
-      ([week, gamification]) => {
-        if (week.status === "fulfilled") setWeekDays(week.value.days);
-        if (gamification.status === "fulfilled") setStreakDays(gamification.value.current_streak_days);
-      }
-    );
-  }, []);
+  const { data: weekData } = useSWR("weekly-activity-7", () => STUDENT.getWeeklyActivity(7));
+  const { data: gamification } = useSWR("gamification", () => STUDENT.getGamification());
 
-  const loadChart = useCallback((p: "weekly" | "monthly") => {
-    setLoading(true);
-    setFailed(false);
-    STUDENT.getWeeklyActivity(p === "monthly" ? 30 : 7)
-      .then((data) => setDays(data.days))
-      .catch(() => setFailed(true))
-      .finally(() => setLoading(false));
-  }, []);
+  const days = period === "monthly" ? 30 : 7;
+  const {
+    data: chartResponse,
+    isLoading: loading,
+    error: chartError,
+    mutate: retryChart,
+  } = useSWR(["weekly-activity", days], () => STUDENT.getWeeklyActivity(days), {
+    keepPreviousData: true,
+  });
 
-  useEffect(() => {
-    loadStatic();
-  }, [loadStatic]);
+  const weekDays = weekData?.days ?? [];
+  const streakDays = gamification?.current_streak_days ?? null;
+  const failed = !!chartError;
 
-  useEffect(() => {
-    loadChart(period);
-  }, [period, loadChart]);
-
-  const chartData = days.map((d) => ({
+  const chartData = (chartResponse?.days ?? []).map((d) => ({
     label: period === "monthly" ? dayOfMonth(d.activity_date) : d.weekday,
     value: d.xp_earned,
   }));
@@ -72,7 +61,7 @@ export default function WeeklyActivity() {
           </div>
           <button
             type="button"
-            onClick={() => loadChart(period)}
+            onClick={() => retryChart()}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:underline"
           >
             <RotateCw className="size-3.5" />
@@ -86,7 +75,7 @@ export default function WeeklyActivity() {
           data={chartData}
           period={period}
           onPeriodChange={setPeriod}
-          loading={loading && days.length === 0}
+          loading={loading && chartData.length === 0}
         />
       )}
 

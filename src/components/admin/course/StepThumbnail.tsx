@@ -68,6 +68,7 @@ export default function StepThumbnail({
                                 src={preview}
                                 alt="Thumbnail preview"
                                 fill
+                                sizes="100vw"
                                 className="object-cover"
                             />
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -8,6 +8,8 @@ import { SITE_URL } from "@/lib/constants";
 import { NextIntlClientProvider } from "next-intl";
 import RouteProgress from "@/components/shared/RouteProgress";
 import { getLocale } from "next-intl/server";
+import ServiceWorkerRegister from "@/components/shared/ServiceWorkerRegister";
+import InstallPrompt from "@/components/shared/InstallPrompt";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,6 +69,24 @@ export const metadata: Metadata = {
   },
 
   formatDetection: { telephone: false },
+
+  // iOS reads these instead of the web app manifest — Safari doesn't support
+  // the manifest icon/display spec, so "Add to Home Screen" falls back to
+  // these meta tags for a standalone (no browser chrome) launch.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ReadAM",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#2563EB",
 };
 
 export default async function RootLayout({
@@ -87,9 +107,11 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <NetworkProvider />
           <RouteProgress />
+          <ServiceWorkerRegister />
 
           {children}
 
+          <InstallPrompt />
           <Toaster richColors position="top-right" closeButton />
         </NextIntlClientProvider>
       </body>

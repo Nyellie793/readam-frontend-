@@ -70,6 +70,7 @@ export default function StepReview({
                                 src={thumbnail}
                                 alt="Thumbnail"
                                 fill
+                                sizes="160px"
                                 className="object-cover"
                             />
                         </div>

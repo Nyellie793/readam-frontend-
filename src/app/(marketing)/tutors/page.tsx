@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Star, BookOpen, GraduationCap, Search } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getPublicTutors } from "@/lib/public-api";
 import { getTranslations } from "next-intl/server";
@@ -47,7 +46,6 @@ export default async function TutorsPage({
       <div className="pointer-events-none absolute right-0 top-0 z-0 h-[50vh] w-[55vw] rounded-full bg-blue-100/40 blur-[120px]" />
 
       <div className="relative z-10">
-        <Navbar />
 
         <main>
           <section className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-20">

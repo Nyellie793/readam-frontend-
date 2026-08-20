@@ -8,11 +8,12 @@ import { useTranslations } from "next-intl";
 
 type Props = {
   interests: string[];
+  loading?: boolean;
   userName: string;
   onBack: () => void;
 };
 
-export default function Welcome({ interests, userName, onBack }: Props) {
+export default function Welcome({ interests, loading = false, userName, onBack }: Props) {
   const t = useTranslations("onboarding");
   const displayInterests =
     interests.slice(0, 2).join(" and ") || "your selected topics";
@@ -76,9 +77,13 @@ export default function Welcome({ interests, userName, onBack }: Props) {
           <p className="mt-4 text-sm leading-relaxed text-gray-500">
             Your learning journey starts now. We&apos;ve personalized your
             dashboard based on your interests in{" "}
-            <span className="font-semibold text-gray-700">
-              {displayInterests}
-            </span>
+            {loading ? (
+              <span className="inline-block h-3.5 w-32 animate-pulse rounded bg-gray-200 align-middle" />
+            ) : (
+              <span className="font-semibold text-gray-700">
+                {displayInterests}
+              </span>
+            )}
             . Here is what you can do next:
           </p>
 

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { Sparkles } from "lucide-react";
 import STUDENT from "@/services/student.service";
-import type { BadgeItem } from "@/types/api.types";
 import { useTranslations } from "next-intl";
 
 const COLORS = [
@@ -14,15 +13,8 @@ const COLORS = [
 
 export default function RecentBadges() {
   const t = useTranslations("dash");
-  const [badges, setBadges] = useState<BadgeItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    STUDENT.getBadges()
-      .then((data) => setBadges(data.badges.filter((b) => b.achieved)))
-      .catch(() => null)
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, isLoading: loading } = useSWR("badges", () => STUDENT.getBadges());
+  const badges = (data?.badges ?? []).filter((b) => b.achieved);
 
   return (
     <div className="rounded-2xl border bg-white p-5 shadow-sm">

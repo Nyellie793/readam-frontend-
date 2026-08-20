@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import AI from "@/services/ai.service";
 
@@ -11,17 +11,8 @@ const FALLBACK_SUGGESTIONS = [
 ];
 
 export default function AiHubSuggestions() {
-  const [topics, setTopics] = useState<string[]>(FALLBACK_SUGGESTIONS);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    AI.getSuggestedTopics()
-      .then((data) => {
-        if (data.topics.length > 0) setTopics(data.topics);
-      })
-      .catch(() => null)
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, isLoading: loading } = useSWR("ai-suggested-topics", () => AI.getSuggestedTopics());
+  const topics = data && data.topics.length > 0 ? data.topics : FALLBACK_SUGGESTIONS;
 
   return (
     <div>

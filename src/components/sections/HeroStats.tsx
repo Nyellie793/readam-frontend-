@@ -17,7 +17,7 @@ export default async function HeroStats() {
             key={i}
             className="relative h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-sm"
           >
-            <Image src={avatar.src} alt={avatar.alt} fill className="object-cover" />
+            <Image src={avatar.src} alt={avatar.alt} fill sizes="40px" className="object-cover" />
           </div>
         ))}
       </div>

@@ -26,16 +26,10 @@ export default function TutorTopbar({ greeting, isVerified }: TutorTopbarProps) 
     }
   }, [open]);
 
-  const handlePreload = () => {
-    import("./TutorSidebar");
-  };
-
   return (
     <>
       <div className="mb-4 flex items-center gap-2 lg:hidden">
         <button
-          onPointerEnter={handlePreload}
-          onTouchStart={handlePreload}
           onClick={() => {
             startMeasure("tutor-sidebar-open");
             setOpen(true);

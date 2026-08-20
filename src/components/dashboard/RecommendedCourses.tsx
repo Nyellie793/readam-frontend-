@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import STUDENT from "@/services/student.service";
-import type { CourseListItem } from "@/types/api.types";
 import CourseCard from "@/components/dashboard/courses/CourseCard";
 import { useTranslations } from "next-intl";
 
@@ -19,20 +18,11 @@ function CourseCardSkeleton() {
 
 export default function RecommendedCourses() {
   const t = useTranslations("dash");
-  const [courses, setCourses] = useState<CourseListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [interests, setInterests] = useState<string[]>([]);
+  const { data, error, isLoading: loading } = useSWR("recommended-courses", () => STUDENT.getRecommendedCourses());
+  const { data: profile } = useSWR("profile", () => STUDENT.getProfile());
 
-  useEffect(() => {
-    STUDENT.getRecommendedCourses()
-      .then(data => setCourses(data.items))
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
-    STUDENT.getProfile()
-      .then(profile => setInterests(profile.interests))
-      .catch(() => null);
-  }, []);
+  const courses = data?.items ?? [];
+  const interests = profile?.interests ?? [];
 
   const subtitle = interests.length > 0
     ? `Based on your interest in ${interests.slice(0, 2).join(" and ")}`
@@ -50,7 +40,7 @@ export default function RecommendedCourses() {
         </Link>
       </div>
 
-      {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
+      {error && <p className="mt-4 text-sm text-red-500">{error.message}</p>}
 
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {loading

@@ -19,7 +19,7 @@ export default function RecentlyViewedItem({ courseId, image, title, meta, progr
     >
       <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
         {image ? (
-          <Image src={image} alt={title} fill className="object-cover" />
+          <Image src={image} alt={title} fill sizes="48px" className="object-cover" />
         ) : (
           <BookOpen className="size-5 text-gray-300" />
         )}

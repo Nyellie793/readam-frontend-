@@ -3,7 +3,6 @@ import { getPublicTutor, isUuid } from "@/lib/public-api";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, BookOpen, BadgeCheck, ArrowLeft } from "lucide-react";
-import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { getTranslations } from "next-intl/server";
 
@@ -204,7 +203,6 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
         <div className="relative min-h-screen bg-[#F8F9FC]">
             <div className="pointer-events-none absolute right-0 top-0 z-0 h-[50vh] w-[60vw] rounded-full bg-blue-100/30 blur-[120px]" />
             <div className="relative z-10">
-                <Navbar />
                 <main className="mx-auto max-w-5xl px-6 py-10">
 
                     <Link href="/tutors" className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors">
@@ -216,7 +214,7 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
                     <div className="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm">
                         <div className="grid gap-0 lg:grid-cols-2">
                             <div className="relative h-72 w-full overflow-hidden bg-gray-100 lg:h-auto lg:min-h-[380px]">
-                                <Image src={tutor.image} alt={tutor.name} fill className="object-cover" priority />
+                                <Image src={tutor.image} alt={tutor.name} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" priority />
                             </div>
                             <div className="flex flex-col justify-center p-8 lg:p-10">
                                 <div className="flex items-center gap-2">
@@ -299,7 +297,7 @@ export default async function TutorProfilePage({ params }: { params: Promise<{ i
                                         </span>
                                     </div>
                                     <div className="relative mx-4 h-36 overflow-hidden rounded-xl bg-gray-100">
-                                        <Image src={course.image} alt={course.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <Image src={course.image} alt={course.title} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                                     </div>
                                     <div className="px-4 pt-3 pb-4">
                                         <h3 className="text-sm font-bold text-gray-900 leading-snug">{course.title}</h3>

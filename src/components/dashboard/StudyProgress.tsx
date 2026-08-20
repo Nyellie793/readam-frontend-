@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import useSWR from "swr";
 import { RotateCw } from "lucide-react";
 import STUDENT from "@/services/student.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { GamificationResponse } from "@/types/api.types";
 import { useTranslations } from "next-intl";
 
 /**
@@ -12,35 +11,38 @@ import { useTranslations } from "next-intl";
  * student with a 30-day streak saw "0 days · 0 xp" on every page load — and
  * permanently if the request failed, which is indistinguishable from having
  * genuinely lost the streak.
+ *
+ * "gamification" is the same SWR key used by WeeklyActivity, AiHubLearningStreak,
+ * and CourseFilters, so only one of them triggers the network request per
+ * cache window — the rest read the shared result.
  */
 export default function StudyProgress() {
   const t = useTranslations("dash");
-  const [data, setData] = useState<GamificationResponse | null>(null);
-  const [enrollmentCount, setEnrollmentCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const {
+    data,
+    isLoading: gLoading,
+    error: gError,
+    mutate: retryGamification,
+  } = useSWR("gamification", () => STUDENT.getGamification());
+  const {
+    data: enrollments,
+    isLoading: eLoading,
+    error: eError,
+    mutate: retryEnrollments,
+  } = useSWR("enrollments", () => STUDENT.getEnrollments());
 
-  const load = useCallback(() => {
-    setLoading(true);
-    setFailed(false);
+  const loading = gLoading || eLoading;
+  // Only a total failure is worth surfacing; one missing tile still leaves
+  // the section useful.
+  const failed = !!gError && !!eError;
 
-    Promise.allSettled([STUDENT.getGamification(), STUDENT.getEnrollments()])
-      .then(([gamification, enrollments]) => {
-        if (gamification.status === "fulfilled") setData(gamification.value);
-        if (enrollments.status === "fulfilled") setEnrollmentCount(enrollments.value.total);
-        // Only a total failure is worth surfacing; one missing tile still
-        // leaves the section useful.
-        setFailed(gamification.status === "rejected" && enrollments.status === "rejected");
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  function load() {
+    retryGamification();
+    retryEnrollments();
+  }
 
   const stats = [
-    { label: t("enrolledCourses"), value: enrollmentCount, suffix: "" },
+    { label: t("enrolledCourses"), value: enrollments?.total ?? null, suffix: "" },
     { label: t("studyStreak"), value: data?.current_streak_days ?? null, suffix: t("days") },
     { label: t("totalXp"), value: data?.total_xp ?? null, suffix: t("xp") },
     { label: t("longestStreak"), value: data?.longest_streak_days ?? null, suffix: t("days") },
