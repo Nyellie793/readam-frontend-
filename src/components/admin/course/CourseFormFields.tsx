@@ -129,33 +129,6 @@ export default function CourseForm({
                     </select>
                 </div>
 
-                <div>
-                    <label className="mb-1.5 block text-xs font-semibold text-gray-600">
-                        Level <span className="text-red-500">*</span>
-                    </label>
-
-                    <select
-                        value={form.level}
-                        onChange={(e) =>
-                            onChange({
-                                level: e.target.value as CourseFormData["level"],
-                            })
-                        }
-                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 transition"
-                    >
-                        <option value="beginner">
-                            Beginner
-                        </option>
-
-                        <option value="intermediate">
-                            Intermediate
-                        </option>
-
-                        <option value="advanced">
-                            Advanced
-                        </option>
-                    </select>
-                </div>
             </div>
 
             {/* Language + Price */}

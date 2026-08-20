@@ -55,6 +55,12 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
    * video transcripts are generated in, so getting it wrong is not cosmetic.
    */
   const [language, setLanguage] = useState<CourseLanguage>("en");
+  /**
+   * Tags could be set when the course was created but never changed
+   * afterwards, which is the "edit has fewer options than add" complaint.
+   * They drive search, so a course tagged wrongly stayed hard to find.
+   */
+  const [tags, setTags] = useState("");
   const [uploadingThumb, setUploadingThumb] = useState(false);
   const thumbInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +72,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
     setPrice(String(c.price));
     setThumbnailUrl(c.thumbnail_url ?? null);
     setLanguage((c.language as CourseLanguage) ?? "en");
+    setTags((c.tags ?? []).join(", "));
   }
 
   function reload() {
@@ -107,6 +114,10 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
         description: description.trim() || null,
         category,
         language,
+        tags: tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
         price: Number(price) || 0,
         is_premium: Number(price) > 0,
         thumbnail_url: thumbnailUrl,
@@ -279,6 +290,18 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
               <option value="bilingual">{t("langBilingual")}</option>
             </select>
             <p className="text-[11px] leading-relaxed text-gray-400">{t("langHelp")}</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-700">{t("tags")}</label>
+            <input
+              type="text"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder={t("tagsPh")}
+              className="h-10 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+            <p className="text-[11px] leading-relaxed text-gray-400">{t("tagsHelp")}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

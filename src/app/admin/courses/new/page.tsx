@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import Topbar from "@/components/admin/Topbar";
+import type { CourseLanguage } from "@/types/api.types";
 
 import StepIndicator from "@/components/admin/course/StepIndicator";
 import StepInfo from "@/components/admin/course/StepInfo";
@@ -68,11 +69,10 @@ export default function NewCoursePage() {
         title: "",
         description: "",
         category: "",
-        level: "beginner",
         price: "0",
         is_premium: false,
         tags: "",
-        language: "english",
+        language: "en",
         status: "draft",
     });
 
@@ -224,6 +224,11 @@ export default function NewCoursePage() {
                 title: form.title.trim(),
                 description: form.description.trim() || undefined,
                 category: form.category,
+                // The wizard asked for this and then dropped it, so every
+                // admin-authored course was filed as English regardless of
+                // what was picked — and language decides who finds the course
+                // and how its transcripts are generated.
+                language: form.language as CourseLanguage,
                 price: Number(form.price) || 0,
                 is_premium: form.is_premium,
                 thumbnail_url: thumbnailUrl,

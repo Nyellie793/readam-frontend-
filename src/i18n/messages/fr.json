@@ -865,7 +865,10 @@
     "langHelp": "La langue d'enseignement de ce cours. Elle détermine quels élèves le trouvent, et dans quelle langue les transcriptions vidéo sont générées.",
     "allLanguages": "Toutes les langues",
     "editContent": "Modifier le contenu",
-    "viewCourse": "Voir le cours"
+    "viewCourse": "Voir le cours",
+    "tags": "Mots-clés",
+    "tagsPh": "ex. GCE, A Level, Mathématiques",
+    "tagsHelp": "Séparés par des virgules. Utilisés lors des recherches."
   },
   "contact": {
     "eyebrow": "Contact",

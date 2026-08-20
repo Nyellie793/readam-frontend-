@@ -2,7 +2,6 @@
 
 import type {
     CourseForm,
-    CourseLevel,
 } from "./course.types";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
 
@@ -142,30 +141,6 @@ export default function StepInfo({
                     ))}
                 </SelectField>
 
-                {/* Level */}
-                <SelectField
-                    label="Level"
-                    required
-                    value={form.level}
-                    onChange={(e) =>
-                        onChange({
-                            level: e.target.value as CourseLevel,
-                        })
-                    }
-                >
-                    <option value="beginner">
-                        Beginner
-                    </option>
-
-                    <option value="intermediate">
-                        Intermediate
-                    </option>
-
-                    <option value="advanced">
-                        Advanced
-                    </option>
-                </SelectField>
-
                 {/* Language */}
                 <SelectField
                     label="Language"
@@ -176,11 +151,13 @@ export default function StepInfo({
                         })
                     }
                 >
-                    <option value="english">
+                    {/* Must match the API enum: en / fr / bilingual. These
+                        were "english" and "french", which the backend rejects. */}
+                    <option value="en">
                         English
                     </option>
 
-                    <option value="french">
+                    <option value="fr">
                         French
                     </option>
 

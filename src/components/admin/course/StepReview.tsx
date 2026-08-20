@@ -99,10 +99,6 @@ export default function StepReview({
                                 </span>
                             )}
 
-                            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium capitalize text-gray-600">
-                                {form.level}
-                            </span>
-
                             {form.is_premium && (
                                 <span className="rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-600">
                                     Premium

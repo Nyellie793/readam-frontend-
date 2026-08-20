@@ -30,10 +30,10 @@ export interface CourseForm {
     title: string;
     description: string;
     category: string;
-    level: CourseLevel;
     price: string;
     is_premium: boolean;
     tags: string;
+    /** Must be one of the API values: "en" | "fr" | "bilingual". */
     language: string;
     status: CourseStatus;
 }
