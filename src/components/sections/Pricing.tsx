@@ -25,8 +25,15 @@ export default function Pricing() {
   const t = useTranslations("home");
   const tp = useTranslations("pricing");
   const user = useStoredUser();
-  // Signed out, send them via login and return them to the purchase flow.
-  const target = "/payment/past-questions";
+  /**
+   * Straight to checkout for the plan this section actually advertises.
+   *
+   * It pointed at /payment/past-questions, which sells subject bundles — a
+   * different product from the 5,000/year GCE subscription named on the card.
+   * Until now there was no such product at all, so the button led nowhere
+   * that could take the money it was asking for.
+   */
+  const target = "/checkout?product=gce_annual";
   const pricingHref = user ? target : `/login?next=${encodeURIComponent(target)}`;
 
   return (
