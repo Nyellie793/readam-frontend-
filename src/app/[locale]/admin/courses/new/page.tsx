@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -35,6 +35,8 @@ const STEPS = [
     "Review & Publish",
 ];
 
+const DRAFT_KEY = "readam_admin_course_draft";
+
 function uid() {
     return Math.random().toString(36).slice(2, 9);
 }
@@ -48,6 +50,12 @@ function makeLesson() {
         fileName: "",
         duration: "",
         isPreview: false,
+        uploadState: "idle" as const,
+        uploadProgress: 0,
+        uploadError: "",
+        contentUrl: null,
+        streamUid: null,
+        durationSeconds: null,
     };
 }
 
@@ -83,6 +91,86 @@ export default function NewCoursePage() {
         makeModule(),
     ]);
 
+    // Uploaded cover image URL. Kept separately from the File so it survives a
+    // reload, which the File cannot.
+    const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+    const [thumbnailState, setThumbnailState] = useState<"idle" | "uploading" | "ready" | "error">("idle");
+
+    // Lessons whose upload is already running, so a re-render cannot start a
+    // second one for the same lesson before the state patch lands.
+    const uploading = useRef<Set<string>>(new Set());
+
+    /* ── Draft persistence ───────────────────────────────────────────────
+     * Nothing used to be saved until Publish, so a refresh, a closed tab or a
+     * flaky connection lost the whole course. Files are excluded because a
+     * File cannot be serialised; by the time it matters the upload has
+     * finished and only its URL is needed.
+     */
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const saved = JSON.parse(raw) as Partial<{
+                step: number;
+                form: CourseForm;
+                modules: Module[];
+                thumbnailUrl: string;
+            }>;
+            if (saved.form) setForm(saved.form);
+            if (Array.isArray(saved.modules) && saved.modules.length) {
+                // An upload that was still running when the tab closed cannot
+                // be resumed: the File is gone. Send those lessons back to
+                // "idle" so the admin is asked for the file again rather than
+                // being left with a progress bar that never moves.
+                setModules(
+                    saved.modules.map((m) => ({
+                        ...m,
+                        lessons: m.lessons.map((l) =>
+                            l.uploadState === "uploading"
+                                ? {
+                                      ...l,
+                                      file: null,
+                                      fileName: "",
+                                      uploadState: "idle" as const,
+                                      uploadProgress: 0,
+                                  }
+                                : l
+                        ),
+                    }))
+                );
+            }
+            if (typeof saved.step === "number") setStep(saved.step);
+            if (saved.thumbnailUrl) {
+                setThumbnailUrl(saved.thumbnailUrl);
+                setThumbnailPreview(saved.thumbnailUrl);
+                setThumbnailState("ready");
+            }
+            toast.info("Picked up where you left off.");
+        } catch {
+            // A corrupt draft should never block starting a new course.
+        }
+    }, []);
+
+    useEffect(() => {
+        if (submitted) return;
+        try {
+            localStorage.setItem(
+                DRAFT_KEY,
+                JSON.stringify({
+                    step,
+                    form,
+                    thumbnailUrl,
+                    modules: modules.map((m) => ({
+                        ...m,
+                        lessons: m.lessons.map((l) => ({ ...l, file: null })),
+                    })),
+                })
+            );
+        } catch {
+            // Quota errors are not worth interrupting the admin over.
+        }
+    }, [step, form, thumbnailUrl, modules, submitted]);
+
     function updateForm(updates: Partial<CourseForm>) {
         setForm((current) => ({
             ...current,
@@ -90,9 +178,20 @@ export default function NewCoursePage() {
         }));
     }
 
-    function handleThumbnail(file: File) {
+    async function handleThumbnail(file: File) {
         setThumbnail(file);
         setThumbnailPreview(URL.createObjectURL(file));
+        setThumbnailState("uploading");
+        try {
+            assertUploadable(file, "image");
+            const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
+            await putToPresigned(presigned.upload_url, file);
+            setThumbnailUrl(presigned.file_url);
+            setThumbnailState("ready");
+        } catch (err) {
+            setThumbnailState("error");
+            toast.error(errorMessage(err, "Could not upload the cover image."));
+        }
     }
 
     /**
@@ -114,7 +213,10 @@ export default function NewCoursePage() {
         }
 
         if (step === 1) {
-            return thumbnail ? null : "Upload a cover image.";
+            if (!thumbnail && !thumbnailUrl) return "Upload a cover image.";
+            if (thumbnailState === "uploading") return "Waiting for the cover image to finish uploading.";
+            if (thumbnailState === "error") return "The cover image failed to upload. Try another file.";
+            return null;
         }
 
         if (step === 2) {
@@ -134,8 +236,19 @@ export default function NewCoursePage() {
                     if (!lesson.title.trim()) {
                         return `Name lesson ${li + 1} in module ${mi + 1}.`;
                     }
-                    if (lesson.type !== "quiz" && !lesson.file) {
-                        return `Upload a file for "${lesson.title.trim()}".`;
+                    if (lesson.type !== "quiz") {
+                        if (lesson.uploadState === "idle") {
+                            return `Upload a file for "${lesson.title.trim()}".`;
+                        }
+                        if (lesson.uploadState === "uploading") {
+                            return `"${lesson.title.trim()}" is still uploading (${lesson.uploadProgress}%).`;
+                        }
+                        if (lesson.uploadState === "error") {
+                            return `"${lesson.title.trim()}" failed to upload. Replace the file and try again.`;
+                        }
+                        // "processing" is fine to continue on: the playback URL
+                        // and stream id already exist, and only the duration is
+                        // still being worked out by Cloudflare.
                     }
                 }
             }
@@ -149,89 +262,132 @@ export default function NewCoursePage() {
         return blockingReason() === null;
     }
 
-    async function uploadThumbnail(): Promise<string | undefined> {
-        if (!thumbnail) return undefined;
-        assertUploadable(thumbnail, "image");
-        const presigned = await TUTOR.requestAssetUpload(thumbnail.name, thumbnail.type);
-        await putToPresigned(presigned.upload_url, thumbnail);
-        return presigned.file_url;
+    function patchLesson(moduleId: string, lessonId: string, patch: Partial<Lesson>) {
+        setModules((current) =>
+            current.map((m) =>
+                m.id !== moduleId
+                    ? m
+                    : {
+                          ...m,
+                          lessons: m.lessons.map((l) =>
+                              l.id !== lessonId ? l : { ...l, ...patch }
+                          ),
+                      }
+            )
+        );
     }
 
-    async function pollVideoReady(streamUid: string, lessonTitle: string): Promise<number | null> {
-        for (let attempt = 0; attempt < 100; attempt++) {
-            await new Promise((r) => setTimeout(r, 3000));
-            const status = await TUTOR.getVideoStatus(streamUid);
-            // Cloudflare returns a float (e.g. 144.8s) — the backend column is
-            // an integer and rejects fractional values with a 422.
-            if (status.state === "ready") {
-                return status.duration_seconds != null ? Math.round(status.duration_seconds) : null;
-            }
-            if (status.state === "error") {
-                throw new Error(`Video processing failed for "${lessonTitle}"`);
-            }
-        }
-        throw new Error(`Video for "${lessonTitle}" is taking too long to process`);
-    }
-
-    async function uploadLessonFile(
-        lesson: Lesson
-    ): Promise<{ content_url?: string | null; duration_seconds?: number | null; stream_uid?: string | null }> {
-        if (lesson.type === "quiz" || !lesson.file) return {};
-
-        if (lesson.type === "pdf") {
-            assertUploadable(lesson.file, "document");
-            const presigned = await TUTOR.requestAssetUpload(lesson.file.name, lesson.file.type);
-            await putToPresigned(presigned.upload_url, lesson.file);
-            return { content_url: presigned.file_url };
-        }
-
-        // video
-        const presigned = await TUTOR.requestVideoUpload(lesson.file.name, lesson.file.size);
-        const file = lesson.file;
-        await new Promise<void>((resolve, reject) => {
+    /** POST with a progress callback. fetch() cannot report upload progress. */
+    function uploadWithProgress(url: string, file: File, onProgress: (pct: number) => void) {
+        return new Promise<void>((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            xhr.open("POST", presigned.upload_url);
+            xhr.open("POST", url);
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+            };
             xhr.onload = () =>
                 xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error("Upload failed"));
             xhr.onerror = () => reject(new Error("Upload failed"));
-            const formData = new FormData();
-            formData.append("file", file);
-            xhr.send(formData);
+            const body = new FormData();
+            body.append("file", file);
+            xhr.send(body);
         });
-        const durationSeconds = await pollVideoReady(presigned.stream_uid, lesson.title || "lesson");
-        return { content_url: presigned.hls_url, duration_seconds: durationSeconds, stream_uid: presigned.stream_uid };
     }
 
-    async function handleSubmit() {
-        for (const courseModule of modules) {
-            for (const lesson of courseModule.lessons) {
-                if (!lesson.title.trim()) {
-                    toast.error(`Every lesson needs a title (missing in "${courseModule.title || "a module"}").`);
-                    return;
-                }
-                if (lesson.type !== "quiz" && !lesson.file) {
-                    toast.error(`"${lesson.title}" needs a file uploaded before you can publish.`);
-                    return;
+    /**
+     * Wait for Cloudflare to finish transcoding, only to learn the duration.
+     *
+     * This runs in the background after the upload rather than at publish.
+     * Publish does not wait for it: the playback URL and stream id are known
+     * as soon as the upload lands, and duration is optional on the lesson.
+     */
+    async function pollVideoReady(streamUid: string): Promise<number | null> {
+        for (let attempt = 0; attempt < 100; attempt++) {
+            await new Promise((r) => setTimeout(r, 3000));
+            const status = await TUTOR.getVideoStatus(streamUid);
+            if (status.state === "ready") {
+                // Cloudflare returns a float (e.g. 144.8s); the column is an
+                // integer and rejects fractional values with a 422.
+                return status.duration_seconds != null ? Math.round(status.duration_seconds) : null;
+            }
+            if (status.state === "error") throw new Error("Cloudflare could not process this video.");
+        }
+        return null;
+    }
+
+    async function startLessonUpload(moduleId: string, lesson: Lesson) {
+        const file = lesson.file;
+        if (!file) return;
+        uploading.current.add(lesson.id);
+        patchLesson(moduleId, lesson.id, { uploadState: "uploading", uploadProgress: 0, uploadError: "" });
+
+        try {
+            if (lesson.type === "pdf") {
+                assertUploadable(file, "document");
+                const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
+                await putToPresigned(presigned.upload_url, file);
+                patchLesson(moduleId, lesson.id, {
+                    uploadState: "ready",
+                    uploadProgress: 100,
+                    contentUrl: presigned.file_url,
+                    file: null,
+                });
+                return;
+            }
+
+            const presigned = await TUTOR.requestVideoUpload(file.name, file.size);
+            await uploadWithProgress(presigned.upload_url, file, (pct) =>
+                patchLesson(moduleId, lesson.id, { uploadProgress: pct })
+            );
+            // Publishable from here: the stream id and playback URL are known.
+            patchLesson(moduleId, lesson.id, {
+                uploadState: "processing",
+                uploadProgress: 100,
+                streamUid: presigned.stream_uid,
+                contentUrl: presigned.hls_url,
+                file: null,
+            });
+
+            const duration = await pollVideoReady(presigned.stream_uid);
+            patchLesson(moduleId, lesson.id, { uploadState: "ready", durationSeconds: duration });
+        } catch (err) {
+            patchLesson(moduleId, lesson.id, {
+                uploadState: "error",
+                uploadError: errorMessage(err, "Upload failed."),
+            });
+            toast.error(errorMessage(err, `Could not upload the file for "${lesson.title || "this lesson"}".`));
+        } finally {
+            uploading.current.delete(lesson.id);
+        }
+    }
+
+    /** Starts the upload for any lesson that has just been given a file. */
+    function handleModules(next: Module[]) {
+        setModules(next);
+        for (const m of next) {
+            for (const l of m.lessons) {
+                if (l.file && l.uploadState === "idle" && !uploading.current.has(l.id)) {
+                    void startLessonUpload(m.id, l);
                 }
             }
         }
+    }
 
+    async function handleSubmit() {
         setSubmitting(true);
         try {
-            const thumbnailUrl = await uploadThumbnail();
-
             const course = await TUTOR.createCourse({
                 title: form.title.trim(),
                 description: form.description.trim() || undefined,
                 category: form.category,
                 // The wizard asked for this and then dropped it, so every
                 // admin-authored course was filed as English regardless of
-                // what was picked — and language decides who finds the course
+                // what was picked, and language decides who finds the course
                 // and how its transcripts are generated.
                 language: form.language as CourseLanguage,
                 price: Number(form.price) || 0,
                 is_premium: form.is_premium,
-                thumbnail_url: thumbnailUrl,
+                thumbnail_url: thumbnailUrl ?? undefined,
                 tags: form.tags
                     .split(",")
                     .map((t) => t.trim())
@@ -247,15 +403,14 @@ export default function NewCoursePage() {
 
                 for (let lIndex = 0; lIndex < courseModule.lessons.length; lIndex++) {
                     const lesson = courseModule.lessons[lIndex];
-                    const uploaded = await uploadLessonFile(lesson);
                     await TUTOR.addLesson(course.id, createdModule.id, {
                         title: lesson.title.trim(),
                         type: lesson.type,
                         order: lIndex,
-                        duration_seconds: uploaded.duration_seconds ?? null,
-                        content_url: uploaded.content_url ?? null,
+                        duration_seconds: lesson.durationSeconds,
+                        content_url: lesson.contentUrl,
                         is_preview: lesson.isPreview,
-                        stream_uid: uploaded.stream_uid ?? null,
+                        stream_uid: lesson.streamUid,
                     });
                 }
             }
@@ -264,6 +419,11 @@ export default function NewCoursePage() {
                 await TUTOR.submitCourse(course.id);
             }
 
+            try {
+                localStorage.removeItem(DRAFT_KEY);
+            } catch {
+                // Nothing useful to do if storage is unavailable.
+            }
             setSubmitted(true);
         } catch (err) {
             toast.error(errorMessage(err, "Couldn't create this course."));
@@ -356,7 +516,7 @@ export default function NewCoursePage() {
                         {step === 2 && (
                             <StepModules
                                 modules={modules}
-                                onModules={setModules}
+                                onModules={handleModules}
                             />
                         )}
 

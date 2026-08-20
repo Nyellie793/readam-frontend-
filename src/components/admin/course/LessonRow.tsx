@@ -2,10 +2,12 @@
 
 import { useRef } from "react";
 import {
+    AlertCircle,
     BookOpen,
     Check,
     FileText,
     GripVertical,
+    Loader2,
     Trash2,
     Upload,
     Video,
@@ -155,19 +157,68 @@ export default function LessonRow({
                                         e.target.files?.[0];
 
                                     if (file) {
+                                        // Reset the upload state too, or a
+                                        // lesson that previously failed would
+                                        // keep its old status and never retry.
                                         onUpdate({
                                             file,
                                             fileName: file.name,
+                                            uploadState: "idle",
+                                            uploadProgress: 0,
+                                            uploadError: "",
+                                            contentUrl: null,
+                                            streamUid: null,
+                                            durationSeconds: null,
                                         });
                                     }
                                 }}
                             />
 
                             {lesson.fileName && (
-                                <p className="mt-1 flex items-center gap-1 text-xs text-green-600">
-                                    <Check className="h-3 w-3" />
-                                    {lesson.fileName}
-                                </p>
+                                <div className="mt-1">
+                                    {lesson.uploadState === "uploading" && (
+                                        <>
+                                            <p className="flex items-center gap-1 text-xs text-blue-600">
+                                                <Loader2 className="h-3 w-3 animate-spin" />
+                                                Uploading {lesson.uploadProgress}%
+                                            </p>
+                                            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-gray-100">
+                                                <div
+                                                    className="h-full rounded-full bg-blue-600 transition-all"
+                                                    style={{ width: `${lesson.uploadProgress}%` }}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Uploaded and playable. Cloudflare is still
+                                        working out the duration, which is optional,
+                                        so there is no reason to make anyone wait. */}
+                                    {lesson.uploadState === "processing" && (
+                                        <p className="flex items-center gap-1 text-xs text-gray-500">
+                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                            Uploaded. Processing in the background, you can carry on.
+                                        </p>
+                                    )}
+
+                                    {lesson.uploadState === "ready" && (
+                                        <p className="flex items-center gap-1 text-xs text-green-600">
+                                            <Check className="h-3 w-3" />
+                                            {lesson.fileName}
+                                        </p>
+                                    )}
+
+                                    {lesson.uploadState === "error" && (
+                                        <p className="flex items-start gap-1 text-xs text-red-500">
+                                            <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" />
+                                            <span>{lesson.uploadError || "Upload failed."} Pick the file again to retry.</span>
+                                        </p>
+                                    )}
+
+                                    {lesson.uploadState === "idle" && (
+                                        <p className="text-xs text-gray-400">{lesson.fileName}</p>
+                                    )}
+                                </div>
                             )}
                         </div>
                     )}

@@ -36,6 +36,12 @@ function makeLesson(): Lesson {
         fileName: "",
         duration: "",
         isPreview: false,
+        uploadState: "idle" as const,
+        uploadProgress: 0,
+        uploadError: "",
+        contentUrl: null,
+        streamUid: null,
+        durationSeconds: null,
     };
 }
 
