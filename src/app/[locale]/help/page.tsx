@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import PageShell from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Help Center",
@@ -20,7 +20,15 @@ export const metadata: Metadata = {
 };
 
 
-export default async function HelpPage() {
+export default async function HelpPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
   const tm = await getTranslations("misc");
   const th = await getTranslations("help");
   const TOPICS = [

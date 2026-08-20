@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PenLine, Mail } from "lucide-react";
 import PageShell from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Blog | ReadAM",
@@ -17,7 +17,15 @@ export const metadata: Metadata = {
  * empty state with a post list once the first articles are written.
  */
 
-export default async function BlogPage() {
+export default async function BlogPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
   const t = await getTranslations("blog");
   const PLANNED = [
     t("p1"),

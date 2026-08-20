@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell, { Article } from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Terms of Use",
@@ -10,7 +10,15 @@ export const metadata: Metadata = {
     "The terms governing your use of ReadAM, including accounts, payments in XAF, AI session credits, tutor obligations and refunds.",
 };
 
-export default async function TermsPage() {
+export default async function TermsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
   const tm = await getTranslations("misc");
   const t = await getTranslations("terms");
 

@@ -9,8 +9,17 @@ import Pricing from "@/components/sections/Pricing";
 import Newsletter from "@/components/sections/Newsletter";
 import Footer from "@/components/layout/Footer";
 import BackToTop from "@/components/shared/BackToTop";
+import { setRequestLocale } from "next-intl/server";
 
-export default function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-white">

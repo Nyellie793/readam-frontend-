@@ -11,7 +11,7 @@ import {
   Users,
   Trophy,
 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import Footer from "@/components/layout/Footer";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -80,7 +80,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
-export default async function AboutPage() {
+export default async function AboutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
   const t = await getTranslations("about");
   return (
     <div className="relative min-h-screen bg-white">

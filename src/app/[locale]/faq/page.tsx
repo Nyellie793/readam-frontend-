@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import PageShell from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions | ReadAM",
@@ -13,7 +13,15 @@ export const metadata: Metadata = {
 
 /** `id` is the anchor target used by /help and the footer. Keep them in sync. */
 
-export default async function FaqPage() {
+export default async function FaqPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
   const tm = await getTranslations("misc");
   const GROUPS: { id: string; title: string; items: { q: string; a: React.ReactNode }[] }[] = [
     {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell, { Article } from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -10,7 +10,15 @@ export const metadata: Metadata = {
     "What data ReadAM collects, why we collect it, who we share it with, how long we keep it, and how to exercise your rights.",
 };
 
-export default async function PrivacyPage() {
+export default async function PrivacyPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
   const tm = await getTranslations("misc");
   const t = await getTranslations("privacy");
 

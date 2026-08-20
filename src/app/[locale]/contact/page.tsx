@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Mail, MapPin, LifeBuoy, GraduationCap, CreditCard } from "lucide-react";
 import PageShell from "@/components/layout/PageShell";
 import { CONTACT } from "@/constants/branding";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Contact ReadAM",
@@ -13,7 +13,15 @@ export const metadata: Metadata = {
 
 
 
-export default async function ContactPage() {
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // Opts this page into static rendering. next-intl renders per request
+  // unless it is told the locale up front.
+  setRequestLocale(locale);
   const t = await getTranslations("contact");
   const CHANNELS = [
     {

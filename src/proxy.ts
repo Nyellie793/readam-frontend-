@@ -20,6 +20,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ADMIN_ROLES, ROUTES } from "@/lib/constants";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale } from "@/i18n/locales";
 
 const ADMIN_LOGIN = ROUTES.adminLogin;
 
@@ -28,6 +29,22 @@ const TUTOR_ROUTES = /^\/tutor(\/|$)/;
 const AUTH_REQUIRED =
   /^\/(onboarding-\d|welcome-back|dashboard|notifications|settings|checkout|payment)(\/|$)/;
 const GUEST_ONLY = /^\/(login|signup)(\/|$)/;
+
+/**
+ * Rewrite the request onto the [locale] segment.
+ *
+ * Visitors never see a prefix: /about stays /about in the address bar, in
+ * canonical tags, in the sitemap and in Open Graph URLs. Internally it is
+ * served by /en/about or /fr/about, which is what lets those routes be
+ * pre-rendered at build time instead of rendered per request.
+ */
+function withLocale(req: NextRequest, pathname?: string) {
+  const cookie = req.cookies.get(LOCALE_COOKIE)?.value;
+  const locale = isLocale(cookie) ? cookie : DEFAULT_LOCALE;
+  const url = req.nextUrl.clone();
+  url.pathname = `/${locale}${pathname ?? req.nextUrl.pathname}`;
+  return NextResponse.rewrite(url);
+}
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -41,7 +58,7 @@ export function proxy(req: NextRequest) {
     if (pathname !== "/select-role") {
       return NextResponse.redirect(new URL("/select-role", req.url));
     }
-    return NextResponse.next();
+    return withLocale(req);
   }
 
   /* ── Admin sign-in — guest-only, never gated by its own rule below ─────── */
@@ -49,13 +66,13 @@ export function proxy(req: NextRequest) {
     if (isAuth && isAdminRole) {
       return NextResponse.redirect(new URL("/admin", req.url));
     }
-    return NextResponse.next();
+    return withLocale(req);
   }
 
   /* ── The old /admin/login must not confirm that an admin panel exists.
         404 rather than redirect, so a scanner learns nothing. ─────────────── */
   if (pathname === "/admin/login") {
-    return NextResponse.rewrite(new URL("/not-found-404", req.url));
+    return withLocale(req, "/not-found-404");
   }
 
   /* ── Admin routes ───────────────────────────────────────── */
@@ -93,22 +110,13 @@ export function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL(dest, req.url));
   }
 
-  return NextResponse.next();
+  return withLocale(req);
 }
 
 export const config = {
-  matcher: [
-    "/admin/:path*",
-    "/readam-console/:path*",
-    "/tutor/:path*",
-    "/onboarding-:path*",
-    "/welcome-back",
-    "/login",
-    "/signup",
-    "/dashboard/:path*",
-    "/notifications/:path*",
-    "/settings/:path*",
-    "/checkout/:path*",
-    "/payment/:path*",
-  ],
+  // Every page route, because the locale rewrite is site-wide. Excluded:
+  // /api (JSON, locale-independent), Next internals, the metadata routes
+  // /icon and /opengraph-image, and anything with a file extension
+  // (/sw.js, /robots.txt, /sitemap.xml, /manifest.webmanifest, /icons/*).
+  matcher: ["/((?!api|_next|icon|opengraph-image|.*\\..*).*)"],
 };
