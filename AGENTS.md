@@ -184,6 +184,46 @@ readam-frontend/
 3. Create components in `src/components/dashboard/<page-name>/`
 4. **Do not create a new `layout.tsx`** — it is inherited
 
+### 4a. The `[locale]` segment, and why URLs still have no prefix
+
+**All routes live under `src/app/[locale]/`.** The exceptions, which stay at
+`src/app/`, are `api/`, `globals.css`, `global-error.tsx`, `icon.tsx`,
+`manifest.ts`, `opengraph-image.tsx`, `robots.ts` and `sitemap.ts`.
+
+Visitors never see `/en` or `/fr`. `src/proxy.ts` reads the `readam_locale`
+cookie and rewrites `/about` to `/en/about` internally. Canonical tags, the
+sitemap and Open Graph URLs are all unprefixed, and `/en/about` returns 404
+from outside so there is no duplicate content.
+
+The point of the segment is speed. The locale used to come from the cookie
+inside `src/i18n/request.ts`, which the root layout calls, so **every** route
+was rendered per request and production served `no-store` on all of them.
+Taking the locale from the route instead lets the public pages be
+pre-rendered.
+
+**When you add a public page that should be static**, it must take the param
+and call `setRequestLocale`, or next-intl silently falls back to a
+per-request render:
+
+```tsx
+import { setRequestLocale } from "next-intl/server";
+
+export default async function ThingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  // ...
+}
+```
+
+Check `npm run build` afterwards: the route should print `●`, not `ƒ`.
+
+Pages that read live API data (`/courses`, `/tutors`, the `[id]` pages) are
+correctly dynamic and should stay that way.
+
 ### Admin routes
 
 Completely separate. Live under `/admin/*` with their own layout. Never mix admin and student components.
@@ -491,7 +531,7 @@ If you need a component not in this list, run `npx shadcn add <component>`. Neve
 
 8. **Mock data goes in `src/data/student-mock.ts`** — not inline in components. Shape it to the real API type so the swap to a live fetch is a one-liner.
 
-9. **Never change `src/proxy.ts` matcher** without understanding it guards `/admin/*`, `/onboarding-*`, `/welcome-back`, `/login`, `/signup` — and currently does NOT guard `/dashboard/*` routes.
+9. **Never change `src/proxy.ts` matcher** without understanding what it does. It now matches **every page route**, not just guarded ones, because it also performs the locale rewrite (see section 4a). It excludes `/api`, Next internals, `/icon`, `/opengraph-image`, and anything with a file extension. Narrowing it breaks the language switch; widening it to `/api` breaks the auth callback.
 
 10. **Always check `src/constants/student-nav.ts`** when adding a page — the nav entry and the page file must match.
 
