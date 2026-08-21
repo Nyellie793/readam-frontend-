@@ -123,6 +123,18 @@ export default function LessonRow({
                         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:border-blue-400"
                     />
 
+                    {/* Optional blurb. The course editor has always had this
+                        field, so a lesson written here and then reopened for
+                        editing gained a box that was never offered when the
+                        course was first built. */}
+                    <textarea
+                        rows={2}
+                        placeholder="Lesson description (optional)"
+                        value={lesson.description}
+                        onChange={(e) => onUpdate({ description: e.target.value })}
+                        className="w-full resize-y rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition placeholder:text-gray-400 focus:border-blue-400"
+                    />
+
                     {/* File upload */}
                     {lesson.type !== "quiz" && (
                         <div>

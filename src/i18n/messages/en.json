@@ -869,7 +869,11 @@
     "viewCourse": "View course",
     "tags": "Tags",
     "tagsPh": "e.g. GCE, A Level, Mathematics",
-    "tagsHelp": "Comma separated. Used when students search."
+    "tagsHelp": "Comma separated. Used when students search.",
+    "premiumCourse": "Premium Course",
+    "premiumCourseHint": "Only available to subscribed students",
+    "freePreviewLesson": "Free preview",
+    "freePreviewLessonHint": "Students can watch this lesson without enrolling"
   },
   "contact": {
     "eyebrow": "Contact",

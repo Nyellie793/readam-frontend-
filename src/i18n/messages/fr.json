@@ -869,7 +869,11 @@
     "viewCourse": "Voir le cours",
     "tags": "Mots-clés",
     "tagsPh": "ex. GCE, A Level, Mathématiques",
-    "tagsHelp": "Séparés par des virgules. Utilisés lors des recherches."
+    "tagsHelp": "Séparés par des virgules. Utilisés lors des recherches.",
+    "premiumCourse": "Cours premium",
+    "premiumCourseHint": "Réservé aux étudiants abonnés",
+    "freePreviewLesson": "Aperçu gratuit",
+    "freePreviewLessonHint": "Les étudiants peuvent suivre cette leçon sans s'inscrire"
   },
   "contact": {
     "eyebrow": "Contact",

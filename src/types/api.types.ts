@@ -40,6 +40,7 @@ export interface CourseListItem {
     order: number;
     duration_seconds: number | null;
     is_preview: boolean;
+    description?: string | null;
     /** Two-page sample of the first PDF lesson. Null on every other lesson. */
     preview_url?: string | null;
   }

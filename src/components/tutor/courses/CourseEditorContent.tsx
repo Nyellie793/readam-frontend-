@@ -61,6 +61,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
    * They drive search, so a course tagged wrongly stayed hard to find.
    */
   const [tags, setTags] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
   const [uploadingThumb, setUploadingThumb] = useState(false);
   const thumbInputRef = useRef<HTMLInputElement>(null);
 
@@ -73,6 +74,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
     setThumbnailUrl(c.thumbnail_url ?? null);
     setLanguage((c.language as CourseLanguage) ?? "en");
     setTags((c.tags ?? []).join(", "));
+    setIsPremium(!!c.is_premium);
   }
 
   function reload() {
@@ -119,7 +121,7 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
           .map((t) => t.trim())
           .filter(Boolean),
         price: Number(price) || 0,
-        is_premium: Number(price) > 0,
+        is_premium: isPremium,
         thumbnail_url: thumbnailUrl,
       });
       toast.success(t("courseUpdated"));
@@ -329,6 +331,33 @@ export default function CourseEditorContent({ courseId }: CourseEditorContentPro
                 className="h-10 w-full rounded-xl border border-gray-200 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
+          </div>
+
+          {/* Premium. Previously derived from the price on every save, which
+              silently flipped the flag whenever a course was edited, so the
+              student-facing card changed between Free and Premium on its own.
+              The create wizard has always had this as its own switch. */}
+          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-800">{t("premiumCourse")}</p>
+              <p className="text-xs text-gray-400">{t("premiumCourseHint")}</p>
+            </div>
+            <button
+              type="button"
+              disabled={!editable}
+              onClick={() => setIsPremium((v) => !v)}
+              aria-pressed={isPremium}
+              aria-label={t("premiumCourse")}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+                isPremium ? "bg-blue-600" : "bg-gray-200"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+                  isPremium ? "left-[22px]" : "left-0.5"
+                }`}
+              />
+            </button>
           </div>
           {/* Course cover. Cloudflare R2 only stores what we send it — nothing
               generates a thumbnail automatically, so this has to be uploaded. */}

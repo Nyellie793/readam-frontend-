@@ -25,6 +25,7 @@ function makeLesson() {
         file: null,
         fileName: "",
         duration: "",
+        description: "",
         isPreview: false,
         uploadState: "idle" as const,
         uploadProgress: 0,

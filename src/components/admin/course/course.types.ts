@@ -31,6 +31,7 @@ export interface Lesson {
     file: File | null;
     fileName: string;
     duration: string;
+    description: string;
     isPreview: boolean;
 
     uploadState: UploadState;

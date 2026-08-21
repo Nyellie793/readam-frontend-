@@ -43,11 +43,12 @@ export default function LessonEditorDialog({
   const [title, setTitle] = useState("");
   const [type, setType] = useState<LessonType>("video");
   /**
-   * Free preview is automatic rather than a tutor choice: the first lesson of
-   * the course is the free sample, everything after it requires enrolment.
-   * Editing an existing lesson keeps whatever it already had.
+   * Free preview defaults to the first lesson of the course, which is the
+   * usual free sample, but stays changeable. It used to be a fixed value here
+   * while the admin create wizard offered it as a switch, so a lesson marked
+   * as a preview when the course was built could never be changed afterwards.
    */
-  const isPreview = lesson ? lesson.is_preview : isFirstLessonOfCourse;
+  const [isPreview, setIsPreview] = useState(false);
   const [description, setDescription] = useState("");
 
   const [contentUrl, setContentUrl] = useState<string | null>(null);
@@ -66,14 +67,15 @@ export default function LessonEditorDialog({
     if (!open) return;
     setTitle(lesson?.title ?? "");
     setType(lesson?.type ?? "video");
-    setDescription("");
+    setDescription(lesson?.description ?? "");
+    setIsPreview(lesson ? lesson.is_preview : isFirstLessonOfCourse);
     setContentUrl(null);
     setDurationSeconds(lesson?.duration_seconds ?? null);
     setStreamUid(null);
     setContentChanged(false);
     setUploadState(lesson ? "ready" : "idle");
     setUploadProgress(0);
-  }, [open, lesson]);
+  }, [open, lesson, isFirstLessonOfCourse]);
 
   async function pollVideoStatus(uid: string) {
     for (let attempt = 0; attempt < 100; attempt++) {
@@ -339,6 +341,31 @@ export default function LessonEditorDialog({
               rows={2}
               className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
+          </div>
+
+          {/* Free preview. Matches the switch in the admin create wizard, so a
+              lesson can still be opened up, or closed off, after the course
+              has been built. */}
+          <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-gray-800">{t("freePreviewLesson")}</p>
+              <p className="text-xs text-gray-400">{t("freePreviewLessonHint")}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsPreview((v) => !v)}
+              aria-pressed={isPreview}
+              aria-label={t("freePreviewLesson")}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                isPreview ? "bg-blue-600" : "bg-gray-200"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+                  isPreview ? "left-[22px]" : "left-0.5"
+                }`}
+              />
+            </button>
           </div>
 
         </div>
