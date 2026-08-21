@@ -20,6 +20,7 @@ function uid() {
 function makeLesson() {
     return {
         id: uid(),
+        serverId: null,
         title: "",
         type: "video" as const,
         file: null,
@@ -39,6 +40,7 @@ function makeLesson() {
 function makeModule(): Module {
     return {
         id: uid(),
+        serverId: null,
         title: "",
         lessons: [makeLesson()],
         collapsed: false,

@@ -24,7 +24,10 @@ export type UploadState =
     | "error";
 
 export interface Lesson {
+    /** Local-only id, stable across renders. Not the database id. */
     id: string;
+    /** Set once this lesson exists on the server. Null while it is local only. */
+    serverId: string | null;
     title: string;
     type: LessonType;
     /** Only held until the upload finishes. Not persisted: File cannot be serialised. */
@@ -45,7 +48,10 @@ export interface Lesson {
 }
 
 export interface Module {
+    /** Local-only id, stable across renders. Not the database id. */
     id: string;
+    /** Set once this module exists on the server. Null while it is local only. */
+    serverId: string | null;
     title: string;
     lessons: Lesson[];
     collapsed: boolean;

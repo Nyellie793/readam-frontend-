@@ -36,6 +36,7 @@ const STEPS = [
 ];
 
 const DRAFT_KEY = "readam_admin_course_draft";
+const DRAFT_ID_KEY = "readam_admin_course_draft_id";
 
 function uid() {
     return Math.random().toString(36).slice(2, 9);
@@ -44,6 +45,7 @@ function uid() {
 function makeLesson() {
     return {
         id: uid(),
+        serverId: null,
         title: "",
         type: "video" as const,
         file: null,
@@ -63,6 +65,7 @@ function makeLesson() {
 function makeModule(): Module {
     return {
         id: uid(),
+        serverId: null,
         title: "",
         lessons: [makeLesson()],
         collapsed: false,
@@ -101,76 +104,358 @@ export default function NewCoursePage() {
     // second one for the same lesson before the state patch lands.
     const uploading = useRef<Set<string>>(new Set());
 
-    /* ── Draft persistence ───────────────────────────────────────────────
-     * Nothing used to be saved until Publish, so a refresh, a closed tab or a
-     * flaky connection lost the whole course. Files are excluded because a
-     * File cannot be serialised; by the time it matters the upload has
-     * finished and only its URL is needed.
+    /* ── Draft ───────────────────────────────────────────────────────────
+     * The course becomes a real draft on the server as soon as step one is
+     * valid, and everything after that is saved as it is entered. Before that
+     * point there is nothing on the server to save to, so the browser holds
+     * the half typed first step and hands it over once the course exists.
+     *
+     * Deliberately only one of the two is ever authoritative. Keeping a full
+     * browser copy alongside a server draft gives two sources of truth, and
+     * restoring a stale browser copy over a newer draft silently undoes real
+     * work. Once the course id exists the browser copy is discarded.
      */
-    useEffect(() => {
-        try {
-            const raw = localStorage.getItem(DRAFT_KEY);
-            if (!raw) return;
-            const saved = JSON.parse(raw) as Partial<{
-                step: number;
-                form: CourseForm;
-                modules: Module[];
-                thumbnailUrl: string;
-            }>;
-            if (saved.form) setForm(saved.form);
-            if (Array.isArray(saved.modules) && saved.modules.length) {
-                // An upload that was still running when the tab closed cannot
-                // be resumed: the File is gone. Send those lessons back to
-                // "idle" so the admin is asked for the file again rather than
-                // being left with a progress bar that never moves.
-                setModules(
-                    saved.modules.map((m) => ({
-                        ...m,
-                        lessons: m.lessons.map((l) =>
-                            l.uploadState === "uploading"
-                                ? {
-                                      ...l,
-                                      file: null,
-                                      fileName: "",
-                                      uploadState: "idle" as const,
-                                      uploadProgress: 0,
-                                  }
-                                : l
-                        ),
-                    }))
-                );
-            }
-            if (typeof saved.step === "number") setStep(saved.step);
-            if (saved.thumbnailUrl) {
-                setThumbnailUrl(saved.thumbnailUrl);
-                setThumbnailPreview(saved.thumbnailUrl);
-                setThumbnailState("ready");
-            }
-            toast.info("Picked up where you left off.");
-        } catch {
-            // A corrupt draft should never block starting a new course.
+    const [courseId, setCourseId] = useState<string | null>(null);
+    const [savingStep, setSavingStep] = useState(false);
+    const [draftState, setDraftState] = useState<"idle" | "saving" | "saved">("idle");
+    const [loadingDraft, setLoadingDraft] = useState(true);
+    const hydrated = useRef(false);
+
+    // Signature of what was last written to the server, keyed by local id, so
+    // an unchanged module or lesson is not re-sent on every keystroke.
+    const synced = useRef<Map<string, string>>(new Map());
+    /**
+     * Database ids keyed by local id, written the instant a row is created.
+     *
+     * State cannot be trusted for this. A sync pass closes over the modules
+     * array from its own render, so a second pass queued before setModules has
+     * landed would still see serverId as null and create the row a second
+     * time, leaving duplicate modules and lessons on the course. This ref is
+     * updated synchronously, so it is always ahead of the state.
+     */
+    const serverIds = useRef<Map<string, string>>(new Map());
+    // Rows removed locally that still exist on the server.
+    const pendingDeletes = useRef<{ modules: string[]; lessons: { m: string; l: string }[] }>({
+        modules: [],
+        lessons: [],
+    });
+    // Serialises sync passes: each queued pass waits for the one before it, so
+    // publishing can await the chain and know everything has landed.
+    const syncChain = useRef<Promise<void>>(Promise.resolve());
+
+    function courseInfoPayload() {
+        return {
+            title: form.title.trim(),
+            description: form.description.trim() || undefined,
+            category: form.category,
+            // The wizard asked for this and then dropped it, so every
+            // admin-authored course was filed as English regardless of what
+            // was picked, and language decides who finds the course and how
+            // its transcripts are generated.
+            language: form.language as CourseLanguage,
+            price: Number(form.price) || 0,
+            is_premium: form.is_premium,
+            thumbnail_url: thumbnailUrl ?? undefined,
+            tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        };
+    }
+
+    /** Creates the draft on first call, updates it afterwards. */
+    async function ensureCourse(): Promise<string> {
+        if (courseId) {
+            await TUTOR.updateCourse(courseId, courseInfoPayload());
+            return courseId;
         }
+        const created = await TUTOR.createCourse(courseInfoPayload());
+        setCourseId(created.id);
+        try {
+            localStorage.setItem(DRAFT_ID_KEY, created.id);
+            // The server is authoritative from here.
+            localStorage.removeItem(DRAFT_KEY);
+        } catch {
+            // Storage being unavailable only costs the resume, not the draft.
+        }
+        return created.id;
+    }
+
+    /* ── Restore ─────────────────────────────────────────────────────────── */
+    useEffect(() => {
+        let cancelled = false;
+
+        async function restore() {
+            let storedId: string | null = null;
+            try {
+                storedId = localStorage.getItem(DRAFT_ID_KEY);
+            } catch {
+                storedId = null;
+            }
+
+            if (storedId) {
+                try {
+                    const c = await TUTOR.getMyCourse(storedId);
+                    if (cancelled) return;
+                    if (c.status !== "draft") throw new Error("not a draft");
+
+                    setCourseId(c.id);
+                    setForm({
+                        title: c.title ?? "",
+                        description: c.description ?? "",
+                        category: c.category ?? "",
+                        price: String(c.price ?? 0),
+                        is_premium: !!c.is_premium,
+                        tags: (c.tags ?? []).join(", "),
+                        language: c.language ?? "en",
+                        status: "draft",
+                    });
+                    if (c.thumbnail_url) {
+                        setThumbnailUrl(c.thumbnail_url);
+                        setThumbnailPreview(c.thumbnail_url);
+                        setThumbnailState("ready");
+                    }
+                    if (c.modules?.length) {
+                        setModules(
+                            c.modules.map((m) => {
+                                const localModuleId = uid();
+                                serverIds.current.set(localModuleId, m.id);
+                                return {
+                                id: localModuleId,
+                                serverId: m.id,
+                                title: m.title,
+                                collapsed: false,
+                                lessons: m.lessons.length
+                                    ? m.lessons.map((l) => {
+                                          const localLessonId = uid();
+                                          serverIds.current.set(localLessonId, l.id);
+                                          return {
+                                          id: localLessonId,
+                                          serverId: l.id,
+                                          title: l.title,
+                                          type: l.type,
+                                          file: null,
+                                          fileName: "Uploaded file",
+                                          duration: "",
+                                          description: l.description ?? "",
+                                          isPreview: l.is_preview,
+                                          uploadState: "ready" as const,
+                                          uploadProgress: 100,
+                                          uploadError: "",
+                                          // Left null on purpose: the lesson
+                                          // already has content on the server,
+                                          // and sending null would clear it.
+                                          contentUrl: null,
+                                          streamUid: null,
+                                          durationSeconds: l.duration_seconds,
+                                          };
+                                      })
+                                    : [makeLesson()],
+                                };
+                            })
+                        );
+                        setStep(2);
+                    } else {
+                        setStep(c.thumbnail_url ? 2 : 1);
+                    }
+                    toast.info("Picked up your unfinished draft.");
+                    return;
+                } catch {
+                    // Deleted, published, or belongs to someone else. Drop the
+                    // pointer rather than trapping the admin on a dead draft.
+                    try {
+                        localStorage.removeItem(DRAFT_ID_KEY);
+                    } catch {
+                        // nothing useful to do
+                    }
+                }
+            }
+
+            // No server draft: fall back to the half typed first step.
+            try {
+                const raw = localStorage.getItem(DRAFT_KEY);
+                if (raw && !cancelled) {
+                    const saved = JSON.parse(raw) as Partial<{ form: CourseForm }>;
+                    if (saved.form) setForm(saved.form);
+                }
+            } catch {
+                // A corrupt draft should never block starting a new course.
+            }
+        }
+
+        void restore().finally(() => {
+            if (cancelled) return;
+            hydrated.current = true;
+            setLoadingDraft(false);
+        });
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
+    /* ── Before the course exists, hold step one in the browser ──────────── */
     useEffect(() => {
-        if (submitted) return;
+        if (!hydrated.current || courseId || submitted) return;
         try {
-            localStorage.setItem(
-                DRAFT_KEY,
-                JSON.stringify({
-                    step,
-                    form,
-                    thumbnailUrl,
-                    modules: modules.map((m) => ({
-                        ...m,
-                        lessons: m.lessons.map((l) => ({ ...l, file: null })),
-                    })),
-                })
-            );
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({ form }));
         } catch {
             // Quota errors are not worth interrupting the admin over.
         }
-    }, [step, form, thumbnailUrl, modules, submitted]);
+    }, [form, courseId, submitted]);
+
+    /* ── Once it exists, course details save as they change ─────────────── */
+    const courseInfoSignature = JSON.stringify([form, thumbnailUrl]);
+    useEffect(() => {
+        if (!courseId || submitted) return;
+        const timer = setTimeout(() => {
+            // Set here rather than in the effect body: saving only actually
+            // begins once the debounce fires, and flipping state synchronously
+            // on every keystroke just causes a cascading render.
+            setDraftState("saving");
+            TUTOR.updateCourse(courseId, courseInfoPayload())
+                .then(() => setDraftState("saved"))
+                .catch(() => {
+                // Silent: the same values go up again on the next change and
+                // once more when publishing, so one dropped autosave is not
+                // worth a toast mid-typing.
+            });
+        }, 800);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [courseInfoSignature, courseId, submitted]);
+
+    /* ── And so do modules and lessons ──────────────────────────────────── */
+    const modulesSignature = JSON.stringify(
+        modules.map((m) => ({
+            t: m.title.trim(),
+            l: m.lessons.map((l) => ({
+                t: l.title.trim(),
+                ty: l.type,
+                d: l.description.trim(),
+                p: l.isPreview,
+                c: l.contentUrl,
+                s: l.streamUid,
+                du: l.durationSeconds,
+            })),
+        }))
+    );
+
+    function queueSync(explicitId?: string): Promise<void> {
+        const id = explicitId ?? courseId;
+        if (!id) return syncChain.current;
+        setDraftState("saving");
+        syncChain.current = syncChain.current
+            .then(() => runSync(id))
+            .then(() => setDraftState("saved"))
+            .catch(() => setDraftState("idle"));
+        return syncChain.current;
+    }
+
+    async function runSync(id: string): Promise<void> {
+
+        const dropped = pendingDeletes.current;
+        pendingDeletes.current = { modules: [], lessons: [] };
+        for (const d of dropped.lessons) {
+            try {
+                await TUTOR.deleteLesson(id, d.m, d.l);
+            } catch {
+                // Already gone is the outcome we wanted.
+            }
+        }
+        for (const moduleId of dropped.modules) {
+            try {
+                await TUTOR.deleteModule(id, moduleId);
+            } catch {
+                // As above.
+            }
+        }
+
+        for (let mi = 0; mi < modules.length; mi++) {
+            const m = modules[mi];
+            if (!m.title.trim()) continue;
+
+            let moduleServerId = m.serverId ?? serverIds.current.get(m.id) ?? null;
+            const moduleSig = `${m.title.trim()}|${mi}`;
+            if (!moduleServerId) {
+                const created = await TUTOR.addModule(id, { title: m.title.trim(), order: mi });
+                moduleServerId = created.id;
+                serverIds.current.set(m.id, created.id);
+                setModules((cur) =>
+                    cur.map((x) => (x.id === m.id ? { ...x, serverId: created.id } : x))
+                );
+                synced.current.set(m.id, moduleSig);
+            } else if (synced.current.get(m.id) !== moduleSig) {
+                await TUTOR.updateModule(id, moduleServerId, { title: m.title.trim(), order: mi });
+                synced.current.set(m.id, moduleSig);
+            }
+
+            for (let li = 0; li < m.lessons.length; li++) {
+                const l = m.lessons[li];
+                if (!l.title.trim()) continue;
+                // The backend rejects a non-quiz lesson with no content, so it
+                // waits here until the upload has produced a URL.
+                const lessonServerId = l.serverId ?? serverIds.current.get(l.id) ?? null;
+                if (l.type !== "quiz" && !l.contentUrl && !lessonServerId) continue;
+
+                const lessonSig = JSON.stringify([
+                    l.title.trim(), l.type, l.description.trim(), l.isPreview,
+                    l.contentUrl, l.streamUid, l.durationSeconds, li,
+                ]);
+                if (synced.current.get(l.id) === lessonSig) continue;
+
+                // Only send file fields when this session produced new content;
+                // omitting them leaves whatever the lesson already has.
+                const content = l.contentUrl
+                    ? {
+                          content_url: l.contentUrl,
+                          stream_uid: l.streamUid,
+                          duration_seconds: l.durationSeconds,
+                      }
+                    : {};
+
+                if (!lessonServerId) {
+                    const created = await TUTOR.addLesson(id, moduleServerId, {
+                        title: l.title.trim(),
+                        type: l.type,
+                        order: li,
+                        description: l.description.trim() || null,
+                        is_preview: l.isPreview,
+                        ...content,
+                    });
+                    serverIds.current.set(l.id, created.id);
+                    setModules((cur) =>
+                        cur.map((x) =>
+                            x.id !== m.id
+                                ? x
+                                : {
+                                      ...x,
+                                      lessons: x.lessons.map((y) =>
+                                          y.id === l.id ? { ...y, serverId: created.id } : y
+                                      ),
+                                  }
+                        )
+                    );
+                } else {
+                    await TUTOR.updateLesson(id, moduleServerId, lessonServerId, {
+                        title: l.title.trim(),
+                        type: l.type,
+                        order: li,
+                        description: l.description.trim() || null,
+                        is_preview: l.isPreview,
+                        ...content,
+                    });
+                }
+                synced.current.set(l.id, lessonSig);
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (!courseId || submitted) return;
+        const timer = setTimeout(() => {
+            void queueSync();
+        }, 800);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [modulesSignature, courseId, submitted]);
 
     function updateForm(updates: Partial<CourseForm>) {
         setForm((current) => ({
@@ -362,8 +647,27 @@ export default function NewCoursePage() {
         }
     }
 
-    /** Starts the upload for any lesson that has just been given a file. */
+    /**
+     * Starts the upload for any lesson that has just been given a file, and
+     * records rows that were removed so the next sync deletes them server side.
+     */
     function handleModules(next: Module[]) {
+        for (const m of modules) {
+            const survivor = next.find((x) => x.id === m.id);
+            const moduleServerId = m.serverId ?? serverIds.current.get(m.id) ?? null;
+            if (!survivor) {
+                if (moduleServerId) pendingDeletes.current.modules.push(moduleServerId);
+                continue;
+            }
+            if (!moduleServerId) continue;
+            const keptLessons = new Set(survivor.lessons.map((l) => l.id));
+            for (const l of m.lessons) {
+                const lessonServerId = l.serverId ?? serverIds.current.get(l.id) ?? null;
+                if (!keptLessons.has(l.id) && lessonServerId) {
+                    pendingDeletes.current.lessons.push({ m: moduleServerId, l: lessonServerId });
+                }
+            }
+        }
         setModules(next);
         for (const m of next) {
             for (const l of m.lessons) {
@@ -374,64 +678,90 @@ export default function NewCoursePage() {
         }
     }
 
+    /**
+     * Throw the current draft away and start clean.
+     *
+     * Without this the wizard would always reopen the same unfinished draft,
+     * with no way to begin a different course while one is outstanding.
+     */
+    async function discardDraft() {
+        if (!confirm("Delete this draft and start a new course? This cannot be undone.")) return;
+        setSavingStep(true);
+        try {
+            if (courseId) await TUTOR.deleteCourse(courseId);
+        } catch (err) {
+            toast.error(errorMessage(err, "Could not delete the draft."));
+            setSavingStep(false);
+            return;
+        }
+        try {
+            localStorage.removeItem(DRAFT_KEY);
+            localStorage.removeItem(DRAFT_ID_KEY);
+        } catch {
+            // Nothing useful to do if storage is unavailable.
+        }
+        // Reload rather than unpick every piece of state by hand: the refs
+        // holding server ids and sync signatures have to go too.
+        window.location.reload();
+    }
+
+    async function goNext() {
+        if (!canAdvance() || savingStep) return;
+        // Leaving the first step is what turns this into a real draft: it is
+        // the first point at which the backend has everything it needs.
+        if (step === 0) {
+            setSavingStep(true);
+            try {
+                await ensureCourse();
+            } catch (err) {
+                toast.error(errorMessage(err, "Could not start this course."));
+                return;
+            } finally {
+                setSavingStep(false);
+            }
+        }
+        setStep((current) => current + 1);
+    }
+
     async function handleSubmit() {
         setSubmitting(true);
         try {
-            const course = await TUTOR.createCourse({
-                title: form.title.trim(),
-                description: form.description.trim() || undefined,
-                category: form.category,
-                // The wizard asked for this and then dropped it, so every
-                // admin-authored course was filed as English regardless of
-                // what was picked, and language decides who finds the course
-                // and how its transcripts are generated.
-                language: form.language as CourseLanguage,
-                price: Number(form.price) || 0,
-                is_premium: form.is_premium,
-                thumbnail_url: thumbnailUrl ?? undefined,
-                tags: form.tags
-                    .split(",")
-                    .map((t) => t.trim())
-                    .filter(Boolean),
-            });
-
-            for (let mIndex = 0; mIndex < modules.length; mIndex++) {
-                const courseModule = modules[mIndex];
-                const createdModule = await TUTOR.addModule(course.id, {
-                    title: courseModule.title.trim(),
-                    order: mIndex,
-                });
-
-                for (let lIndex = 0; lIndex < courseModule.lessons.length; lIndex++) {
-                    const lesson = courseModule.lessons[lIndex];
-                    await TUTOR.addLesson(course.id, createdModule.id, {
-                        title: lesson.title.trim(),
-                        type: lesson.type,
-                        order: lIndex,
-                        description: lesson.description.trim() || null,
-                        duration_seconds: lesson.durationSeconds,
-                        content_url: lesson.contentUrl,
-                        is_preview: lesson.isPreview,
-                        stream_uid: lesson.streamUid,
-                    });
-                }
-            }
-
+            // Everything has been saved along the way; this flushes anything
+            // still in flight and then decides whether it goes live.
+            const id = await ensureCourse();
+            await queueSync(id);
             if (form.status === "published") {
-                await TUTOR.submitCourse(course.id);
+                await TUTOR.submitCourse(id);
             }
-
             try {
                 localStorage.removeItem(DRAFT_KEY);
+                localStorage.removeItem(DRAFT_ID_KEY);
             } catch {
                 // Nothing useful to do if storage is unavailable.
             }
             setSubmitted(true);
         } catch (err) {
-            toast.error(errorMessage(err, "Couldn't create this course."));
+            toast.error(errorMessage(err, "Couldn't save this course."));
         } finally {
             setSubmitting(false);
         }
+    }
+
+    // Restoring reads the draft back from the server, so without this the form
+    // shows empty for a moment and then fills itself in, which reads as the
+    // work having been lost.
+    if (loadingDraft) {
+        return (
+            <>
+                <Topbar title="Upload Course" />
+                <div className="flex min-h-[70vh] items-center justify-center">
+                    <p className="flex items-center gap-2 text-sm text-gray-400">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Checking for an unfinished draft
+                    </p>
+                </div>
+            </>
+        );
     }
 
     if (submitted) {
@@ -490,8 +820,38 @@ export default function NewCoursePage() {
                     Back to Courses
                 </Link>
 
-                <div className="mb-8 flex justify-center">
+                <div className="mb-8 flex flex-col items-center gap-2">
                     <StepIndicator current={step} />
+
+                    {/* Says plainly whether the work is safe. Before the course
+                        exists there is nothing on the server to point at, so
+                        this stays quiet until the first step is done. */}
+                    {draftState !== "idle" && (
+                        <p className="flex items-center gap-1.5 text-xs text-gray-400">
+                            {draftState === "saving" ? (
+                                <>
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    Saving draft
+                                </>
+                            ) : (
+                                <>
+                                    <Check className="h-3 w-3 text-green-600" />
+                                    Draft saved. You can close this and come back to it.
+                                </>
+                            )}
+                        </p>
+                    )}
+
+                    {courseId && (
+                        <button
+                            type="button"
+                            onClick={discardDraft}
+                            disabled={savingStep || submitting}
+                            className="text-xs font-medium text-gray-400 underline underline-offset-2 hover:text-red-500 disabled:opacity-50"
+                        >
+                            Discard this draft and start over
+                        </button>
+                    )}
                 </div>
 
                 <div className="mx-auto max-w-3xl">
@@ -559,10 +919,11 @@ export default function NewCoursePage() {
                         {step < STEPS.length - 1 ? (
                             <button
                                 type="button"
-                                onClick={() => canAdvance() && setStep((s) => s + 1)}
-                                disabled={!canAdvance()}
+                                onClick={goNext}
+                                disabled={!canAdvance() || savingStep}
                                 className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
                             >
+                                {savingStep && <Loader2 className="h-4 w-4 animate-spin" />}
                                 Continue
                                 <ArrowRight className="h-4 w-4" />
                             </button>

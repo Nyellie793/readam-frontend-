@@ -30,6 +30,7 @@ function uid() {
 function makeLesson(): Lesson {
     return {
         id: uid(),
+        serverId: null,
         title: "",
         type: "video",
         file: null,
