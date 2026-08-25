@@ -34,7 +34,7 @@ export default async function AdminCourseEditPage({
           <ArrowLeft className="size-4" />
           Back to review
         </Link>
-        <CourseEditorContent courseId={courseId} />
+        <CourseEditorContent courseId={courseId} asAdmin />
       </div>
     </>
   );

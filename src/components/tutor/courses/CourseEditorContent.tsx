@@ -26,9 +26,16 @@ const STATUS_STYLES: Record<string, string> = {
 
 interface CourseEditorContentProps {
   courseId: string;
+  /**
+   * True when an admin is editing. An admin submitting is the reviewer, so the
+   * backend publishes the course there and then instead of queueing it. The
+   * button said "Submit for Review" either way, which meant an admin pressing
+   * it put the course live while being told it had gone for review.
+   */
+  asAdmin?: boolean;
 }
 
-export default function CourseEditorContent({ courseId }: CourseEditorContentProps) {
+export default function CourseEditorContent({ courseId, asAdmin = false }: CourseEditorContentProps) {
   const t = useTranslations("tutor");
   const tc = useTranslations("cat");
   const STATUS_LABELS: Record<string, string> = {

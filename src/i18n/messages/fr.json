@@ -873,7 +873,9 @@
     "premiumCourse": "Cours premium",
     "premiumCourseHint": "Réservé aux étudiants abonnés",
     "freePreviewLesson": "Aperçu gratuit",
-    "freePreviewLessonHint": "Les étudiants peuvent suivre cette leçon sans s'inscrire"
+    "freePreviewLessonHint": "Les étudiants peuvent suivre cette leçon sans s'inscrire",
+    "publishCourse": "Publier le cours",
+    "coursePublished": "Cours publié. Il est maintenant en ligne."
   },
   "contact": {
     "eyebrow": "Contact",

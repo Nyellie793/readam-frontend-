@@ -873,7 +873,9 @@
     "premiumCourse": "Premium Course",
     "premiumCourseHint": "Only available to subscribed students",
     "freePreviewLesson": "Free preview",
-    "freePreviewLessonHint": "Students can watch this lesson without enrolling"
+    "freePreviewLessonHint": "Students can watch this lesson without enrolling",
+    "publishCourse": "Publish Course",
+    "coursePublished": "Course published. It is live now."
   },
   "contact": {
     "eyebrow": "Contact",
