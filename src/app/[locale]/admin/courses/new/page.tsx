@@ -35,6 +35,17 @@ const STEPS = [
     "Review & Publish",
 ];
 
+/**
+ * Cloudflare caps a single direct upload at 200 MB. Anything larger has to go
+ * through their resumable (tus) protocol, which this wizard does not speak yet,
+ * so the upload is refused near the end with nothing explaining why.
+ */
+const MULTIPART_UPLOAD_LIMIT_BYTES = 200 * 1024 * 1024;
+
+function formatSize(bytes: number) {
+    return `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
+}
+
 const DRAFT_KEY = "readam_admin_course_draft";
 const DRAFT_ID_KEY = "readam_admin_course_draft_id";
 
@@ -563,7 +574,13 @@ export default function NewCoursePage() {
         );
     }
 
-    /** POST with a progress callback. fetch() cannot report upload progress. */
+    /**
+     * POST with a progress callback. fetch() cannot report upload progress.
+     *
+     * Reports what actually went wrong. Rejecting with a bare "Upload failed"
+     * meant a rejected file, a dropped connection and a blocked request all
+     * looked identical, with nothing to work from.
+     */
     function uploadWithProgress(url: string, file: File, onProgress: (pct: number) => void) {
         return new Promise<void>((resolve, reject) => {
             const xhr = new XMLHttpRequest();
@@ -571,9 +588,23 @@ export default function NewCoursePage() {
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
             };
-            xhr.onload = () =>
-                xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error("Upload failed"));
-            xhr.onerror = () => reject(new Error("Upload failed"));
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve();
+                    return;
+                }
+                const body = (xhr.responseText || "").slice(0, 200);
+                reject(
+                    new Error(
+                        file.size > MULTIPART_UPLOAD_LIMIT_BYTES
+                            ? `Cloudflare rejected this file (${xhr.status}). It is ${formatSize(file.size)}, and a single upload cannot exceed ${formatSize(MULTIPART_UPLOAD_LIMIT_BYTES)}.`
+                            : `Cloudflare rejected this file (${xhr.status}). ${body}`.trim()
+                    )
+                );
+            };
+            xhr.onerror = () =>
+                reject(new Error("The connection dropped while sending the file. Please try again."));
+            xhr.ontimeout = () => reject(new Error("The upload timed out. Please try again."));
             const body = new FormData();
             body.append("file", file);
             xhr.send(body);
@@ -608,6 +639,14 @@ export default function NewCoursePage() {
         patchLesson(moduleId, lesson.id, { uploadState: "uploading", uploadProgress: 0, uploadError: "" });
 
         try {
+            if (lesson.type !== "pdf" && file.size > MULTIPART_UPLOAD_LIMIT_BYTES) {
+                // Caught here rather than after a long upload that was always
+                // going to be refused at the end.
+                throw new Error(
+                    `This video is ${formatSize(file.size)}. Videos must be under ${formatSize(MULTIPART_UPLOAD_LIMIT_BYTES)} for now. Please compress it or split the lesson.`
+                );
+            }
+
             if (lesson.type === "pdf") {
                 assertUploadable(file, "document");
                 const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
