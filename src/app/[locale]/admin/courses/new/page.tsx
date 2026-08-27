@@ -27,7 +27,7 @@ import type {
 } from "@/components/admin/course/course.types";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
-import { uploadVideoFile, uploadErrorText } from "@/lib/video-upload";
+import { beginVideoUpload, uploadVideoFile, uploadErrorText } from "@/lib/video-upload";
 
 const STEPS = [
     "Course Info",
@@ -412,7 +412,11 @@ export default function NewCoursePage() {
                 // The backend rejects a non-quiz lesson with no content, so it
                 // waits here until the upload has produced a URL.
                 const lessonServerId = l.serverId ?? serverIds.current.get(l.id) ?? null;
-                if (l.type !== "quiz" && !l.contentUrl && !lessonServerId) continue;
+                // Saved as soon as it has a title, without waiting for its
+                // file. The backend accepts a lesson with no content, and
+                // holding back meant typing several lesson titles and losing
+                // all but the one whose upload happened to finish. The video
+                // is attached by the update below once it lands.
 
                 const lessonSig = JSON.stringify([
                     l.title.trim(), l.type, l.description.trim(), l.isPreview,
@@ -623,7 +627,9 @@ export default function NewCoursePage() {
                 return;
             }
 
-            const presigned = await TUTOR.requestVideoUpload(file.name, file.size);
+            // Reuses an unfinished session for this file, so a retry picks up
+            // where it stopped instead of starting again.
+            const presigned = await beginVideoUpload(file);
             await uploadVideoFile(presigned, file, (pct) =>
                 patchLesson(moduleId, lesson.id, { uploadProgress: pct })
             );

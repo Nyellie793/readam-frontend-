@@ -6,7 +6,7 @@ import { Loader2, UploadCloud, CheckCircle2, FileText, Video, HelpCircle } from 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import TUTOR from "@/services/tutor.service";
-import { uploadVideoFile, uploadErrorText } from "@/lib/video-upload";
+import { beginVideoUpload, uploadVideoFile, uploadErrorText } from "@/lib/video-upload";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import type { CreateLessonRequest, ModuleLesson } from "@/types/api.types";
 import { useTranslations } from "next-intl";
