@@ -19,6 +19,12 @@ interface LessonEditorDialogProps {
   lesson: ModuleLesson | null;
   /** True when this will be the very first lesson of the course. */
   isFirstLessonOfCourse: boolean;
+  /**
+   * Where a new lesson goes: the number of lessons already in this module.
+   * This used to be hardcoded to 0, so every lesson in a module shared a
+   * position and they came back in an order the database chose freely.
+   */
+  nextOrder: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
@@ -35,6 +41,7 @@ export default function LessonEditorDialog({
   moduleId,
   lesson,
   isFirstLessonOfCourse,
+  nextOrder,
   open,
   onOpenChange,
   onSaved,
@@ -180,7 +187,7 @@ export default function LessonEditorDialog({
       const body: CreateLessonRequest = {
         title: title.trim(),
         type,
-        order: lesson?.order ?? 0,
+        order: lesson?.order ?? nextOrder,
         description: description.trim() || null,
         is_preview: isPreview,
       };

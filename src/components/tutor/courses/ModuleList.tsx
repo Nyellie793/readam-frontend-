@@ -259,6 +259,9 @@ export default function ModuleList({ courseId, modules, editable, onChanged }: M
           moduleId={lessonDialog.moduleId}
           lesson={lessonDialog.lesson}
           isFirstLessonOfCourse={totalLessons === 0}
+          nextOrder={
+            modules.find((m) => m.id === lessonDialog.moduleId)?.lessons.length ?? 0
+          }
           open={!!lessonDialog}
           onOpenChange={(open) => !open && setLessonDialog(null)}
           onSaved={onChanged}
