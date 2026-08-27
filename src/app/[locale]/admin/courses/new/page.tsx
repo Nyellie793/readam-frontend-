@@ -50,6 +50,21 @@ const MULTIPART_UPLOAD_LIMIT_BYTES = 200 * 1024 * 1024;
  */
 const TUS_CHUNK_BYTES = 10 * 1024 * 1024;
 
+/**
+ * Message for an upload failure.
+ *
+ * errorMessage() returns its fallback for anything that is not an
+ * ApiRequestError, which is every error the upload itself raises: Cloudflare's
+ * status and body, a dropped connection, a refused chunk. All of it was being
+ * replaced by "could not upload the file", which is precisely the detail
+ * needed to tell those apart. ApiRequestError sets message to its detail, so
+ * reading message covers both.
+ */
+function uploadErrorText(err: unknown, fallback: string): string {
+    if (err instanceof Error && err.message.trim()) return err.message;
+    return fallback;
+}
+
 function formatSize(bytes: number) {
     return `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
 }
@@ -729,11 +744,12 @@ export default function NewCoursePage() {
             const duration = await pollVideoReady(presigned.stream_uid);
             patchLesson(moduleId, lesson.id, { uploadState: "ready", durationSeconds: duration });
         } catch (err) {
-            patchLesson(moduleId, lesson.id, {
-                uploadState: "error",
-                uploadError: errorMessage(err, "Upload failed."),
-            });
-            toast.error(errorMessage(err, `Could not upload the file for "${lesson.title || "this lesson"}".`));
+            const reason = uploadErrorText(
+                err,
+                `Could not upload the file for "${lesson.title || "this lesson"}".`
+            );
+            patchLesson(moduleId, lesson.id, { uploadState: "error", uploadError: reason });
+            toast.error(reason);
         } finally {
             uploading.current.delete(lesson.id);
         }
