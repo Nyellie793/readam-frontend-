@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import * as tus from "tus-js-client";
 import {
     ArrowLeft,
     ArrowRight,
@@ -28,6 +27,7 @@ import type {
 } from "@/components/admin/course/course.types";
 import TUTOR from "@/services/tutor.service";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
+import { uploadVideoFile, uploadErrorText } from "@/lib/video-upload";
 
 const STEPS = [
     "Course Info",
@@ -49,21 +49,6 @@ const MULTIPART_UPLOAD_LIMIT_BYTES = 200 * 1024 * 1024;
  * connection only the failed chunk is retried, not the whole file.
  */
 const TUS_CHUNK_BYTES = 10 * 1024 * 1024;
-
-/**
- * Message for an upload failure.
- *
- * errorMessage() returns its fallback for anything that is not an
- * ApiRequestError, which is every error the upload itself raises: Cloudflare's
- * status and body, a dropped connection, a refused chunk. All of it was being
- * replaced by "could not upload the file", which is precisely the detail
- * needed to tell those apart. ApiRequestError sets message to its detail, so
- * reading message covers both.
- */
-function uploadErrorText(err: unknown, fallback: string): string {
-    if (err instanceof Error && err.message.trim()) return err.message;
-    return fallback;
-}
 
 function formatSize(bytes: number) {
     return `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
@@ -598,91 +583,6 @@ export default function NewCoursePage() {
     }
 
     /**
-     * POST with a progress callback. fetch() cannot report upload progress.
-     *
-     * Reports what actually went wrong. Rejecting with a bare "Upload failed"
-     * meant a rejected file, a dropped connection and a blocked request all
-     * looked identical, with nothing to work from.
-     */
-    function uploadWithProgress(url: string, file: File, onProgress: (pct: number) => void) {
-        return new Promise<void>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", url);
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
-            };
-            xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve();
-                    return;
-                }
-                const body = (xhr.responseText || "").slice(0, 200);
-                reject(
-                    new Error(
-                        file.size > MULTIPART_UPLOAD_LIMIT_BYTES
-                            ? `Cloudflare rejected this file (${xhr.status}). It is ${formatSize(file.size)}, and a single upload cannot exceed ${formatSize(MULTIPART_UPLOAD_LIMIT_BYTES)}.`
-                            : `Cloudflare rejected this file (${xhr.status}). ${body}`.trim()
-                    )
-                );
-            };
-            xhr.onerror = () =>
-                reject(new Error("The connection dropped while sending the file. Please try again."));
-            xhr.ontimeout = () => reject(new Error("The upload timed out. Please try again."));
-            const body = new FormData();
-            body.append("file", file);
-            xhr.send(body);
-        });
-    }
-
-    /**
-     * Send the file to a pre-created Cloudflare resumable session.
-     *
-     * uploadUrl, not endpoint: the session already exists because the backend
-     * created it, and passing endpoint would have tus create a second one.
-     */
-    function uploadResumable(url: string, file: File, onProgress: (pct: number) => void) {
-        return new Promise<void>((resolve, reject) => {
-            const upload = new tus.Upload(file, {
-                uploadUrl: url,
-                chunkSize: TUS_CHUNK_BYTES,
-                // Backs off and retries rather than losing the whole transfer
-                // to one dropped connection.
-                retryDelays: [0, 3000, 6000, 12000, 24000],
-                metadata: { filename: file.name, filetype: file.type },
-                onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
-                onSuccess: () => resolve(),
-                onError: (err) => {
-                    // A tus failure carries the request and response that
-                    // caused it. Rejecting with just the message loses the
-                    // status and body, which is the whole reason this chase
-                    // took as long as it did.
-                    const detail = err as tus.DetailedError;
-                    const res = detail?.originalResponse;
-                    if (res) {
-                        const method = detail.originalRequest?.getMethod?.() ?? "";
-                        reject(
-                            new Error(
-                                `Cloudflare rejected the upload (${method} ${res.getStatus()}). ${String(
-                                    res.getBody() ?? ""
-                                ).slice(0, 200)}`.trim()
-                            )
-                        );
-                        return;
-                    }
-                    // No response at all means the request never completed:
-                    // usually the connection, or the browser blocking it.
-                    reject(
-                        new Error(
-                            `${err?.message || "The upload failed"}. This usually means the connection dropped.`
-                        )
-                    );
-                },
-            });
-            upload.start();
-        });
-    }
-
-    /**
      * Wait for Cloudflare to finish transcoding, only to learn the duration.
      *
      * This runs in the background after the upload rather than at publish.
@@ -724,14 +624,9 @@ export default function NewCoursePage() {
             }
 
             const presigned = await TUTOR.requestVideoUpload(file.name, file.size);
-            const onProgress = (pct: number) =>
-                patchLesson(moduleId, lesson.id, { uploadProgress: pct });
-
-            if (presigned.upload_protocol === "tus") {
-                await uploadResumable(presigned.upload_url, file, onProgress);
-            } else {
-                await uploadWithProgress(presigned.upload_url, file, onProgress);
-            }
+            await uploadVideoFile(presigned, file, (pct) =>
+                patchLesson(moduleId, lesson.id, { uploadProgress: pct })
+            );
             // Publishable from here: the stream id and playback URL are known.
             patchLesson(moduleId, lesson.id, {
                 uploadState: "processing",

@@ -6,6 +6,7 @@ import { Loader2, UploadCloud, CheckCircle2, FileText, Video, HelpCircle } from 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import TUTOR from "@/services/tutor.service";
+import { uploadVideoFile, uploadErrorText } from "@/lib/video-upload";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import type { CreateLessonRequest, ModuleLesson } from "@/types/api.types";
 import { useTranslations } from "next-intl";
@@ -114,18 +115,11 @@ export default function LessonEditorDialog({
       setContentUrl(presigned.hls_url);
       setContentChanged(true);
 
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", presigned.upload_url);
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        };
-        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(t("uploadFailed"))));
-        xhr.onerror = () => reject(new Error(t("uploadFailed")));
-        const formData = new FormData();
-        formData.append("file", file);
-        xhr.send(formData);
-      });
+      // Shared with the admin create wizard. This used to be its own plain
+      // POST, which Cloudflare refuses over 200 MB only after receiving the
+      // whole file, so every large lesson video failed here long after that
+      // had been fixed for the wizard.
+      await uploadVideoFile(presigned, file, setUploadProgress);
 
       setUploadState("processing");
       await pollVideoStatus(presigned.stream_uid);
