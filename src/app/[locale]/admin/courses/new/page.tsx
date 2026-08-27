@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import * as tus from "tus-js-client";
 import {
     ArrowLeft,
     ArrowRight,
@@ -36,11 +37,18 @@ const STEPS = [
 ];
 
 /**
- * Cloudflare caps a single direct upload at 200 MB. Anything larger has to go
- * through their resumable (tus) protocol, which this wizard does not speak yet,
- * so the upload is refused near the end with nothing explaining why.
+ * Cloudflare caps a single direct upload at 200 MB. The backend provisions a
+ * resumable (tus) session above that and says so in upload_protocol, so the
+ * limit no longer decides what can be uploaded, only how.
  */
 const MULTIPART_UPLOAD_LIMIT_BYTES = 200 * 1024 * 1024;
+
+/**
+ * 10 MiB. Cloudflare requires at least 5,242,880 bytes and a size divisible by
+ * 256 KiB; this is exactly 40 of those. Kept small deliberately: on a poor
+ * connection only the failed chunk is retried, not the whole file.
+ */
+const TUS_CHUNK_BYTES = 10 * 1024 * 1024;
 
 function formatSize(bytes: number) {
     return `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
@@ -612,6 +620,29 @@ export default function NewCoursePage() {
     }
 
     /**
+     * Send the file to a pre-created Cloudflare resumable session.
+     *
+     * uploadUrl, not endpoint: the session already exists because the backend
+     * created it, and passing endpoint would have tus create a second one.
+     */
+    function uploadResumable(url: string, file: File, onProgress: (pct: number) => void) {
+        return new Promise<void>((resolve, reject) => {
+            const upload = new tus.Upload(file, {
+                uploadUrl: url,
+                chunkSize: TUS_CHUNK_BYTES,
+                // Backs off and retries rather than losing the whole transfer
+                // to one dropped connection.
+                retryDelays: [0, 3000, 6000, 12000, 24000],
+                metadata: { filename: file.name, filetype: file.type },
+                onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
+                onSuccess: () => resolve(),
+                onError: (err) => reject(err instanceof Error ? err : new Error(String(err))),
+            });
+            upload.start();
+        });
+    }
+
+    /**
      * Wait for Cloudflare to finish transcoding, only to learn the duration.
      *
      * This runs in the background after the upload rather than at publish.
@@ -639,14 +670,6 @@ export default function NewCoursePage() {
         patchLesson(moduleId, lesson.id, { uploadState: "uploading", uploadProgress: 0, uploadError: "" });
 
         try {
-            if (lesson.type !== "pdf" && file.size > MULTIPART_UPLOAD_LIMIT_BYTES) {
-                // Caught here rather than after a long upload that was always
-                // going to be refused at the end.
-                throw new Error(
-                    `This video is ${formatSize(file.size)}. Videos must be under ${formatSize(MULTIPART_UPLOAD_LIMIT_BYTES)} for now. Please compress it or split the lesson.`
-                );
-            }
-
             if (lesson.type === "pdf") {
                 assertUploadable(file, "document");
                 const presigned = await TUTOR.requestAssetUpload(file.name, file.type);
@@ -661,9 +684,14 @@ export default function NewCoursePage() {
             }
 
             const presigned = await TUTOR.requestVideoUpload(file.name, file.size);
-            await uploadWithProgress(presigned.upload_url, file, (pct) =>
-                patchLesson(moduleId, lesson.id, { uploadProgress: pct })
-            );
+            const onProgress = (pct: number) =>
+                patchLesson(moduleId, lesson.id, { uploadProgress: pct });
+
+            if (presigned.upload_protocol === "tus") {
+                await uploadResumable(presigned.upload_url, file, onProgress);
+            } else {
+                await uploadWithProgress(presigned.upload_url, file, onProgress);
+            }
             // Publishable from here: the stream id and playback URL are known.
             patchLesson(moduleId, lesson.id, {
                 uploadState: "processing",

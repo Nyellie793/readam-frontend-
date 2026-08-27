@@ -768,6 +768,12 @@ export interface CourseListItem {
     stream_uid: string;
     hls_url: string;
     thumbnail_url: string | null;
+    /**
+     * How to send the file. Cloudflare refuses a plain POST over 200 MB, but
+     * only after the whole file has been transferred, so these are not
+     * interchangeable. Older responses omit it, hence the default.
+     */
+    upload_protocol?: "post" | "tus";
   }
 
   export interface VideoStatusResponse {
