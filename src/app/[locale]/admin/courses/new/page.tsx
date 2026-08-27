@@ -636,7 +636,32 @@ export default function NewCoursePage() {
                 metadata: { filename: file.name, filetype: file.type },
                 onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
                 onSuccess: () => resolve(),
-                onError: (err) => reject(err instanceof Error ? err : new Error(String(err))),
+                onError: (err) => {
+                    // A tus failure carries the request and response that
+                    // caused it. Rejecting with just the message loses the
+                    // status and body, which is the whole reason this chase
+                    // took as long as it did.
+                    const detail = err as tus.DetailedError;
+                    const res = detail?.originalResponse;
+                    if (res) {
+                        const method = detail.originalRequest?.getMethod?.() ?? "";
+                        reject(
+                            new Error(
+                                `Cloudflare rejected the upload (${method} ${res.getStatus()}). ${String(
+                                    res.getBody() ?? ""
+                                ).slice(0, 200)}`.trim()
+                            )
+                        );
+                        return;
+                    }
+                    // No response at all means the request never completed:
+                    // usually the connection, or the browser blocking it.
+                    reject(
+                        new Error(
+                            `${err?.message || "The upload failed"}. This usually means the connection dropped.`
+                        )
+                    );
+                },
             });
             upload.start();
         });
