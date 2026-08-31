@@ -69,6 +69,8 @@ export interface CourseListItem {
     transcript_status: "none" | "pending" | "ready" | "failed";
     caption_url_en: string | null;
     caption_url_fr: string | null;
+    /** Where this student left off, in seconds. 0 for a lesson never started. */
+    last_position_seconds: number;
   }
 
   export interface LessonProgressResponse {

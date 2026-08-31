@@ -182,6 +182,7 @@ export default function LessonPage() {
               <VideoPlayer
                 src={lesson.content_url}
                 poster={course.thumbnail_url ?? undefined}
+                startAtSeconds={lesson.last_position_seconds}
                 onProgress={handleProgress}
                 captions={{
                   en: lesson.caption_url_en,
