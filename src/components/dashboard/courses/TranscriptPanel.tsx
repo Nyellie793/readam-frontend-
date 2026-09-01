@@ -22,6 +22,10 @@ export default function TranscriptPanel({ src, currentTime, onSeek }: Transcript
   const [loaded, setLoaded] = useState<{ src: string; cues: Cue[] } | null>(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  // Logged, not shown: the panel keeps one friendly sentence for everyone,
+  // but a 404 (caption deleted), a CORS block, and a timeout used to all
+  // collapse into that same sentence with nothing to tell them apart.
+  const failureRef = useRef<string | null>(null);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [query, setQuery] = useState("");
@@ -40,10 +44,13 @@ export default function TranscriptPanel({ src, currentTime, onSeek }: Transcript
       setFailed(false);
       try {
         const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) throw new Error(String(res.status));
+        if (!res.ok) throw new Error(`http ${res.status}`);
         setLoaded({ src: url, cues: parseVtt(await res.text()) });
       } catch (err) {
-        if ((err as Error)?.name !== "AbortError") setFailed(true);
+        if ((err as Error)?.name === "AbortError") return;
+        failureRef.current = err instanceof Error ? err.message : "unknown";
+        console.warn(`Transcript fetch failed (${failureRef.current}):`, url);
+        setFailed(true);
       } finally {
         setLoading(false);
       }
