@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { History, Loader2, MessageSquare, Play, Clock } from "lucide-react";
+import { History, Loader2, MessageSquare, Play, Clock, Eye } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +57,13 @@ export default function SessionHistoryDialog({
     if (open) void load();
   }, [open, load]);
 
-  function resume(id: string) {
+  /**
+   * Opens any session, live or long over. The chat screen already loads full
+   * message history for a session regardless of status — the backend never
+   * gated get_session_detail on it being active — so this is just navigation,
+   * not a resume in the "restart the clock" sense for anything already ended.
+   */
+  function openSession(id: string) {
     onOpenChange(false);
     router.push(`/dashboard/ai-tutor/ai-chat?session=${id}`);
   }
@@ -141,14 +147,29 @@ export default function SessionHistoryDialog({
                       </p>
                     </div>
 
-                    {resumable && !isCurrent && (
+                    {!isCurrent && resumable && (
                       <button
                         type="button"
-                        onClick={() => resume(s.id)}
+                        onClick={() => openSession(s.id)}
                         className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700"
                       >
                         <Play className="size-3" />
                         {t("resume")}
+                      </button>
+                    )}
+
+                    {/* Ended and expired sessions have nothing left to resume,
+                        but the transcript is still there — every session used
+                        to be listed here with no way to actually open the ones
+                        that had already finished. */}
+                    {!isCurrent && !resumable && (
+                      <button
+                        type="button"
+                        onClick={() => openSession(s.id)}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+                      >
+                        <Eye className="size-3" />
+                        {t("historyView")}
                       </button>
                     )}
                   </div>

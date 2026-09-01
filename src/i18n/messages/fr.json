@@ -707,7 +707,8 @@
     "historyMessages": "messages",
     "historyLesson": "Session de leçon",
     "historyGeneral": "Session générale",
-    "historyCurrent": "en cours"
+    "historyCurrent": "en cours",
+    "historyView": "Voir"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

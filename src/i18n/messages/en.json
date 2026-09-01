@@ -707,7 +707,8 @@
     "historyMessages": "messages",
     "historyLesson": "Lesson session",
     "historyGeneral": "General session",
-    "historyCurrent": "current"
+    "historyCurrent": "current",
+    "historyView": "View"
   },
   "tutor": {
     "dashboard": "Dashboard",
