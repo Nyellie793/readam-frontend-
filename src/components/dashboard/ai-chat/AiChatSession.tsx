@@ -182,7 +182,10 @@ export default function AiChatSession() {
   const t = useTranslations("dash");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initRan = useRef(false);
+  // The search-param signature already acted on, so a change in the URL
+  // triggers a real reload while our own router.replace() landing on the
+  // URL we just set does not loop back into itself.
+  const processedParams = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -233,13 +236,32 @@ export default function AiChatSession() {
   }, []);
 
   useEffect(() => {
-    if (initRan.current) return;
-    initRan.current = true;
+    // Keyed on the actual query string, not a one-time flag: this used to run
+    // exactly once per mount, so opening a different session from History
+    // while already on this screen changed the URL but nothing else — the
+    // first session you landed on was the only one that would ever load.
+    // Comparing against what was last acted on lets a genuine change through
+    // while still ignoring the re-render our own router.replace() below
+    // causes once it lands on the URL we already handled.
+    const paramsKey = searchParams.toString();
+    if (processedParams.current === paramsKey) return;
+    processedParams.current = paramsKey;
 
     const existingSessionId = searchParams.get("session");
     const lessonId = searchParams.get("lessonId");
     const intent = searchParams.get("intent");
     const topic = searchParams.get("topic");
+
+    // Reusing the same mounted screen for a different session means whatever
+    // was on screen for the last one has to be cleared, not just replaced
+    // once the new data arrives — otherwise the old messages and summary sit
+    // there, stale, for the whole time the new session is loading.
+    setLoading(true);
+    setInitError(null);
+    setMessages([]);
+    setSummary(null);
+    setActiveQuiz(null);
+    setPendingAttachment(null);
 
     (async () => {
       try {
@@ -255,6 +277,7 @@ export default function AiChatSession() {
           setMessages(detail.messages);
           storeActiveSession(detail.id, detail.expires_at);
           if (!existingSessionId) {
+            processedParams.current = `session=${detail.id}`;
             router.replace(`/dashboard/ai-tutor/ai-chat?session=${detail.id}`);
           }
           await refreshSummary(detail.id);
@@ -264,6 +287,7 @@ export default function AiChatSession() {
         const started = await AI.startSession(lessonId ?? undefined);
         setSession(started);
         storeActiveSession(started.id, started.expires_at);
+        processedParams.current = `session=${started.id}`;
         router.replace(`/dashboard/ai-tutor/ai-chat?session=${started.id}`);
         await refreshSummary(started.id);
 
@@ -322,7 +346,7 @@ export default function AiChatSession() {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     })();
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!session) return;
