@@ -708,7 +708,8 @@
     "historyLesson": "Lesson session",
     "historyGeneral": "General session",
     "historyCurrent": "current",
-    "historyView": "View"
+    "historyView": "View",
+    "viewPastSessions": "View past sessions"
   },
   "tutor": {
     "dashboard": "Dashboard",

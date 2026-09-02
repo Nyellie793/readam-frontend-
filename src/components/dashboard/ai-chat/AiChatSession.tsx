@@ -535,6 +535,19 @@ export default function AiChatSession() {
             Back to AI Hub
           </Link>
         )}
+
+        {/* Whatever stopped a new session from starting, an old one is still
+            worth reaching — this used to be a dead end with no way back into
+            history at all, out of credits was the most common way to land here. */}
+        <button
+          type="button"
+          onClick={() => setHistoryOpen(true)}
+          className="mt-1 text-xs font-semibold text-gray-500 underline underline-offset-2 hover:text-gray-700"
+        >
+          {t("viewPastSessions")}
+        </button>
+
+        <SessionHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
       </div>
     );
   }
