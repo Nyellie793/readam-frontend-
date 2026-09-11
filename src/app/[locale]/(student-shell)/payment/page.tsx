@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, FileText, BookOpen, ArrowRight, ShieldCheck } from "lucide-react";
+import { Sparkles, FileText, BookOpen, GraduationCap, ArrowRight, ShieldCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 /**
@@ -7,10 +7,25 @@ import { getTranslations } from "next-intl/server";
  *
  * This page previously listed four hardcoded "GCE" packages with invented
  * prices that led to a simulated checkout. Those plans did not exist in the
- * API and no money ever moved. It now points at the two purchase flows that
- * are genuinely wired to the payment provider, plus per-course purchase.
+ * API and no money ever moved. It now points at the purchase flows that are
+ * genuinely wired to the payment provider.
+ *
+ * GCE content is a single 5,000 XAF product (product_code: gce_annual) —
+ * there's exactly one package, so it links straight to checkout rather than
+ * a listing page like AI sessions and Past Questions have. It used to only
+ * show up mixed into the AI Study Sessions grid (both ride the same
+ * GET /v1/subscriptions/products endpoint), which read as one more AI plan
+ * rather than the separate GCE subscription it actually is.
  */
 const OPTIONS = [
+  {
+    href: "/checkout?product=gce_annual",
+    icon: GraduationCap,
+    tone: "bg-teal-50 text-teal-600",
+    titleKey: "optGceTitle",
+    bodyKey: "optGceBody",
+    ctaKey: "optGceCta",
+  },
   {
     href: "/payment/ai-sessions",
     icon: Sparkles,

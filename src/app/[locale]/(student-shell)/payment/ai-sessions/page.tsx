@@ -8,7 +8,12 @@ import { useTranslations } from "next-intl";
 
 export default function AiSessionsPricingPage() {
   const t = useTranslations("payment");
-  const { data: products, isLoading: loading } = useSWR("ai-session-products", () => STUDENT.getProducts());
+  const { data, isLoading: loading } = useSWR("ai-session-products", () => STUDENT.getProducts());
+
+  // GET /v1/subscriptions/products returns every product in the catalog,
+  // GCE content subscription included — this page is AI session credits
+  // only. The GCE package now has its own tile on the Plans hub.
+  const products = (data ?? []).filter((p) => p.entitlement_type !== "gce_content");
 
   // Highlight the unlimited-monthly plan, if present — same "best value" framing as before.
   const highlightCode = "ai_unlimited_monthly";
@@ -27,7 +32,7 @@ export default function AiSessionsPricingPage() {
           ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-80 animate-pulse rounded-2xl bg-gray-100" />
             ))
-          : (products ?? []).map((product) => (
+          : products.map((product) => (
               <AiSessionPricingCard
                 key={product.code}
                 product={product}
