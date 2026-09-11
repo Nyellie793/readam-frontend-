@@ -63,14 +63,20 @@ export default function SessionSummaryPanel({
     <aside className="hidden w-72 shrink-0 space-y-4 overflow-y-auto lg:block">
       <div className="flex items-center justify-between">
         <h2 className="font-bold text-gray-900">{t("sessionSummary")}</h2>
+        {/* Paused is not expired — same distinction the message-input notice
+            below makes. This badge used to check isActive alone, which is
+            false for both, so pausing showed "Expired" here even though the
+            session was very much still yours to resume. */}
         <span
           className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
             isActive
               ? "border-blue-200 bg-blue-50 text-blue-600"
-              : "border-gray-200 bg-gray-50 text-gray-500"
+              : isPaused
+                ? "border-orange-200 bg-orange-50 text-orange-600"
+                : "border-gray-200 bg-gray-50 text-gray-500"
           }`}
         >
-          {isActive ? "Live" : "Expired"}
+          {isActive ? "Live" : isPaused ? "Paused" : "Expired"}
         </span>
       </div>
 
