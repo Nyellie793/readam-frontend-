@@ -49,7 +49,13 @@ export default function LessonPage() {
         const firstAvailable = [...data.modules]
           .sort((a, b) => a.order - b.order)
           .flatMap((m) => [...m.lessons].sort((a, b) => a.order - b.order))[0];
-        setSelectedLessonId(firstAvailable?.id ?? null);
+        // resume_lesson_id is null both for a student with no progress here
+        // and one who's finished the course (a finished course deliberately
+        // resets to lesson 1 rather than reopening the last one) — either way
+        // that's the same fallback as before. The lesson-content fetch below
+        // already carries this lesson's own last_position_seconds, so no
+        // separate seek is needed here.
+        setSelectedLessonId(data.resume_lesson_id ?? firstAvailable?.id ?? null);
       })
       .catch((e) => setCourseError(e.message))
       .finally(() => setCourseLoading(false));

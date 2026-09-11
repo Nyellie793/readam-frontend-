@@ -54,6 +54,12 @@ export interface CourseListItem {
   
   export interface CourseDetailResponse extends CourseListItem {
     modules: CourseModule[];
+    // Set for a signed-in student with progress in this course. null means
+    // "no resume point" — either never opened a lesson here, or finished the
+    // course (a finished course resets to lesson 1 deliberately, not back to
+    // the last one). Always null for an anonymous caller.
+    resume_lesson_id: string | null;
+    resume_position_seconds: number;
   }
 
   export interface LessonContentResponse {
@@ -370,6 +376,10 @@ export interface CourseListItem {
     completed_lessons: number;
     remaining_seconds: number;
     last_viewed_at: string;
+    // Same contract as on CourseDetailResponse: null means open the course
+    // normally (first lesson); set means open this lesson at this position.
+    resume_lesson_id: string | null;
+    resume_position_seconds: number;
   }
 
   export interface RecentlyViewedResponse {
