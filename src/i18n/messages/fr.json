@@ -720,7 +720,9 @@
     "savedSubtitle": "Les cours que vous avez enregistrés pour y revenir.",
     "savedEmptyTitle": "Aucun cours enregistré",
     "savedEmptyBody": "Touchez le signet sur un cours pour le retrouver ici plus tard.",
-    "loadMore": "Charger plus"
+    "loadMore": "Charger plus",
+    "showCourseContent": "Afficher le contenu du cours",
+    "hideCourseContent": "Masquer le contenu du cours"
   },
   "tutor": {
     "dashboard": "Tableau de bord",

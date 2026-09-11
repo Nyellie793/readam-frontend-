@@ -7,12 +7,11 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-blue-50">
-      {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r border-gray-100 lg:block">
-        <div className="fixed h-dvh w-64">
-          <DashboardNavigation />
-        </div>
-      </aside>
+      {/* DashboardNavigation owns its own width — it shrinks to an icon rail
+          when the sidebar is collapsed, and the course-filter panel doesn't
+          collapse at all, so the sizing has to live with whichever of those
+          it's actually rendering. */}
+      <DashboardNavigation />
 
       <main className="min-w-0 flex-1">{children}</main>
     </div>

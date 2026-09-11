@@ -720,7 +720,9 @@
     "savedSubtitle": "Courses you've bookmarked to come back to.",
     "savedEmptyTitle": "No saved courses yet",
     "savedEmptyBody": "Tap the bookmark on any course to keep it here for later.",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "showCourseContent": "Show course content",
+    "hideCourseContent": "Hide course content"
   },
   "tutor": {
     "dashboard": "Dashboard",

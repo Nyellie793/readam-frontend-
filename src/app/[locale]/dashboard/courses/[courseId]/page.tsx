@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Lock, AlertTriangle } from "lucide-react";
+import { Lock, AlertTriangle, PanelRightClose, PanelRightOpen } from "lucide-react";
 import VideoPlayer from "@/components/dashboard/courses/VideoPlayer";
 import PdfViewer from "@/components/dashboard/courses/PDFViewer";
 import CourseOutline from "@/components/dashboard/courses/CourseOutline";
@@ -11,6 +11,7 @@ import SaveCourseButton from "@/components/dashboard/courses/SaveCourseButton";
 import ContinueLearningCard from "@/components/dashboard/courses/ContinueLearningCard";
 import STUDENT from "@/services/student.service";
 import { ApiRequestError, errorMessage } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import type { CourseDetailResponse, LessonContentResponse, ModuleLesson } from "@/types/api.types";
 import { useTranslations } from "next-intl";
 
@@ -32,6 +33,11 @@ export default function LessonPage() {
   // Bumping this re-runs the lesson fetch. Re-setting selectedLessonId to the
   // same value would be a no-op, so a retry needs its own changing dep.
   const [lessonRetry, setLessonRetry] = useState(0);
+
+  // Page-local, not persisted — collapsing the outline is about giving this
+  // one video more room right now, not a standing preference like the global
+  // sidebar's.
+  const [outlineCollapsed, setOutlineCollapsed] = useState(false);
 
   const allLessons = useMemo(
     () =>
@@ -257,29 +263,47 @@ export default function LessonPage() {
             )}
           </div>
 
-          <div className="w-full lg:w-80 lg:shrink-0">
-            <div className="lg:sticky lg:top-6 space-y-4">
-              <div className="flex items-start justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
-                    {course.category.replace(/_/g, " ")}
-                  </p>
-                  <h2 className="mt-0.5 line-clamp-2 text-sm font-bold text-gray-900">
-                    {course.title}
-                  </h2>
+          <div className={cn("w-full lg:shrink-0", outlineCollapsed ? "lg:w-auto" : "lg:w-80")}>
+            <div className="flex flex-col items-end gap-3 lg:sticky lg:top-6">
+              <button
+                type="button"
+                onClick={() => setOutlineCollapsed((v) => !v)}
+                aria-label={outlineCollapsed ? t("showCourseContent") : t("hideCourseContent")}
+                title={outlineCollapsed ? t("showCourseContent") : t("hideCourseContent")}
+                className="hidden rounded-xl border border-gray-100 bg-white p-2 text-gray-400 shadow-sm transition-colors hover:text-gray-700 lg:flex"
+              >
+                {outlineCollapsed ? (
+                  <PanelRightOpen className="size-[18px]" />
+                ) : (
+                  <PanelRightClose className="size-[18px]" />
+                )}
+              </button>
+
+              {!outlineCollapsed && (
+                <div className="w-full space-y-4">
+                  <div className="flex items-start justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                        {course.category.replace(/_/g, " ")}
+                      </p>
+                      <h2 className="mt-0.5 line-clamp-2 text-sm font-bold text-gray-900">
+                        {course.title}
+                      </h2>
+                    </div>
+                    <SaveCourseButton
+                      courseId={course.id}
+                      initialSaved={course.is_saved}
+                      className="shrink-0 px-2.5 py-1.5 text-xs"
+                    />
+                  </div>
+                  <CourseOutline
+                    modules={course.modules}
+                    selectedLessonId={selectedLessonId ?? undefined}
+                    hasAccess={hasAccess}
+                    onSelectLesson={handleSelectLesson}
+                  />
                 </div>
-                <SaveCourseButton
-                  courseId={course.id}
-                  initialSaved={course.is_saved}
-                  className="shrink-0 px-2.5 py-1.5 text-xs"
-                />
-              </div>
-              <CourseOutline
-                modules={course.modules}
-                selectedLessonId={selectedLessonId ?? undefined}
-                hasAccess={hasAccess}
-                onSelectLesson={handleSelectLesson}
-              />
+              )}
             </div>
           </div>
 
