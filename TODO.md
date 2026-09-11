@@ -58,6 +58,12 @@ Working tracker. Check items off as they ship. Updated as we go.
     `price === 0` like everywhere else in the app, so a free course is never shown "Buy Now"
     for 0 XAF again.
 
+- [x] **AI session badge said "Expired" for a session that was just paused** (readam-frontend-
+  commit `58a0075`). `SessionSummaryPanel`'s status badge only checked `isActive`, which is
+  false for both paused and truly-expired — the rest of that same screen (pause button,
+  countdown, input notice) already distinguished the two correctly, the badge never got the
+  same fix. Now Live / Paused / Expired.
+
 - [x] **Signing in on a used browser could bounce straight to login** (readam-frontend-
   commit `527eab3`, regression from the previous fix below, caught same session). Two bugs:
   `clearSession()` never wiped `readam_active_ai_session` (the remembered last-AI-session
