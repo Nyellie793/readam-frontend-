@@ -11,7 +11,15 @@ import { ApiRequestError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
-export default function CourseCard({ course }: { course: CourseListItem }) {
+export default function CourseCard({
+  course,
+  onUnsave,
+}: {
+  course: CourseListItem;
+  /** Called after the course is successfully removed from the saved list. The
+   *  Saved page uses it to drop the card without a full refetch. */
+  onUnsave?: () => void;
+}) {
   const t = useTranslations("dash");
   const isVideo = course.has_video;
   const isFree = course.price === 0 && !course.is_premium;
@@ -45,6 +53,7 @@ export default function CourseCard({ course }: { course: CourseListItem }) {
     try {
       await (next ? STUDENT.saveCourse(course.id) : STUDENT.unsaveCourse(course.id));
       setSaved(next);
+      if (!next) onUnsave?.();
     } catch (err) {
       toast.error(err instanceof ApiRequestError ? err.detail : t("savedFailed"));
     } finally {

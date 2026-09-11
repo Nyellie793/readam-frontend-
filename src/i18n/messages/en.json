@@ -714,7 +714,13 @@
     "historyGeneral": "General session",
     "historyCurrent": "current",
     "historyView": "View",
-    "viewPastSessions": "View past sessions"
+    "viewPastSessions": "View past sessions",
+    "saved": "Saved",
+    "savedTitle": "Saved courses",
+    "savedSubtitle": "Courses you've bookmarked to come back to.",
+    "savedEmptyTitle": "No saved courses yet",
+    "savedEmptyBody": "Tap the bookmark on any course to keep it here for later.",
+    "loadMore": "Load more"
   },
   "tutor": {
     "dashboard": "Dashboard",

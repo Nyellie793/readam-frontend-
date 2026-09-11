@@ -714,7 +714,13 @@
     "historyGeneral": "Session générale",
     "historyCurrent": "en cours",
     "historyView": "Voir",
-    "viewPastSessions": "Voir les sessions passées"
+    "viewPastSessions": "Voir les sessions passées",
+    "saved": "Enregistré",
+    "savedTitle": "Cours enregistrés",
+    "savedSubtitle": "Les cours que vous avez enregistrés pour y revenir.",
+    "savedEmptyTitle": "Aucun cours enregistré",
+    "savedEmptyBody": "Touchez le signet sur un cours pour le retrouver ici plus tard.",
+    "loadMore": "Charger plus"
   },
   "tutor": {
     "dashboard": "Tableau de bord",
