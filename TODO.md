@@ -38,6 +38,19 @@ Working tracker. Check items off as they ship. Updated as we go.
 
 ## Done
 
+- [x] **Paused AI session wrongly treated as expired, blocking a student with
+  no new-session credits but usable paused ones** (readam-frontend- commit `84f785e`).
+  Backend's credit model was confirmed correct — a credit is spent once at session
+  creation, pause/resume never touch it. The bug was the plain-visit resume check
+  trusting a locally-cached `expires_at`, which freezes the moment a session is
+  paused (only resume moves it forward). Time passing made a perfectly resumable
+  paused session look expired client-side, so a plain nav skipped straight to
+  starting a new session and hit 402, even with paused sessions sitting there
+  already paid for. Now asks the backend for the real status before trusting a
+  locally-remembered session; an explicit `?session=` link (from History) is
+  unchanged. The 402 screen also now leads with "Resume your paused session" when
+  one exists, instead of only "Buy More Credits".
+
 - [x] **Free-preview lesson player on the public course page** (readam-frontend- commit
   `5dd5463`). Backend unblocked anonymous access in `ada6cff`. New `PreviewLessonRow`
   makes an `is_preview` lesson row a button that opens a dialog and plays the video / renders
