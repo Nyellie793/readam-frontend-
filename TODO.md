@@ -38,6 +38,26 @@ Working tracker. Check items off as they ship. Updated as we go.
 
 ## Done
 
+- [x] **Free-course enrollment: security hole, staleness, and a missing "My Learning"
+  surface** (readam commits `d6c71fb`, `b5b5b22`; readam-frontend- commit `6573d13`). Found
+  while testing the Enroll Now flow, three real bugs in one thread:
+  - **Security**: `POST /v1/enrollments` never checked price at all — anyone could enroll
+    for free in any paid, published course by hitting the endpoint directly, and the
+    resulting Enrollment row genuinely unlocked every lesson. Fixed with a payment-existence
+    check (not a plain price check, since the same function is also called by the Fapshi
+    webhook for legitimate paid enrollments) — rejects with 402 only when price > 0, no
+    payment_reference (never set by the public route), and no successful Payment row for
+    that student+course. 5 new tests.
+  - **"Enrolled" reverting to "Enroll Now"**: `CourseCard`'s enrolled state was local-only,
+    seeded false every render — a refresh or filter change lost it. Backend now annotates
+    `is_enrolled` on every course card (same pattern as `is_saved`), frontend seeds from it.
+  - **No "My Learning" page**: `GET /v1/enrollments` was fully wired but never surfaced as a
+    page. Added `/dashboard/my-learning` + nav entry.
+  - Also cleaned up along the way: `is_premium` has zero server-side enforcement anywhere
+    (confirmed) — `CourseCard`'s free-check was `price === 0 && !is_premium`, now just
+    `price === 0` like everywhere else in the app, so a free course is never shown "Buy Now"
+    for 0 XAF again.
+
 - [x] **Signing in on a used browser could bounce straight to login** (readam-frontend-
   commit `527eab3`, regression from the previous fix below, caught same session). Two bugs:
   `clearSession()` never wiped `readam_active_ai_session` (the remembered last-AI-session
