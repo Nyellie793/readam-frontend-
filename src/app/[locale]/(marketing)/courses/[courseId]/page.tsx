@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { BookOpen, Lock, PlayCircle, FileText, ArrowLeft, Check, Eye } from "lucide-react";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
+import CoursePurchaseCta from "@/components/sections/CoursePurchaseCta";
 import { TutorInitials } from "@/components/sections/TutorInitial";
 import { initialsOf } from "@/lib/initials";
 import { getTranslations } from "next-intl/server";
@@ -59,7 +60,6 @@ export default async function PublicCoursePage({
 
   const modules = [...(course.modules ?? [])].sort((a, b) => a.order - b.order);
   const lessonCount = modules.reduce((n, m) => n + (m.lessons?.length ?? 0), 0);
-  const isFree = course.price === 0;
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -211,20 +211,7 @@ export default async function PublicCoursePage({
                 </div>
 
                 <div className="p-5">
-                  <p className="text-2xl font-black text-gray-900">
-                    {isFree ? "Free" : `${course.price.toLocaleString()} XAF`}
-                  </p>
-
-                  <Link
-                    href={isFree ? "/signup" : `/checkout?course=${course.id}`}
-                    className="mt-4 block rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-blue-700"
-                  >
-                    {isFree ? "Start learning free" : "Get this course"}
-                  </Link>
-
-                  <p className="mt-3 text-center text-[11px] text-gray-400">
-                    You will be asked to sign in first.
-                  </p>
+                  <CoursePurchaseCta courseId={course.id} price={course.price} />
 
                   <ul className="mt-5 space-y-2.5 border-t border-gray-50 pt-5">
                     {[
