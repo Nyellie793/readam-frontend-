@@ -38,6 +38,17 @@ Working tracker. Check items off as they ship. Updated as we go.
 
 ## Done
 
+- [x] **Signing in on a used browser could bounce straight to login** (readam-frontend-
+  commit `527eab3`, regression from the previous fix below, caught same session). Two bugs:
+  `clearSession()` never wiped `readam_active_ai_session` (the remembered last-AI-session
+  pointer), so a second account signing in on the same browser inherited the previous
+  account's session id; and the paused-session fix's backend status check would then 401 on
+  that foreign id, which `api.ts` treated as "your session died" and hard-redirected the
+  whole tab to `/login`, even with a perfectly valid token. Fixed both: `clearSession()` now
+  clears the AI session pointer too, and that lookup opts into a new `silentAuthFailure`
+  request flag so a 401 there just falls through to starting a fresh session instead of
+  nuking global auth state. Explicit `?session=` links (History) unaffected.
+
 - [x] **Paused AI session wrongly treated as expired, blocking a student with
   no new-session credits but usable paused ones** (readam-frontend- commit `84f785e`).
   Backend's credit model was confirmed correct — a credit is spent once at session
