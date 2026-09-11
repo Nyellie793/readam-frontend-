@@ -59,7 +59,9 @@
     "langFr": "Français",
     "langBilingual": "Bilingue",
     "allLanguages": "Toutes les langues",
-    "language": "Langue"
+    "language": "Langue",
+    "previewFailed": "Cet aperçu n'a pas pu être chargé. Veuillez réessayer.",
+    "previewUnsupported": "Un aperçu n'est pas encore disponible pour ce type de leçon."
   },
   "tutors": {
     "eyebrow": "Nos tuteurs",

@@ -59,7 +59,9 @@
     "langFr": "French",
     "langBilingual": "Bilingual",
     "allLanguages": "All languages",
-    "language": "Language"
+    "language": "Language",
+    "previewFailed": "This preview could not be loaded. Please try again.",
+    "previewUnsupported": "A preview isn't available for this lesson type yet."
   },
   "tutors": {
     "eyebrow": "Our Tutors",

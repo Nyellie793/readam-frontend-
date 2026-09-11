@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { BookOpen, Lock, PlayCircle, FileText, ArrowLeft, Check, Eye } from "lucide-react";
+import { BookOpen, ArrowLeft, Check } from "lucide-react";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
 import CoursePurchaseCta from "@/components/sections/CoursePurchaseCta";
+import PreviewLessonRow from "@/components/sections/PreviewLessonRow";
 import { TutorInitials } from "@/components/sections/TutorInitial";
 import { initialsOf } from "@/lib/initials";
 import { getTranslations } from "next-intl/server";
@@ -40,12 +41,6 @@ export async function generateMetadata({
       images: course.thumbnail_url ? [course.thumbnail_url] : undefined,
     },
   };
-}
-
-function formatDuration(seconds: number | null): string | null {
-  if (!seconds) return null;
-  const mins = Math.round(seconds / 60);
-  return mins < 60 ? `${mins} min` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
 }
 
 export default async function PublicCoursePage({
@@ -139,47 +134,9 @@ export default async function PublicCoursePage({
                       <ul className="divide-y divide-gray-50">
                         {[...(m.lessons ?? [])]
                           .sort((a, b) => a.order - b.order)
-                          .map((l) => {
-                            const duration = formatDuration(l.duration_seconds);
-                            return (
-                              <li
-                                key={l.id}
-                                className="flex items-center gap-3 px-5 py-3 text-sm text-gray-700"
-                              >
-                                {l.type === "video" ? (
-                                  <PlayCircle className="size-4 shrink-0 text-gray-400" />
-                                ) : (
-                                  <FileText className="size-4 shrink-0 text-gray-400" />
-                                )}
-                                <span className="min-w-0 flex-1 truncate">{l.title}</span>
-                                {/* The sample is a two-page extract of this
-                                    lesson, generated server-side. It exists on
-                                    the first PDF lesson only, so this renders
-                                    on exactly one row per course. */}
-                                {l.preview_url && (
-                                  <a
-                                    href={l.preview_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 transition hover:bg-blue-100"
-                                  >
-                                    <Eye className="size-3" />
-                                    Sample
-                                  </a>
-                                )}
-                                {l.is_preview ? (
-                                  <span className="shrink-0 rounded-full bg-teal-50 px-2.5 py-0.5 text-[11px] font-semibold text-teal-600">
-                                    Free preview
-                                  </span>
-                                ) : (
-                                  <Lock className="size-3.5 shrink-0 text-gray-300" />
-                                )}
-                                {duration && (
-                                  <span className="shrink-0 text-xs text-gray-400">{duration}</span>
-                                )}
-                              </li>
-                            );
-                          })}
+                          .map((l) => (
+                            <PreviewLessonRow key={l.id} lesson={l} courseId={course.id} />
+                          ))}
                       </ul>
                     </div>
                   ))}
