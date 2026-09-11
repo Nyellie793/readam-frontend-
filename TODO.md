@@ -6,18 +6,6 @@ Working tracker. Check items off as they ship. Updated as we go.
 
 ## Not started
 
-- [ ] **Course detail page — no lesson preview.** The marketing `/courses/[courseId]` page
-  shows a locked outline with no way to sample a free-preview lesson before buying.
-  **Backend unblocked:** `GET /v1/courses/{id}/lessons/{lesson_id}` now accepts anonymous
-  callers — serves the lesson when it's `is_preview=True` on a published course, 404
-  otherwise (readam commit `ada6cff`). Ready to wire: a player + calling that endpoint
-  for anonymous/not-enrolled visitors.
-
-- [ ] **Continue exactly where I left off, across a whole course.** Per-lesson resume
-  already works (`last_position_seconds`). Nothing tracks *which lesson* was last active
-  for a given enrollment — needs a backend field/query (not started) plus a new frontend
-  "my courses, resume" surface.
-
 - [ ] **Referral commissions.** Zero code exists anywhere — fully greenfield, backend not
   started.
   **Decided:** percentage of the *platform's* cut, not the tutor's share or the full price.
@@ -49,6 +37,44 @@ Working tracker. Check items off as they ship. Updated as we go.
 ---
 
 ## Done
+
+- [x] **Free-preview lesson player on the public course page** (readam-frontend- commit
+  `5dd5463`). Backend unblocked anonymous access in `ada6cff`. New `PreviewLessonRow`
+  makes an `is_preview` lesson row a button that opens a dialog and plays the video / renders
+  the PDF via `STUDENT.getLessonContent`, which already omits the Authorization header when
+  there's no token, so the same call works signed out. Non-preview lessons unchanged.
+
+- [x] **Continue exactly where I left off, across a whole course** (readam commit `a28a563`
+  backend, readam-frontend- commit `565adb1` frontend). `CourseDetailResponse` and
+  `RecentlyViewedItem` now carry `resume_lesson_id`/`resume_position_seconds`; null means no
+  resume point (never started, or finished — a finished course resets to lesson 1 on
+  purpose). The course page opens that lesson instead of always the first one. Recently-viewed
+  card needed no change, it already links to the course page and inherits the fix.
+
+- [x] **Video auto-advance didn't autoplay** (readam-frontend- commit `820765f`, found while
+  testing auto-advance above). `VideoPlayer` remounts a fresh `<video>` on every lesson change
+  (auto-advance, Up Next, outline click) but nothing called `.play()` on it — it loaded
+  seeked to the resume position and just sat there paused. Fixed in `onLoadedMetadata`.
+
+- [x] **Dashboard sidebars couldn't collapse** (readam-frontend- commit `418e75e`, came up
+  while testing on a narrow viewport). Left nav: `useSidebarCollapsed` hook (localStorage +
+  window event, same pattern as `readam_auth_change`) toggles `Sidebar` between full and
+  icon-only, persisted across navigation; the course-filter panel on `/dashboard/courses` is
+  unaffected. Right course-outline panel on the lesson page: page-local collapse to just a
+  toggle button, not persisted, since it's about one video at a time.
+
+- [x] **GCE pricing mixed into the AI Study Sessions page, and priced twice via Past
+  Questions** (readam-frontend- commits `3702458`, `dba2f28`). `/payment/ai-sessions` fetched
+  every product with no filter, so the single 5,000 XAF GCE package showed up as one more AI
+  plan; it now filters `entitlement_type !== "gce_content"` and GCE gets its own Plans-hub
+  tile straight to checkout. Separately, the whole Past Questions bundle flow
+  (3,000/7,500/11,000/18,000 XAF by subject count) sold only official/admin-authored
+  courses — content the 5,000 XAF GCE subscription already grants outright — so it was
+  pricing the same content again for up to 3.6x GCE's price. Removed entirely: the page, its
+  checkout branch, the three components and service methods behind it, the nav/hub entry
+  points. Past Questions courses are still browsable via Explore Courses' "Official" filter
+  and covered by GCE. Backend still has the now-unused `PAST_QUESTIONS_PRODUCTS` catalog and
+  its two routes — harmless dead code, flagged for the backend session, not removed here.
 
 - [x] **Auto-advance to next video** (readam-frontend- commit `12d1255`, landed while this
   session was on Saved courses). `handleProgress` now advances to the next lesson in
@@ -108,8 +134,9 @@ Working tracker. Check items off as they ship. Updated as we go.
 
 - The session-switching bug is the live thread — pick this back up first unless told
   otherwise. Still need to hear what happens on screen when a different session is clicked.
-- Lesson preview on `/courses/[courseId]` is now unblocked — see "Not started" above.
+- Referral commissions is the only "Not started" item left, and it's fully greenfield —
+  backend hasn't begun.
 - At some point, once enough of this list has shipped, do an end-to-end pass actually
   testing these rather than just reading the diffs: Google login device cap, preview
-  playback, purchase/completion emails landing in a real inbox, continue-where-left-off,
-  auto-advance, referrals once built.
+  playback, purchase/completion emails landing in a real inbox, continue-where-left-off on a
+  finished course specifically, referrals once built.
