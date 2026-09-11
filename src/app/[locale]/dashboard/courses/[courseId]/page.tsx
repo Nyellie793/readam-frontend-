@@ -122,6 +122,18 @@ export default function LessonPage() {
       last_position_seconds: positionSeconds,
       completed,
     }).catch(() => null);
+
+    // completed only ever arrives true from VideoPlayer's onEnded (pause just
+    // reports position), so this can't fire from a PDF/quiz lesson or a mid-
+    // watch pause — only a video actually finishing playing.
+    if (completed) {
+      const currentIndex = allLessons.findIndex((l) => l.id === selectedLessonId);
+      const next = currentIndex >= 0 ? allLessons[currentIndex + 1] : undefined;
+      // No check for whether `next` is locked: clicking a locked "Up Next" card
+      // already lands on the same paywall screen via the lesson endpoint's 403,
+      // so auto-advancing into one behaves exactly like a manual click there.
+      if (next) setSelectedLessonId(next.id);
+    }
   }
 
   if (courseLoading) {
