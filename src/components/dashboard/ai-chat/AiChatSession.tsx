@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useStoredUser } from "@/hooks/useStoredUser";
 import { cn } from "@/lib/utils";
+import { AI_ACTIVE_SESSION_KEY } from "@/lib/constants";
 import StudyPlanDialog, { type StudyBrief } from "./StudyPlanDialog";
 import SessionHistoryDialog from "./SessionHistoryDialog";
 import { formatDuration } from "@/lib/duration";
@@ -54,11 +55,13 @@ import { useTranslations } from "next-intl";
 // before the backend agreed, and a plain visit skipped straight to starting
 // (and paying for) a new session instead of dropping back into the one
 // already sitting there, paid for and paused.
-const ACTIVE_SESSION_KEY = "readam_active_ai_session";
+//
+// clearSession() (src/lib/auth.ts) wipes this same key on logout, so a
+// second account signing in on the same browser never inherits it.
 
 function readActiveSessionId(): string | null {
   try {
-    const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
+    const raw = localStorage.getItem(AI_ACTIVE_SESSION_KEY);
     if (!raw) return null;
     const stored = JSON.parse(raw) as { id: string };
     return stored.id ?? null;
@@ -68,11 +71,11 @@ function readActiveSessionId(): string | null {
 }
 
 function storeActiveSession(id: string) {
-  localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ id }));
+  localStorage.setItem(AI_ACTIVE_SESSION_KEY, JSON.stringify({ id }));
 }
 
 function clearActiveSession() {
-  localStorage.removeItem(ACTIVE_SESSION_KEY);
+  localStorage.removeItem(AI_ACTIVE_SESSION_KEY);
 }
 
 function timeAgo(iso: string): string {
@@ -303,7 +306,7 @@ export default function AiChatSession() {
           // it's genuinely usable. Any failure here just means start fresh;
           // it's not this student's problem to see.
           try {
-            const detail = await AI.getSession(impliedId);
+            const detail = await AI.getSession(impliedId, { silentAuthFailure: true });
             if (detail.status === "active" || detail.status === "paused") {
               resumed = detail;
             } else {

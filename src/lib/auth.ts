@@ -1,4 +1,4 @@
-import { TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY, ADMIN_ROLES } from "@/lib/constants";
+import { TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY, AI_ACTIVE_SESSION_KEY, ADMIN_ROLES } from "@/lib/constants";
 import type { User, AuthResponse } from "@/types/user.types";
 
 function notifyAuthChange(): void {
@@ -33,6 +33,10 @@ export function clearSession(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  // A leftover AI session id here belongs to whoever was signed in before —
+  // the next person to sign in on this browser must not have it silently
+  // looked up as "theirs" to resume.
+  localStorage.removeItem(AI_ACTIVE_SESSION_KEY);
   document.cookie = "readam_role=; path=/; max-age=0";
   document.cookie = "readam_auth=; path=/; max-age=0";
   if (typeof window !== "undefined") {

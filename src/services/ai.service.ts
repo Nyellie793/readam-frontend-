@@ -20,8 +20,11 @@ const AI = {
     api.post<AISessionResponse>("/v1/ai/sessions", { lesson_id: lessonId ?? null }, true),
 
   // GET /v1/ai/sessions/:id
-  getSession: (sessionId: string) =>
-    api.get<AISessionDetailResponse>(`/v1/ai/sessions/${sessionId}`),
+  // silentAuthFailure: set true for a background "is this still mine to
+  // resume?" probe — a 401 there (a stale or foreign session id, say) must
+  // not log the whole app out, only fall through to starting a fresh one.
+  getSession: (sessionId: string, opts?: { silentAuthFailure?: boolean }) =>
+    api.get<AISessionDetailResponse>(`/v1/ai/sessions/${sessionId}`, true, opts),
 
   // GET /v1/ai/sessions
   listSessions: () => api.get<AISessionListItem[]>("/v1/ai/sessions"),

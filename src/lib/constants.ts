@@ -13,6 +13,11 @@ export const SITE_URL =
 export const TOKEN_KEY         = "readam_access_token";
 export const REFRESH_TOKEN_KEY = "readam_refresh_token";
 export const USER_KEY          = "readam_user";
+// The last AI session a student was in, so a plain visit to AI Chat resumes
+// it instead of starting (and paying for) a new one. Per-account, not
+// per-browser — clearSession() must wipe this too, or the next person to
+// sign in on the same browser inherits someone else's session pointer.
+export const AI_ACTIVE_SESSION_KEY = "readam_active_ai_session";
 
 // UserRole enum from API only has "admin" — no super_admin
 export const ADMIN_ROLES = ["admin"] as const;

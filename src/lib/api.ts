@@ -92,11 +92,25 @@ async function refreshAccessToken(): Promise<string | null> {
   return refreshPromise;
 }
 
+interface RequestOpts {
+  /**
+   * A best-effort background probe has no business logging the whole app
+   * out because the one thing it happened to check turned out stale or not
+   * this user's — that used to be indistinguishable here from an actually
+   * dead session, so any 401 anywhere, however low-stakes the caller
+   * considered it, forced clearSession() and a hard redirect to /login. Set
+   * this to fail like an ordinary error instead: thrown normally, caller's
+   * own try/catch decides what to do, no global side effect.
+   */
+  silentAuthFailure?: boolean;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
   auth = false,
-  retried = false
+  retried = false,
+  opts: RequestOpts = {}
 ): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -111,11 +125,13 @@ async function request<T>(
   if (res.status === 401 && auth && !retried) {
     const newToken = await refreshAccessToken();
     if (newToken) {
-      return request<T>(path, options, auth, true);
+      return request<T>(path, options, auth, true, opts);
     }
-    clearSession();
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
+    if (!opts.silentAuthFailure) {
+      clearSession();
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
     throw new ApiRequestError(401, "Session expired. Please log in again.");
   }
@@ -197,7 +213,7 @@ export async function putToPresigned(uploadUrl: string, file: File): Promise<voi
 }
 
 export const api = {
-  get:    <T>(path: string, auth = true)                 => request<T>(path, { method: "GET" }, auth),
+  get:    <T>(path: string, auth = true, opts?: RequestOpts) => request<T>(path, { method: "GET" }, auth, false, opts),
   post:   <T>(path: string, body: unknown, auth = false) => request<T>(path, { method: "POST",  body: JSON.stringify(body) }, auth),
   patch:  <T>(path: string, body: unknown, auth = true)  => request<T>(path, { method: "PATCH", body: JSON.stringify(body) }, auth),
   delete: <T>(path: string, auth = true)                 => request<T>(path, { method: "DELETE" }, auth),
