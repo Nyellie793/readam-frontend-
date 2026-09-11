@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Logo from "@/components/shared/Logo";
 import { STUDENT_NAV, AI_TUTOR_SUB_NAV } from "@/constants/student-nav";
 import { cn } from "@/lib/utils";
-import { BookOpen, Sparkles, FileText, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { BookOpen, Sparkles, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export interface SidebarProps {
   onNavigate?: () => void;
@@ -145,19 +145,6 @@ export default function Sidebar({ onNavigate, collapsed = false, onToggleCollaps
                   >
                     <Sparkles className="size-3.5 shrink-0" />
                     AI Study Sessions
-                  </Link>
-                  <Link
-                    href="/payment/past-questions"
-                    onClick={onNavigate}
-                    className={cn(
-                      "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition-colors",
-                      pathname === "/payment/past-questions"
-                        ? "bg-blue-50 text-blue-700 font-bold"
-                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                    )}
-                  >
-                    <FileText className="size-3.5 shrink-0" />
-                    Past Questions
                   </Link>
                 </div>
               )}

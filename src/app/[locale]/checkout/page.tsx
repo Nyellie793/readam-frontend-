@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import SubscriptionCheckout from "@/components/payment/SubscriptionCheckout";
 import CourseCheckout from "@/components/payment/CourseCheckout";
-import PastQuestionsCheckout from "@/components/payment/PastQuestionsCheckout";
 import { useTranslations } from "next-intl";
 
 /**
@@ -23,17 +22,6 @@ function CheckoutContent() {
 
   const productCode = searchParams.get("product");
   const courseId = searchParams.get("course");
-  const pastQProduct = searchParams.get("pastq");
-  const subjectsParam = searchParams.get("subjects");
-
-  if (pastQProduct) {
-    return (
-      <PastQuestionsCheckout
-        productCode={pastQProduct}
-        courseIds={subjectsParam ? subjectsParam.split(",") : []}
-      />
-    );
-  }
 
   if (productCode) return <SubscriptionCheckout productCode={productCode} />;
   if (courseId) return <CourseCheckout courseId={courseId} />;

@@ -21,7 +21,6 @@ import type {
   NotificationItem,
   SubscriptionPaymentResponse,
   PaymentResponse,
-  PastQuestionsProductResponse,
 } from "@/types/api.types";
 
 const STUDENT = {
@@ -80,22 +79,6 @@ const STUDENT = {
     phone: string;
     medium?: "mobile money" | "orange money";
   }) => api.post<PaymentResponse>("/v1/payments/initiate", body, true),
-
-  // GET /v1/payments/past-questions-products
-  getPastQuestionsProducts: () =>
-    api.get<PastQuestionsProductResponse[]>("/v1/payments/past-questions-products"),
-
-  // POST /v1/payments/initiate-past-questions — buy a Past Questions subject bundle
-  initiatePastQuestionsPayment: (body: {
-    product_code: string;
-    course_ids: string[];
-    phone: string;
-    medium?: "mobile money" | "orange money";
-  }) => api.post<PaymentResponse>("/v1/payments/initiate-past-questions", body, true),
-
-  // GET /v1/courses?official_only=true — browse admin-authored Past Questions subjects
-  getPastQuestionsCourses: (page = 1) =>
-    api.get<PaginatedCoursesResponse>(`/v1/courses?official_only=true&page=${page}&page_size=100`),
 
   // POST /v1/courses/:courseId/save — bookmark a course
   saveCourse: (courseId: string) =>

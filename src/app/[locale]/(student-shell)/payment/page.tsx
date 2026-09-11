@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, FileText, BookOpen, GraduationCap, ArrowRight, ShieldCheck } from "lucide-react";
+import { Sparkles, BookOpen, GraduationCap, ArrowRight, ShieldCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 /**
@@ -12,10 +12,15 @@ import { getTranslations } from "next-intl/server";
  *
  * GCE content is a single 5,000 XAF product (product_code: gce_annual) —
  * there's exactly one package, so it links straight to checkout rather than
- * a listing page like AI sessions and Past Questions have. It used to only
- * show up mixed into the AI Study Sessions grid (both ride the same
- * GET /v1/subscriptions/products endpoint), which read as one more AI plan
- * rather than the separate GCE subscription it actually is.
+ * a listing page like AI sessions has.
+ *
+ * There used to be a fourth tile here for Past Questions bundles
+ * (3,000/7,500/11,000/18,000 XAF by subject count), with its own separate
+ * checkout flow. Every course sold that way was official/admin-authored —
+ * exactly the content the 5,000 XAF GCE subscription already grants access
+ * to — so it was pricing the same content twice, for more than GCE itself
+ * costs. Removed. Past Questions courses are still fully browsable from
+ * Explore Courses (the "Official" filter) and covered outright by GCE.
  */
 const OPTIONS = [
   {
@@ -33,14 +38,6 @@ const OPTIONS = [
     titleKey: "optAiTitle",
     bodyKey: "optAiBody",
     ctaKey: "optAiCta",
-  },
-  {
-    href: "/payment/past-questions",
-    icon: FileText,
-    tone: "bg-orange-50 text-orange-500",
-    titleKey: "optPastTitle",
-    bodyKey: "optPastBody",
-    ctaKey: "optPastCta",
   },
   {
     href: "/dashboard/courses",

@@ -54,12 +54,8 @@ export default function Pricing() {
         {/* Cards */}
         <div className="mx-auto grid max-w-md gap-6">
 
-          {/*
-            Every card's CTA was a bare <Button> with no handler, so the whole
-            pricing section was inert. These four plans are the Past Questions
-            bundles (past_q_single / small / medium / full), so the CTA goes to
-            the real purchase flow where the subjects are chosen.
-          */}
+          {/* Every card's CTA used to be a bare <Button> with no handler, so
+              the whole section was inert. */}
           {plans.map((plan) => {
 
             const styles = {

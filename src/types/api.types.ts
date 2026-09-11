@@ -599,14 +599,6 @@ export interface CourseListItem {
     created_at: string;
   }
 
-  export interface PastQuestionsProductResponse {
-    code: string;
-    name: string;
-    description: string;
-    price_xaf: number;
-    subject_count: number | null;
-  }
-
   export interface SessionSummaryResponse {
     session_id: string;
     session_type: "lesson" | "general";
