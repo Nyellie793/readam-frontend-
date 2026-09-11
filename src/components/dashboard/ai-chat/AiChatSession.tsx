@@ -33,6 +33,8 @@ import SessionSummaryPanel from "./SessionSummaryPanel";
 import type {
   AIMessageResponse,
   AISessionResponse,
+  AISessionDetailResponse,
+  AISessionListItem,
   SessionSummaryResponse,
   QuizResponse,
 } from "@/types/api.types";
@@ -44,21 +46,33 @@ import { useTranslations } from "next-intl";
 // Remembers the last active session so navigating away and back (e.g. via the
 // sidebar) resumes it instead of silently starting a new one and burning
 // another AI credit.
+//
+// Whether it's actually still resumable is decided from the backend's own
+// status, not from a locally-cached expires_at: that field freezes the
+// moment a session is paused (only resume moves it forward, pause doesn't),
+// so a paused session left alone for a while looked "expired" here well
+// before the backend agreed, and a plain visit skipped straight to starting
+// (and paying for) a new session instead of dropping back into the one
+// already sitting there, paid for and paused.
 const ACTIVE_SESSION_KEY = "readam_active_ai_session";
 
 function readActiveSessionId(): string | null {
   try {
     const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
     if (!raw) return null;
-    const stored = JSON.parse(raw) as { id: string; expiresAt: string };
-    return new Date(stored.expiresAt).getTime() > Date.now() ? stored.id : null;
+    const stored = JSON.parse(raw) as { id: string };
+    return stored.id ?? null;
   } catch {
     return null;
   }
 }
 
-function storeActiveSession(id: string, expiresAt: string) {
-  localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ id, expiresAt }));
+function storeActiveSession(id: string) {
+  localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ id }));
+}
+
+function clearActiveSession() {
+  localStorage.removeItem(ACTIVE_SESSION_KEY);
 }
 
 function timeAgo(iso: string): string {
@@ -219,6 +233,12 @@ export default function AiChatSession() {
   const [activeQuiz, setActiveQuiz] = useState<QuizResponse | null>(null);
   const [cachedQuizzesById, setCachedQuizzesById] = useState<Record<string, QuizResponse>>({});
 
+  // Only fetched to back the "no new credits, but you have these" message on
+  // the blocked screen below — a student out of credit for a *new* session
+  // has no way to tell from "No AI sessions remaining" alone that a session
+  // they already paid for is just sitting there, paused, free to continue.
+  const [resumableSessions, setResumableSessions] = useState<AISessionListItem[] | null>(null);
+
   useEffect(() => {
     STUDENT.getGamification().then((g) => setStreakDays(g.current_streak_days)).catch(() => null);
     STUDENT.getNotifications().then((d) => setHasUnread(d.unread_count > 0)).catch(() => null);
@@ -265,28 +285,50 @@ export default function AiChatSession() {
 
     (async () => {
       try {
-        // A plain nav (no explicit new-session intent) resumes the last active
-        // session instead of silently starting — and paying for — a new one.
-        const resumeId =
-          existingSessionId ??
-          (!lessonId && !intent && !topic ? readActiveSessionId() : null);
+        // An explicit ?session= link (from History) opens that session no
+        // matter its status — expired/ended ones are meant to still be
+        // viewable. A plain nav with no explicit intent instead resumes
+        // whatever was last active, but only if the backend still agrees
+        // it's active or paused — an implicit resume has no business landing
+        // a student on a transcript they can't do anything with, that's what
+        // the explicit case is for.
+        const impliedId = !lessonId && !intent && !topic ? readActiveSessionId() : null;
 
-        if (resumeId) {
-          const detail = await AI.getSession(resumeId);
-          setSession(detail);
-          setMessages(detail.messages);
-          storeActiveSession(detail.id, detail.expires_at);
-          if (!existingSessionId) {
-            processedParams.current = `session=${detail.id}`;
-            router.replace(`/dashboard/ai-tutor/ai-chat?session=${detail.id}`);
+        let resumed: AISessionDetailResponse | null = null;
+        if (existingSessionId) {
+          // Explicit link — whatever comes back (or throws) is authoritative.
+          resumed = await AI.getSession(existingSessionId);
+        } else if (impliedId) {
+          // Implicit candidate — only trust it if the backend still agrees
+          // it's genuinely usable. Any failure here just means start fresh;
+          // it's not this student's problem to see.
+          try {
+            const detail = await AI.getSession(impliedId);
+            if (detail.status === "active" || detail.status === "paused") {
+              resumed = detail;
+            } else {
+              clearActiveSession();
+            }
+          } catch {
+            clearActiveSession();
           }
-          await refreshSummary(detail.id);
+        }
+
+        if (resumed) {
+          setSession(resumed);
+          setMessages(resumed.messages);
+          storeActiveSession(resumed.id);
+          if (!existingSessionId) {
+            processedParams.current = `session=${resumed.id}`;
+            router.replace(`/dashboard/ai-tutor/ai-chat?session=${resumed.id}`);
+          }
+          await refreshSummary(resumed.id);
           return;
         }
 
         const started = await AI.startSession(lessonId ?? undefined);
         setSession(started);
-        storeActiveSession(started.id, started.expires_at);
+        storeActiveSession(started.id);
         processedParams.current = `session=${started.id}`;
         router.replace(`/dashboard/ai-tutor/ai-chat?session=${started.id}`);
         await refreshSummary(started.id);
@@ -347,6 +389,13 @@ export default function AiChatSession() {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     })();
   }, [searchParams]);
+
+  useEffect(() => {
+    if (initError?.status !== 402) return;
+    AI.listSessions()
+      .then((items) => setResumableSessions(items.filter((s) => s.status === "active" || s.status === "paused")))
+      .catch(() => setResumableSessions([]));
+  }, [initError]);
 
   useEffect(() => {
     if (!session) return;
@@ -534,6 +583,13 @@ export default function AiChatSession() {
   // ── Error / blocked states ───────────────────────────────────────────────────
   if (initError) {
     const noCredits = initError.status === 402;
+    // "No AI sessions remaining" is about *new* sessions specifically — a
+    // student who has spent every credit but still has a session sitting
+    // paused, already paid for, has no way to tell that from the message
+    // alone. Surface it directly instead of leaving it to a small text link.
+    const resumable = resumableSessions ?? [];
+    const hasResumable = noCredits && resumable.length > 0;
+
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-3 px-6 text-center">
         <p className="text-lg font-bold text-gray-900">
@@ -541,15 +597,33 @@ export default function AiChatSession() {
         </p>
         <p className="max-w-sm text-sm text-gray-500">
           {noCredits
-            ? t("noCreditsBody")
+            ? hasResumable
+              ? t("noNewCreditsBody")
+              : t("noCreditsBody")
             : initError.detail}
         </p>
-        {noCredits ? (
+
+        {hasResumable ? (
+          <>
+            <Link
+              href={`/dashboard/ai-tutor/ai-chat?session=${resumable[0].id}`}
+              className="mt-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              {t("resumeLastSession")}
+            </Link>
+            <Link
+              href="/payment/ai-sessions"
+              className="text-xs font-semibold text-gray-500 underline underline-offset-2 hover:text-gray-700"
+            >
+              {t("buyMoreCredits")}
+            </Link>
+          </>
+        ) : noCredits ? (
           <Link
             href="/payment/ai-sessions"
             className="mt-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
           >
-            Buy More Credits
+            {t("buyMoreCredits")}
           </Link>
         ) : (
           <Link

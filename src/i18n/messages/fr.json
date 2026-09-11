@@ -720,7 +720,10 @@
     "savedEmptyBody": "Touchez le signet sur un cours pour le retrouver ici plus tard.",
     "loadMore": "Charger plus",
     "showCourseContent": "Afficher le contenu du cours",
-    "hideCourseContent": "Masquer le contenu du cours"
+    "hideCourseContent": "Masquer le contenu du cours",
+    "noNewCreditsBody": "Vous avez utilisé tous vos crédits pour une nouvelle session, mais au moins une session déjà payée reste en pause, libre à continuer.",
+    "resumeLastSession": "Reprendre votre session en pause",
+    "buyMoreCredits": "Acheter plus de crédits"
   },
   "tutor": {
     "dashboard": "Tableau de bord",
