@@ -22,7 +22,11 @@ export default function CourseCard({
 }) {
   const t = useTranslations("dash");
   const isVideo = course.has_video;
-  const isFree = course.price === 0 && !course.is_premium;
+  // Free means price 0, full stop. is_premium has no server-side enforcement
+  // anywhere (it's a pure display flag), so a 0-priced course with it set
+  // used to fall into the paid "Buy Now" branch below and send a student to
+  // a checkout page for 0 XAF.
+  const isFree = course.price === 0;
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
   const [saved, setSaved] = useState(course.is_saved);
