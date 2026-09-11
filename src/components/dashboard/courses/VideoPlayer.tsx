@@ -140,9 +140,20 @@ export default function VideoPlayer({
         crossOrigin="anonymous"
         className="aspect-video w-full bg-black"
         onLoadedMetadata={() => {
-          if (videoRef.current && startAtSeconds) {
-            videoRef.current.currentTime = startAtSeconds;
+          const video = videoRef.current;
+          if (!video) return;
+          if (startAtSeconds) {
+            video.currentTime = startAtSeconds;
           }
+          // Every lesson change — auto-advance, "Up Next", or picking one from
+          // the outline — remounts this element with a new src (key={src}),
+          // which loads paused. Nothing used to press play again, so the
+          // player sat there ready but silent until the student clicked it
+          // themselves.
+          void video.play().catch(() => {
+            // Autoplay refused (browser policy on first load with no prior
+            // interaction, most likely) — controls are still there.
+          });
         }}
         onTimeUpdate={handleTimeUpdate}
         onPause={() => reportProgress()}
