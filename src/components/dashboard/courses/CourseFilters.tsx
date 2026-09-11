@@ -34,9 +34,9 @@ export default function CourseFilters({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Home, Explore Courses, Saved, AI Tutor — the browsing-related items, minus
-  // Payments and Settings.
-  const navItems = STUDENT_NAV.slice(0, 4);
+  // Home, My Learning, Explore Courses, Saved, AI Tutor — the browsing-related
+  // items, minus Payments and Settings.
+  const navItems = STUDENT_NAV.slice(0, 5);
 
   const category = searchParams.get("category") ?? "";
   const checkedTypes = searchParams.getAll("content_type");

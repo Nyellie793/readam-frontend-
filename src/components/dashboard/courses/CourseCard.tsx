@@ -28,7 +28,10 @@ export default function CourseCard({
   // a checkout page for 0 XAF.
   const isFree = course.price === 0;
   const [enrolling, setEnrolling] = useState(false);
-  const [enrolled, setEnrolled] = useState(false);
+  // Seeded from the server, not always false — otherwise the badge only ever
+  // reflected "did I just click this in the current render," and reverted to
+  // "Enroll Now" the instant the card re-rendered from a fresh fetch.
+  const [enrolled, setEnrolled] = useState(course.is_enrolled);
   const [saved, setSaved] = useState(course.is_saved);
   const [savingBusy, setSavingBusy] = useState(false);
 

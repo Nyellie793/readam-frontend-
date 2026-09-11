@@ -1,6 +1,7 @@
 import {
   Home,
   BookOpen,
+  GraduationCap,
   Bookmark,
   Sparkles,
   CreditCard,
@@ -12,6 +13,7 @@ import type { NavItem } from "@/types/dashboard.types";
 
 export const STUDENT_NAV: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: Home },
+  { label: "My Learning", href: "/dashboard/my-learning", icon: GraduationCap },
   { label: "Explore Courses", href: "/dashboard/courses", icon: BookOpen },
   { label: "Saved", href: "/dashboard/saved", icon: Bookmark },
   { label: "AI Tutor", href: "/dashboard/ai-tutor", icon: Sparkles },

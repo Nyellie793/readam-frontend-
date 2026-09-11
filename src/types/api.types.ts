@@ -19,6 +19,9 @@ export interface CourseListItem {
     updated_at: string;
     is_saved: boolean;
     has_video: boolean;
+    // Whether the current user has an active enrollment in this course.
+    // Always false for an anonymous caller.
+    is_enrolled: boolean;
   }
 
   export interface SavedCourseResponse {

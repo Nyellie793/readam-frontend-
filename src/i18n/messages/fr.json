@@ -723,7 +723,14 @@
     "hideCourseContent": "Masquer le contenu du cours",
     "noNewCreditsBody": "Vous avez utilisé tous vos crédits pour une nouvelle session, mais au moins une session déjà payée reste en pause, libre à continuer.",
     "resumeLastSession": "Reprendre votre session en pause",
-    "buyMoreCredits": "Acheter plus de crédits"
+    "buyMoreCredits": "Acheter plus de crédits",
+    "lessons": "leçons",
+    "continue": "Continuer",
+    "enrolledOn": "Inscrit le",
+    "myLearningTitle": "Mes cours",
+    "myLearningSubtitle": "Tous les cours auxquels vous êtes inscrit, au même endroit.",
+    "myLearningEmptyTitle": "Vous n'êtes inscrit à aucun cours pour l'instant",
+    "myLearningEmptyBody": "Inscrivez-vous à un cours gratuit ou achetez-en un pour le voir apparaître ici."
   },
   "tutor": {
     "dashboard": "Tableau de bord",

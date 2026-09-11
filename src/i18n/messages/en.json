@@ -723,7 +723,14 @@
     "hideCourseContent": "Hide course content",
     "noNewCreditsBody": "You've used all your credits for a new session, but at least one you already paid for is still paused, free to continue.",
     "resumeLastSession": "Resume your paused session",
-    "buyMoreCredits": "Buy More Credits"
+    "buyMoreCredits": "Buy More Credits",
+    "lessons": "lessons",
+    "continue": "Continue",
+    "enrolledOn": "Enrolled",
+    "myLearningTitle": "My Learning",
+    "myLearningSubtitle": "Every course you're enrolled in, in one place.",
+    "myLearningEmptyTitle": "You haven't enrolled in anything yet",
+    "myLearningEmptyBody": "Enrol in a free course or buy one to see it show up here."
   },
   "tutor": {
     "dashboard": "Dashboard",
