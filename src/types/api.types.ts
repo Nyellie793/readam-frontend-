@@ -239,10 +239,70 @@ export interface CourseListItem {
     amount: number;
     status: string;
     created_at: string;
+    /** The influencer code typed at checkout, if any. Always null for payouts. */
+    promo_code: string | null;
   }
 
   export interface AdminTransactionsResponse {
     items: AdminTransactionItem[];
+    total: number;
+    page: number;
+    page_size: number;
+  }
+
+  // ── Promo codes ───────────────────────────────────────────────────────────
+  //
+  // Influencer attribution codes. A code belongs to no user; a student types
+  // it at course checkout and the purchase is counted for that code. It never
+  // changes the price.
+
+  /** GET /v1/promo-codes/{code} — the canonical form of a recognised code. */
+  export interface PromoCodeCheckResponse {
+    code: string;
+  }
+
+  export interface AdminPromoCodeItem {
+    id: string;
+    code: string;
+    /** Who holds it, e.g. "Jane (TikTok)". Admin-only; never shown to students. */
+    label: string | null;
+    is_active: boolean;
+    created_at: string;
+    /** Payments Fapshi confirmed, and what they were worth. */
+    successful_purchases: number;
+    revenue_xaf: number;
+    /** Every payment that carried the code, including failed and pending. */
+    total_attempts: number;
+    last_used_at: string | null;
+  }
+
+  export interface PromoCodeSummary {
+    total_codes: number;
+    active_codes: number;
+    successful_purchases: number;
+    revenue_xaf: number;
+  }
+
+  export interface AdminPromoCodesResponse {
+    items: AdminPromoCodeItem[];
+    total: number;
+    page: number;
+    page_size: number;
+    /** Platform-wide, not per page. */
+    summary: PromoCodeSummary;
+  }
+
+  export interface PromoCodePurchaseItem {
+    payment_id: string;
+    student_name: string;
+    course_title: string | null;
+    amount: number;
+    status: "pending" | "successful" | "failed" | "expired";
+    created_at: string;
+  }
+
+  export interface PromoCodePurchasesResponse {
+    items: PromoCodePurchaseItem[];
     total: number;
     page: number;
     page_size: number;
@@ -439,6 +499,7 @@ export interface CourseListItem {
     phone: string | null;
     medium: string | null;
     status: "pending" | "successful" | "failed" | "expired";
+    promo_code_id: string | null;
     webhook_received_at: string | null;
     created_at: string;
     course_title: string | null;
@@ -598,6 +659,8 @@ export interface CourseListItem {
     medium: string | null;
     status: "pending" | "successful" | "failed" | "expired";
     bundle_course_ids: string[] | null;
+    /** Set when the purchase carried a promo code. */
+    promo_code_id: string | null;
     webhook_received_at: string | null;
     created_at: string;
   }
@@ -847,6 +910,14 @@ export interface CourseSalesPoint {
   sales: number;
 }
 
+/** Sales of one course that carried one promo code. */
+export interface CoursePromoSales {
+  code: string;
+  label: string | null;
+  sales: number;
+  revenue: number;
+}
+
 export interface CourseSalesReport {
   course_id: string;
   title: string;
@@ -857,5 +928,50 @@ export interface CourseSalesReport {
   total_sales: number;
   /** Can exceed total_sales: bundle buyers enrol without a per-course payment. */
   total_enrollments: number;
+  /** total_sales split by whether a promo code was typed; they always add up. */
+  sales_with_promo: number;
+  sales_without_promo: number;
+  by_promo_code: CoursePromoSales[];
   points: CourseSalesPoint[];
+}
+
+// ── Sales by course ───────────────────────────────────────────────────────
+
+/** One course's lifetime sales, split by whether a promo code was used. */
+export interface AdminCourseSalesItem {
+  id: string;
+  title: string;
+  tutor_name: string | null;
+  price: number;
+  status: "draft" | "pending_review" | "published" | "rejected";
+  /** Active enrolments: includes bundle buyers and grants, so can exceed purchases. */
+  students: number;
+  /** Successful direct payments for this course. */
+  purchases: number;
+  purchases_with_promo: number;
+  purchases_without_promo: number;
+  revenue: number;
+  revenue_with_promo: number;
+  last_purchase_at: string | null;
+}
+
+/** Platform-wide, regardless of the list's filters. */
+export interface CourseSalesTotals {
+  purchases: number;
+  purchases_with_promo: number;
+  purchases_without_promo: number;
+  revenue: number;
+  revenue_with_promo: number;
+  students: number;
+}
+
+export type CourseSalesSort = "purchases" | "revenue" | "students" | "newest";
+
+export interface AdminCourseSalesResponse {
+  items: AdminCourseSalesItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  totals: CourseSalesTotals;
+  currency: string;
 }

@@ -536,7 +536,16 @@
     "nothingBody": "Ce lien de paiement ne référence aucun produit. Choisissez une formule ou un cours et réessayez.",
     "viewPlans": "Voir les formules",
     "browseCourses": "Parcourir les cours",
-    "aiSessionsIntro": "Accélérez votre apprentissage avec des sessions d'étude personnalisées pilotées par l'IA. Chaque session cible vos difficultés d'examen et vous fait progresser rapidement sur les sujets complexes."
+    "aiSessionsIntro": "Accélérez votre apprentissage avec des sessions d'étude personnalisées pilotées par l'IA. Chaque session cible vos difficultés d'examen et vous fait progresser rapidement sur les sujets complexes.",
+    "promoTitle": "Code promo ou de parrainage",
+    "promoHint": "Vous avez un code d'un créateur ou d'un ami ? Saisissez-le ici pour qu'il soit crédité. Cela ne change pas votre prix.",
+    "promoPlaceholder": "ex. JANE10",
+    "promoApply": "Appliquer",
+    "promoChecking": "Vérification…",
+    "promoApplied": "Code appliqué",
+    "promoInvalid": "Ce code promo n'est pas valide. Vérifiez-le et réessayez.",
+    "promoRemove": "Retirer",
+    "promoCode": "Code promo"
   },
   "dash": {
     "goodMorning": "Bonjour",

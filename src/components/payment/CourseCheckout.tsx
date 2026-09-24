@@ -6,6 +6,7 @@ import { ArrowLeft, Lock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PaymentMethodSelector, { PaymentMethod } from "@/components/payment/PaymentMethodSelector";
 import PaymentDetailsForm from "@/components/payment/PaymentDetailsForm";
+import PromoCodeField from "@/components/payment/PromoCodeField";
 import OrderSummary from "@/components/payment/OrderSummary";
 import STUDENT from "@/services/student.service";
 import { errorMessage } from "@/lib/api";
@@ -17,7 +18,13 @@ const POLL_TIMEOUT_MS = 3 * 60 * 1000;
 
 type Stage = "loading" | "not-found" | "form" | "pending" | "still-pending" | "success" | "failed";
 
-export default function CourseCheckout({ courseId }: { courseId: string }) {
+interface CourseCheckoutProps {
+  courseId: string;
+  /** From `?promo=` on the checkout URL, so an influencer's link pre-fills their code. */
+  initialPromoCode?: string | null;
+}
+
+export default function CourseCheckout({ courseId, initialPromoCode }: CourseCheckoutProps) {
   const t = useTranslations("payment");
   const [course, setCourse] = useState<CourseDetailResponse | null>(null);
   const [stage, setStage] = useState<Stage>("loading");
@@ -26,6 +33,9 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
   const [errorText, setErrorText] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [resolvedPayment, setResolvedPayment] = useState<PaymentResponse | null>(null);
+  // The canonical code the API confirmed, or null. Attribution only — the
+  // amount charged is always course.price.
+  const [promoCode, setPromoCode] = useState<string | null>(null);
 
   useEffect(() => {
     STUDENT.getCourse(courseId)
@@ -80,6 +90,7 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
         course_id: course.id,
         phone,
         medium: method === "mtn" ? "mobile money" : "orange money",
+        ...(promoCode ? { promo_code: promoCode } : {}),
       });
       setPaymentId(payment.id);
       setStage("pending");
@@ -150,6 +161,12 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
             <div className="flex items-center justify-between">
               <span>{t("method")}</span>
               <span className="font-bold text-gray-900">{resolvedPayment.medium}</span>
+            </div>
+          )}
+          {resolvedPayment?.promo_code_id && promoCode && (
+            <div className="flex items-center justify-between">
+              <span>{t("promoCode")}</span>
+              <span className="font-bold tracking-widest text-gray-900">{promoCode}</span>
             </div>
           )}
         </div>
@@ -226,6 +243,14 @@ export default function CourseCheckout({ courseId }: { courseId: string }) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <PaymentMethodSelector selected={method} onChange={setMethod} />
+          {/* After "Try again" the field remounts; seeding it with the code that
+              was applied re-checks and re-shows it, so the parent never sends a
+              code the student can no longer see. */}
+          <PromoCodeField
+            initialCode={promoCode ?? initialPromoCode}
+            onChange={setPromoCode}
+            disabled={submitting}
+          />
           <PaymentDetailsForm onPay={handlePay} loading={submitting} />
           {errorText && <p className="text-sm text-red-500">{errorText}</p>}
         </div>

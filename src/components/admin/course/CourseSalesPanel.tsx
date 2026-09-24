@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, Loader2, TrendingUp, Users, Receipt } from "lucide-react";
+import { Download, Loader2, Ticket, TrendingUp, Users, Receipt } from "lucide-react";
 import ADMIN from "@/services/admin.service";
 import type { CourseSalesReport } from "@/types/api.types";
 
@@ -52,8 +52,13 @@ export default function CourseSalesPanel({ courseId }: { courseId: string }) {
       ["Tutor", data.tutor_name ?? ""],
       ["Price", String(data.price)],
       ["Total sales", String(data.total_sales)],
+      ["Sales with a promo code", String(data.sales_with_promo)],
+      ["Sales without a promo code", String(data.sales_without_promo)],
       ["Total revenue", String(data.total_revenue)],
       ["Active enrolments", String(data.total_enrollments)],
+      ...(data.by_promo_code.length
+        ? [[], ["Promo code", "Sales", `Revenue (${data.currency})`], ...data.by_promo_code.map((p) => [p.code, String(p.sales), String(p.revenue)])]
+        : []),
     ];
     const csv = rows.map((r) => r.join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
@@ -130,6 +135,49 @@ export default function CourseSalesPanel({ courseId }: { courseId: string }) {
               are enrolled without a payment recorded against this course.
             </p>
           )}
+
+          {/* Who came through a promo code, and who did not */}
+          <div className="mt-4 rounded-xl border border-gray-100 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400">
+                <Ticket className="size-3.5" />
+                Promo codes in this window
+              </p>
+              <p className="text-xs text-gray-600">
+                <span className="font-bold tabular-nums text-gray-900">{data.sales_with_promo}</span>{" "}
+                with a code ·{" "}
+                <span className="font-bold tabular-nums text-gray-900">{data.sales_without_promo}</span>{" "}
+                without
+              </p>
+            </div>
+            {data.total_sales > 0 && (
+              <div className="mt-2 flex h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-2 bg-blue-600"
+                  style={{ width: `${(data.sales_with_promo / data.total_sales) * 100}%` }}
+                  title={`${data.sales_with_promo} with a promo code`}
+                />
+              </div>
+            )}
+            {data.by_promo_code.length > 0 ? (
+              <ul className="mt-3 divide-y divide-gray-50 text-xs">
+                {data.by_promo_code.map((p) => (
+                  <li key={p.code} className="flex items-center justify-between py-1.5">
+                    <span>
+                      <span className="font-mono font-bold tracking-widest text-gray-900">{p.code}</span>
+                      {p.label && <span className="ml-2 text-gray-400">{p.label}</span>}
+                    </span>
+                    <span className="tabular-nums text-gray-600">
+                      {p.sales} {p.sales === 1 ? "sale" : "sales"} ·{" "}
+                      {p.revenue.toLocaleString()} {data.currency}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-[11px] text-gray-400">No sale in this window used a promo code.</p>
+            )}
+          </div>
 
           <div className="mt-5 flex h-32 items-end gap-px">
             {data.points.map((p) => (

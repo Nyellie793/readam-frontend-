@@ -536,7 +536,16 @@
     "nothingBody": "This checkout link is missing a product. Pick a plan or a course and try again.",
     "viewPlans": "View plans",
     "browseCourses": "Browse courses",
-    "aiSessionsIntro": "Accelerate your learning with personalized AI-driven study sessions. Each session is designed to tackle your specific exam challenges and provide instant mastery over complex subjects."
+    "aiSessionsIntro": "Accelerate your learning with personalized AI-driven study sessions. Each session is designed to tackle your specific exam challenges and provide instant mastery over complex subjects.",
+    "promoTitle": "Promo or referral code",
+    "promoHint": "Got a code from a creator or a friend? Enter it here so they get credit. It doesn't change your price.",
+    "promoPlaceholder": "e.g. JANE10",
+    "promoApply": "Apply",
+    "promoChecking": "Checking…",
+    "promoApplied": "Code applied",
+    "promoInvalid": "That promo code isn't valid. Check it and try again.",
+    "promoRemove": "Remove",
+    "promoCode": "Promo code"
   },
   "dash": {
     "goodMorning": "Good Morning",

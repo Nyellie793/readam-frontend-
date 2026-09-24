@@ -1,4 +1,11 @@
 import { api } from "@/lib/api";
+import type {
+  AdminCourseSalesResponse,
+  AdminPromoCodeItem,
+  AdminPromoCodesResponse,
+  CourseSalesSort,
+  PromoCodePurchasesResponse,
+} from "@/types/api.types";
 
 const ADMIN = {
   /* ── Dashboard stats ─────────────────────────────────────────────────────── */
@@ -59,9 +66,27 @@ const ADMIN = {
   /** GET /v1/admin/payments/stats */
   getPaymentStats: () => api.get("/v1/admin/payments/stats"),
 
-  /** GET /v1/admin/courses/{id}/sales — daily sales for one course */
+  /** GET /v1/admin/courses/{id}/sales — daily sales for one course, split by promo code */
   getCourseSales: (courseId: string, days = 30) =>
     api.get(`/v1/admin/courses/${courseId}/sales?days=${days}`),
+
+  /** GET /v1/admin/sales/courses — every course with purchases split promo / no promo, plus totals */
+  getSalesByCourse: (opts: {
+    page?: number;
+    pageSize?: number;
+    sort?: CourseSalesSort;
+    status?: string;
+    search?: string;
+  } = {}) => {
+    const params = new URLSearchParams({
+      page: String(opts.page ?? 1),
+      page_size: String(opts.pageSize ?? 20),
+      sort: opts.sort ?? "purchases",
+    });
+    if (opts.status) params.set("status", opts.status);
+    if (opts.search?.trim()) params.set("search", opts.search.trim());
+    return api.get<AdminCourseSalesResponse>(`/v1/admin/sales/courses?${params.toString()}`);
+  },
 
   /** GET /v1/admin/analytics — revenue, money flow, sources, payment health, top courses */
   getAnalytics: (topCourses = 10) =>
@@ -73,6 +98,27 @@ const ADMIN = {
   /** GET /v1/admin/payments?page=1 */
   getTransactions: (page = 1, pageSize = 20) =>
     api.get(`/v1/admin/payments?page=${page}&page_size=${pageSize}`),
+
+  /* ── Promo codes ─────────────────────────────────────────────────────────── */
+  /** GET /v1/admin/promo-codes — every code with its purchases, best first, plus totals */
+  getPromoCodes: (page = 1, includeInactive = true, pageSize = 20) =>
+    api.get<AdminPromoCodesResponse>(
+      `/v1/admin/promo-codes?page=${page}&page_size=${pageSize}&include_inactive=${includeInactive}`
+    ),
+
+  /** POST /v1/admin/promo-codes — 409 if the code already exists */
+  createPromoCode: (body: { code: string; label?: string | null }) =>
+    api.post<AdminPromoCodeItem>("/v1/admin/promo-codes", body, true),
+
+  /** PATCH /v1/admin/promo-codes/{id} — deactivate/reactivate or relabel */
+  updatePromoCode: (id: string, body: { is_active?: boolean; label?: string }) =>
+    api.patch<AdminPromoCodeItem>(`/v1/admin/promo-codes/${id}`, body),
+
+  /** GET /v1/admin/promo-codes/{id}/purchases?page=1 — every payment made with the code */
+  getPromoCodePurchases: (id: string, page = 1, pageSize = 20) =>
+    api.get<PromoCodePurchasesResponse>(
+      `/v1/admin/promo-codes/${id}/purchases?page=${page}&page_size=${pageSize}`
+    ),
 };
 
 export default ADMIN;

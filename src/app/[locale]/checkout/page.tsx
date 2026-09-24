@@ -22,9 +22,12 @@ function CheckoutContent() {
 
   const productCode = searchParams.get("product");
   const courseId = searchParams.get("course");
+  // An influencer shares `/checkout?course=…&promo=JANE10`; `ref` is accepted
+  // as an alias because that is what most link builders call it.
+  const promoCode = searchParams.get("promo") ?? searchParams.get("ref");
 
   if (productCode) return <SubscriptionCheckout productCode={productCode} />;
-  if (courseId) return <CourseCheckout courseId={courseId} />;
+  if (courseId) return <CourseCheckout courseId={courseId} initialPromoCode={promoCode} />;
 
   return (
     <div className="mx-auto max-w-md space-y-3 px-6 py-20 text-center">

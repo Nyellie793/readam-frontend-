@@ -113,7 +113,14 @@ export default function PaymentsPage() {
                   : transactions.map((t) => (
                       <tr key={t.id} className="hover:bg-gray-50">
                         <td className="px-5 py-4 font-medium text-gray-900">{t.party}</td>
-                        <td className="px-5 py-4 text-gray-600">{t.description}</td>
+                        <td className="px-5 py-4 text-gray-600">
+                          {t.description}
+                          {t.promo_code && (
+                            <Badge variant="info" className="ml-2 font-mono tracking-widest">
+                              {t.promo_code}
+                            </Badge>
+                          )}
+                        </td>
                         <td className="px-5 py-4 capitalize text-gray-600">{t.type}</td>
                         <td className={`px-5 py-4 text-right font-semibold ${t.type === "payout" ? "text-red-600" : "text-emerald-600"}`}>
                           {t.type === "payout" ? "-" : "+"}

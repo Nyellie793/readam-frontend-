@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Topbar from "@/components/admin/Topbar";
+import PromoCodesPanel from "@/components/admin/PromoCodesPanel";
+import SalesOverviewPanel from "@/components/admin/SalesOverviewPanel";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import ADMIN from "@/services/admin.service";
@@ -109,6 +111,11 @@ export default function AdminDashboardPage() {
               <p className="p-5 text-sm text-gray-400">No courses awaiting approval.</p>
             )}
           </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SalesOverviewPanel />
+          <PromoCodesPanel />
         </div>
       </div>
     </>

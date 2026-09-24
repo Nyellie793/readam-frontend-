@@ -15,6 +15,7 @@ import type {
   SavedCourseResponse,
   NotificationPrefsResponse,
   PaginatedPaymentsResponse,
+  PromoCodeCheckResponse,
   ProductResponse,
   PaginatedNotificationsResponse,
   MarkAllReadResponse,
@@ -78,7 +79,14 @@ const STUDENT = {
     course_id: string;
     phone: string;
     medium?: "mobile money" | "orange money";
+    /** Influencer attribution code as typed. Rejected with 400 if unknown. */
+    promo_code?: string;
   }) => api.post<PaymentResponse>("/v1/payments/initiate", body, true),
+
+  // GET /v1/promo-codes/:code — is this code recognised? 400 if not. Returns the
+  // canonical (upper-case) code to send with initiatePayment.
+  checkPromoCode: (code: string) =>
+    api.get<PromoCodeCheckResponse>(`/v1/promo-codes/${encodeURIComponent(code)}`),
 
   // POST /v1/courses/:courseId/save — bookmark a course
   saveCourse: (courseId: string) =>
