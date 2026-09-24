@@ -28,6 +28,7 @@ import type {
 import TUTOR from "@/services/tutor.service";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import { beginVideoUpload, uploadVideoFile, uploadErrorText } from "@/lib/video-upload";
+import { splitTags } from "@/lib/utils";
 
 const STEPS = [
     "Course Info",
@@ -175,7 +176,7 @@ export default function NewCoursePage() {
             price: Number(form.price) || 0,
             is_premium: form.is_premium,
             thumbnail_url: thumbnailUrl ?? undefined,
-            tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+            tags: splitTags(form.tags),
         };
     }
 

@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { errorMessage, assertUploadable, putToPresigned } from "@/lib/api";
 import type { CourseLanguage } from "@/types/api.types";
-import { cn } from "@/lib/utils";
+import { cn, splitTags } from "@/lib/utils";
 import ModuleList from "./ModuleList";
 import type { CourseDetailResponse } from "@/types/api.types";
 import { useTranslations } from "next-intl";
@@ -123,10 +123,7 @@ export default function CourseEditorContent({ courseId, asAdmin = false }: Cours
         description: description.trim() || null,
         category,
         language,
-        tags: tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
+        tags: splitTags(tags),
         price: Number(price) || 0,
         is_premium: isPremium,
         thumbnail_url: thumbnailUrl,

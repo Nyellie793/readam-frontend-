@@ -29,12 +29,13 @@ export default function DashboardCourseCard({ course }: { course: Course }) {
           sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute left-3 top-3 flex gap-1.5">
+        <div className="absolute left-3 right-3 top-3 flex gap-1.5 overflow-hidden">
           {course.tags.map((tag) => (
             <span
               key={tag.label}
+              title={tag.label}
               className={cn(
-                "rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                "min-w-0 max-w-[65%] truncate rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
                 TAG_TONE[tag.tone ?? "dark"]
               )}
             >

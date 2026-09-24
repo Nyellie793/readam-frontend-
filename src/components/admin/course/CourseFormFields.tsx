@@ -200,7 +200,8 @@ export default function CourseForm({
                 />
 
                 <p className="mt-1.5 text-xs text-gray-400">
-                    Tags help students find this course in search.
+                    Up to 10 short tags, each a few words. They help students find this
+                    course in search and are shown on the course card.
                 </p>
             </div>
 

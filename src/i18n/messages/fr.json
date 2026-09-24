@@ -901,7 +901,7 @@
     "viewCourse": "Voir le cours",
     "tags": "Mots-clés",
     "tagsPh": "ex. GCE, A Level, Mathématiques",
-    "tagsHelp": "Séparés par des virgules. Utilisés lors des recherches.",
+    "tagsHelp": "Jusqu'à 10 mots-clés courts, séparés par des virgules. Utilisés lors des recherches et affichés sur la fiche du cours.",
     "premiumCourse": "Cours premium",
     "premiumCourseHint": "Réservé aux étudiants abonnés",
     "freePreviewLesson": "Aperçu gratuit",

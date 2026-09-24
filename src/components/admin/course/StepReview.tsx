@@ -12,6 +12,7 @@ import type {
     Module,
 } from "./course.types";
 import { COURSE_CATEGORIES } from "@/constants/course-categories";
+import { splitTags } from "@/lib/utils";
 
 interface StepReviewProps {
     form: CourseForm;
@@ -157,18 +158,14 @@ export default function StepReview({
                     </p>
 
                     <div className="flex flex-wrap gap-2">
-                        {form.tags
-                            .split(",")
-                            .map((tag) => tag.trim())
-                            .filter(Boolean)
-                            .map((tag) => (
-                                <span
-                                    key={tag}
-                                    className="rounded-full border border-gray-200 px-3 py-1 text-xs text-gray-600"
-                                >
-                                    {tag}
-                                </span>
-                            ))}
+                        {splitTags(form.tags).map((tag) => (
+                            <span
+                                key={tag}
+                                className="rounded-full border border-gray-200 px-3 py-1 text-xs text-gray-600"
+                            >
+                                {tag}
+                            </span>
+                        ))}
                     </div>
                 </div>
             )}

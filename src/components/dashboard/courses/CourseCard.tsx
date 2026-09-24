@@ -87,11 +87,14 @@ export default function CourseCard({
             {isVideo ? <Play className="size-10 text-blue-300" /> : <FileText className="size-10 text-blue-300" />}
           </div>
         )}
-        <div className="absolute left-3 top-3 flex gap-1.5">
+        {/* Bounded to one line and 65% of the width per tag: a long tag is cut
+            with an ellipsis rather than painted across the thumbnail. */}
+        <div className="absolute left-3 right-3 top-3 flex gap-1.5 overflow-hidden">
           {course.tags.slice(0, 2).map((tag) => (
             <span
               key={tag}
-              className="rounded-md bg-gray-900/85 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm"
+              title={tag}
+              className="min-w-0 max-w-[65%] truncate rounded-md bg-gray-900/85 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm"
             >
               {tag}
             </span>

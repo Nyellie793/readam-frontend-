@@ -901,7 +901,7 @@
     "viewCourse": "View course",
     "tags": "Tags",
     "tagsPh": "e.g. GCE, A Level, Mathematics",
-    "tagsHelp": "Comma separated. Used when students search.",
+    "tagsHelp": "Up to 10 short tags, comma separated. Used when students search and shown on the course card.",
     "premiumCourse": "Premium Course",
     "premiumCourseHint": "Only available to subscribed students",
     "freePreviewLesson": "Free preview",
