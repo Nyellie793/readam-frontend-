@@ -739,7 +739,12 @@
     "myLearningTitle": "My Learning",
     "myLearningSubtitle": "Every course you're enrolled in, in one place.",
     "myLearningEmptyTitle": "You haven't enrolled in anything yet",
-    "myLearningEmptyBody": "Enrol in a free course or buy one to see it show up here."
+    "myLearningEmptyBody": "Enrol in a free course or buy one to see it show up here.",
+    "buyNow": "Buy Now",
+    "unlockCourseTitle": "Unlock the full course",
+    "unlockCourseBody": "You're viewing the free previews. Buy once and keep every video, PDF and lesson.",
+    "enrollFreeTitle": "This course is free",
+    "enrollFreeBody": "Enroll to unlock every video, PDF and lesson. No payment needed."
   },
   "tutor": {
     "dashboard": "Dashboard",

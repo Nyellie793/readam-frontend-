@@ -739,7 +739,12 @@
     "myLearningTitle": "Mes cours",
     "myLearningSubtitle": "Tous les cours auxquels vous êtes inscrit, au même endroit.",
     "myLearningEmptyTitle": "Vous n'êtes inscrit à aucun cours pour l'instant",
-    "myLearningEmptyBody": "Inscrivez-vous à un cours gratuit ou achetez-en un pour le voir apparaître ici."
+    "myLearningEmptyBody": "Inscrivez-vous à un cours gratuit ou achetez-en un pour le voir apparaître ici.",
+    "buyNow": "Acheter",
+    "unlockCourseTitle": "Débloquez tout le cours",
+    "unlockCourseBody": "Vous regardez les aperçus gratuits. Achetez une fois et gardez toutes les vidéos, PDF et leçons.",
+    "enrollFreeTitle": "Ce cours est gratuit",
+    "enrollFreeBody": "Inscrivez-vous pour débloquer toutes les vidéos, PDF et leçons. Aucun paiement requis."
   },
   "tutor": {
     "dashboard": "Tableau de bord",

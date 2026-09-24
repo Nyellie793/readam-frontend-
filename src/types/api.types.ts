@@ -63,6 +63,10 @@ export interface CourseListItem {
     // the last one). Always null for an anonymous caller.
     resume_lesson_id: string | null;
     resume_position_seconds: number;
+    // Can the caller open the non-preview lessons: an active enrolment OR a
+    // GCE subscription covering an official course. Broader than is_enrolled.
+    // Always false for an anonymous caller. Decides the purchase prompt.
+    has_access: boolean;
   }
 
   export interface LessonContentResponse {

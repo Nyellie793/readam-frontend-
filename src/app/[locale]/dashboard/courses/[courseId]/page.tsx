@@ -14,6 +14,7 @@ import { ApiRequestError, errorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { CourseDetailResponse, LessonContentResponse, ModuleLesson } from "@/types/api.types";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export default function LessonPage() {
   const t = useTranslations("dash");
@@ -33,6 +34,7 @@ export default function LessonPage() {
   // Bumping this re-runs the lesson fetch. Re-setting selectedLessonId to the
   // same value would be a no-op, so a retry needs its own changing dep.
   const [lessonRetry, setLessonRetry] = useState(0);
+  const [enrolling, setEnrolling] = useState(false);
 
   // Page-local, not persisted — collapsing the outline is about giving this
   // one video more room right now, not a standing preference like the global
@@ -62,47 +64,15 @@ export default function LessonPage() {
         // already carries this lesson's own last_position_seconds, so no
         // separate seek is needed here.
         setSelectedLessonId(data.resume_lesson_id ?? firstAvailable?.id ?? null);
+        // has_access comes from the server with the course: an active
+        // enrolment OR a GCE subscription that covers it. This used to be
+        // re-derived here by walking every page of /v1/enrollments, which
+        // could not see subscriptions, raced the lesson fetch, and could
+        // reset access to false after a lesson had already proved it.
+        setHasAccess(data.has_access);
       })
       .catch((e) => setCourseError(e.message))
       .finally(() => setCourseLoading(false));
-
-    // Entitlement must be checked across *all* enrolment pages. Reading only
-    // page 1 meant a student whose enrolment had scrolled onto a later page saw
-    // a locked outline and a "Buy Course" button for content they already own —
-    // and the more they enrolled in, the more likely that became.
-    let cancelled = false;
-
-    (async () => {
-      try {
-        let page = 1;
-        for (;;) {
-          const data = await STUDENT.getEnrollments(page);
-          if (cancelled) return;
-
-          const enrollment = data.items.find((e) => e.course_id === courseId);
-          if (enrollment) {
-            setHasAccess(
-              enrollment.status === "active" &&
-                (!enrollment.expires_at || new Date(enrollment.expires_at) > new Date())
-            );
-            return;
-          }
-
-          const seen = data.page * data.page_size;
-          if (data.items.length === 0 || seen >= data.total) break;
-          page += 1;
-        }
-        setHasAccess(false);
-      } catch {
-        // Access is re-checked authoritatively by the lesson endpoint (403), so
-        // failing closed here only affects the outline's lock icons.
-        if (!cancelled) setHasAccess(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
   }, [courseId]);
 
   useEffect(() => {
@@ -112,7 +82,13 @@ export default function LessonPage() {
     setLesson(null);
     setLessonError(null);
     STUDENT.getLessonContent(courseId, selectedLessonId)
-      .then(setLesson)
+      .then((data) => {
+        setLesson(data);
+        // The lesson endpoint is the authority on access. A non-preview
+        // lesson that actually loaded proves it, so access can only ever be
+        // raised here, never lowered.
+        if (!data.is_preview) setHasAccess(true);
+      })
       .catch((e) => {
         if (e instanceof ApiRequestError && e.status === 403) {
           setLessonDenied(true);
@@ -127,6 +103,26 @@ export default function LessonPage() {
 
   function handleSelectLesson(l: ModuleLesson) {
     setSelectedLessonId(l.id);
+  }
+
+  // A free course has no checkout to send the student to; enrolling is the
+  // whole purchase. Reloading the lesson afterwards replaces the lock screen
+  // with the content.
+  async function handleEnrollFree() {
+    if (!course || enrolling) return;
+    setEnrolling(true);
+    try {
+      await STUDENT.enroll(course.id);
+      setHasAccess(true);
+      // Only the lock screen needs a refetch to become the lesson. Enrolling
+      // from the banner while a preview plays must not remount the player.
+      if (lessonDenied) setLessonRetry((n) => n + 1);
+      toast.success(`${t("enrolled")} · ${course.title}`);
+    } catch (e) {
+      toast.error(errorMessage(e, t("enrollFailed")));
+    } finally {
+      setEnrolling(false);
+    }
   }
 
   function handleProgress(positionSeconds: number, completed: boolean) {
@@ -164,12 +160,55 @@ export default function LessonPage() {
   const currentIndex = allLessons.findIndex((l) => l.id === selectedLessonId);
   const upNext = currentIndex >= 0 ? allLessons.slice(currentIndex + 1, currentIndex + 4) : [];
 
+  // The buy link used to live only inside the locked-lesson screen, so a
+  // student whose first lesson was a free preview could watch it and never
+  // see a way to buy the rest. Hidden while the lock screen is up, which
+  // carries the same call to action itself. hasAccess is seeded from the
+  // course response, so a student who already has access never sees it.
+  const isFree = course.price === 0;
+  const showAccessPrompt = !hasAccess && !lessonDenied;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10">
         <div className="flex flex-col gap-6 lg:flex-row">
 
           <div className="min-w-0 flex-1">
+            {showAccessPrompt && (
+              <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+                    <Lock className="size-4" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">
+                      {isFree ? t("enrollFreeTitle") : t("unlockCourseTitle")}
+                    </p>
+                    <p className="text-xs leading-relaxed text-gray-600">
+                      {isFree ? t("enrollFreeBody") : t("unlockCourseBody")}
+                    </p>
+                  </div>
+                </div>
+                {isFree ? (
+                  <button
+                    type="button"
+                    onClick={handleEnrollFree}
+                    disabled={enrolling}
+                    className="shrink-0 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                  >
+                    {enrolling ? t("enrolling") : t("enrollNow")}
+                  </button>
+                ) : (
+                  <Link
+                    href={`/checkout?course=${courseId}`}
+                    className="shrink-0 rounded-xl bg-blue-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                  >
+                    {t("buyCourse")} — {course.price.toLocaleString()} XAF
+                  </Link>
+                )}
+              </div>
+            )}
+
             {lessonLoading && (
               <div className="flex aspect-video items-center justify-center rounded-2xl bg-gray-950 text-sm text-white/60">
                 {t("loadingLesson")}
@@ -179,13 +218,24 @@ export default function LessonPage() {
             {!lessonLoading && lessonDenied && (
               <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-2xl bg-gray-950 text-white/80">
                 <Lock className="size-8" />
-                <p className="text-sm">{t("purchaseToAccess")}</p>
-                <Link
-                  href={`/checkout?course=${courseId}`}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                  {t("buyCourse")} — {course.price.toLocaleString()} XAF
-                </Link>
+                <p className="text-sm">{isFree ? t("enrollFreeBody") : t("purchaseToAccess")}</p>
+                {isFree ? (
+                  <button
+                    type="button"
+                    onClick={handleEnrollFree}
+                    disabled={enrolling}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                  >
+                    {enrolling ? t("enrolling") : t("enrollNow")}
+                  </button>
+                ) : (
+                  <Link
+                    href={`/checkout?course=${courseId}`}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                  >
+                    {t("buyCourse")} — {course.price.toLocaleString()} XAF
+                  </Link>
+                )}
               </div>
             )}
 

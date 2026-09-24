@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Star, Play, FileText, Loader2, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import type { CourseListItem } from "@/types/api.types";
@@ -21,11 +22,13 @@ export default function CourseCard({
   onUnsave?: () => void;
 }) {
   const t = useTranslations("dash");
+  const router = useRouter();
   const isVideo = course.has_video;
   // Free means price 0, full stop. is_premium has no server-side enforcement
-  // anywhere (it's a pure display flag), so a 0-priced course with it set
-  // used to fall into the paid "Buy Now" branch below and send a student to
-  // a checkout page for 0 XAF.
+  // anywhere (it's a pure display flag), so it decides nothing here: a paid
+  // course used to get a "Buy Now" button only when that flag happened to be
+  // set, and every other paid course showed a passive "View Course" label
+  // with no way to buy it from the catalogue.
   const isFree = course.price === 0;
   const [enrolling, setEnrolling] = useState(false);
   // Seeded from the server, not always false — otherwise the badge only ever
@@ -49,6 +52,14 @@ export default function CourseCard({
     } finally {
       setEnrolling(false);
     }
+  }
+
+  // A button rather than a nested <Link>: the whole card is already an <a>,
+  // and an anchor inside an anchor is invalid HTML that browsers split apart.
+  function handleBuy(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/checkout?course=${course.id}`);
   }
 
   async function handleToggleSave(e: React.MouseEvent) {
@@ -164,18 +175,18 @@ export default function CourseCard({
               {enrolling && <Loader2 className="size-3.5 animate-spin" />}
               {enrolled ? t("enrolled") : enrolling ? t("enrolling") : t("enrollNow")}
             </button>
-          ) : course.is_premium ? (
-            <Link
-              href={`/checkout?course=${course.id}`}
-              onClick={(e) => e.stopPropagation()}
-              className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800"
-            >
-              Buy Now
-            </Link>
-          ) : (
-            <span className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white">
-              View Course
+          ) : enrolled ? (
+            <span className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white">
+              {t("enrolled")}
             </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleBuy}
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
+            >
+              {t("buyNow")}
+            </button>
           )}
         </div>
       </div>
