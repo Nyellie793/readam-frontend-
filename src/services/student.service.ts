@@ -77,10 +77,14 @@ const STUDENT = {
   // POST /v1/payments/initiate — buy a paid course via MTN MoMo / Orange Money
   initiatePayment: (body: {
     course_id: string;
-    phone: string;
+    /** Required for "direct"; the hosted page asks for it itself. */
+    phone?: string;
     medium?: "mobile money" | "orange money";
     /** Influencer attribution code as typed. Rejected with 400 if unknown. */
     promo_code?: string;
+    /** "link" (the default) returns a hosted Fapshi page; "direct" pushes USSD
+     *  to the phone but needs direct pay activated on the Fapshi account. */
+    method?: "direct" | "link";
   }) => api.post<PaymentResponse>("/v1/payments/initiate", body, true),
 
   // GET /v1/promo-codes/:code — is this code recognised? 400 if not. Returns the

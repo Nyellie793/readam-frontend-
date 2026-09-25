@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Lock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PaymentMethodSelector, { PaymentMethod } from "@/components/payment/PaymentMethodSelector";
 import PaymentDetailsForm from "@/components/payment/PaymentDetailsForm";
 import OrderSummary from "@/components/payment/OrderSummary";
 import STUDENT from "@/services/student.service";
@@ -21,7 +20,6 @@ export default function SubscriptionCheckout({ productCode }: { productCode: str
   const t = useTranslations("payment");
   const [product, setProduct] = useState<ProductResponse | null>(null);
   const [stage, setStage] = useState<Stage>("loading");
-  const [method, setMethod] = useState<PaymentMethod>("mtn");
   const [submitting, setSubmitting] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
@@ -72,15 +70,15 @@ export default function SubscriptionCheckout({ productCode }: { productCode: str
     };
   }, [stage, paymentId, checkOnce]);
 
-  async function handlePay(phone: string) {
+  async function handlePay(phone: string | null) {
     if (!product) return;
     setSubmitting(true);
     setErrorText(null);
     try {
+      // Hosted checkout: Fapshi's page collects the network and number.
       const payment = await STUDENT.purchaseSubscription({
         product_code: product.code,
-        phone,
-        medium: method === "mtn" ? "mobile money" : "orange money",
+        ...(phone ? { phone } : {}),
       });
       setPaymentId(payment.id);
 
@@ -237,7 +235,6 @@ export default function SubscriptionCheckout({ productCode }: { productCode: str
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <PaymentMethodSelector selected={method} onChange={setMethod} />
           <PaymentDetailsForm onPay={handlePay} loading={submitting} />
           {errorText && <p className="text-sm text-red-500">{errorText}</p>}
         </div>

@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Lock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PaymentMethodSelector, { PaymentMethod } from "@/components/payment/PaymentMethodSelector";
 import PaymentDetailsForm from "@/components/payment/PaymentDetailsForm";
 import PromoCodeField from "@/components/payment/PromoCodeField";
 import OrderSummary from "@/components/payment/OrderSummary";
@@ -28,7 +27,6 @@ export default function CourseCheckout({ courseId, initialPromoCode }: CourseChe
   const t = useTranslations("payment");
   const [course, setCourse] = useState<CourseDetailResponse | null>(null);
   const [stage, setStage] = useState<Stage>("loading");
-  const [method, setMethod] = useState<PaymentMethod>("mtn");
   const [submitting, setSubmitting] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
@@ -81,18 +79,30 @@ export default function CourseCheckout({ courseId, initialPromoCode }: CourseChe
     };
   }, [stage, paymentId, checkOnce]);
 
-  async function handlePay(phone: string) {
+  async function handlePay(phone: string | null) {
     if (!course) return;
     setSubmitting(true);
     setErrorText(null);
     try {
+      // Hosted checkout: Fapshi's page collects the network and number, so
+      // neither is sent here — a medium picked on our side would be recorded
+      // even if the student paid with the other network.
       const payment = await STUDENT.initiatePayment({
         course_id: course.id,
-        phone,
-        medium: method === "mtn" ? "mobile money" : "orange money",
+        ...(phone ? { phone } : {}),
         ...(promoCode ? { promo_code: promoCode } : {}),
       });
       setPaymentId(payment.id);
+
+      // The hosted flow (the default, since direct pay is not activated on
+      // the Fapshi account) returns a page the student must complete on.
+      // Send them there; Fapshi brings them back to /payment/status with the
+      // payment id, which polls until the webhook resolves it. Direct pay
+      // returns no link, so the in-page polling below handles that case.
+      if (payment.payment_link) {
+        window.location.href = payment.payment_link;
+        return;
+      }
       setStage("pending");
     } catch (err) {
       setErrorText(errorMessage(err, t("couldNotStart")));
@@ -242,7 +252,6 @@ export default function CourseCheckout({ courseId, initialPromoCode }: CourseChe
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <PaymentMethodSelector selected={method} onChange={setMethod} />
           {/* After "Try again" the field remounts; seeding it with the code that
               was applied re-checks and re-shows it, so the parent never sends a
               code the student can no longer see. */}

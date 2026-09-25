@@ -6,22 +6,65 @@ import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 
 interface PaymentDetailsFormProps {
-  onPay: (phone: string) => void;
+  /** The phone typed for direct pay, or null in hosted mode. */
+  onPay: (phone: string | null) => void;
   loading: boolean;
+  /**
+   * Hosted mode: the student is sent to Fapshi's own page, which asks for the
+   * network and number itself, so this form asks for neither. The default,
+   * since direct pay is not activated on the Fapshi account.
+   */
+  hosted?: boolean;
 }
 
 export default function PaymentDetailsForm({
   onPay,
   loading,
+  hosted = true,
 }: PaymentDetailsFormProps) {
   const t = useTranslations("payment");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (hosted) {
+      onPay(null);
+      return;
+    }
     if (!phoneNumber || phoneNumber.length < 8) return;
     onPay(phoneNumber);
   };
+
+  if (hosted) {
+    return (
+      <div className="border border-gray-100 bg-white p-6 shadow-sm rounded-2xl">
+        <h3 className="text-base font-bold text-gray-900 mb-5">{t("paymentDetails")}</h3>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-3 rounded-xl bg-blue-50/50 border border-blue-100/60 p-4 text-xs text-blue-900">
+            <Info className="size-4.5 text-blue-600 shrink-0 mt-0.5" />
+            <p className="leading-relaxed">{t("hostedIntro")}</p>
+          </div>
+
+          <div className="pt-2">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-12 font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10 cursor-pointer disabled:opacity-60"
+            >
+              <ShieldCheck className="size-4.5" />
+              {loading ? t("processing") : t("continueToPayment")}
+            </Button>
+          </div>
+
+          <div className="flex items-center justify-center gap-1.5 text-[10px] font-semibold text-gray-400 select-none">
+            <Lock className="size-3" />
+            <span>{t("sslNotice")}</span>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-gray-100 bg-white p-6 shadow-sm rounded-2xl">

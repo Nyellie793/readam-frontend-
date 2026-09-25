@@ -545,7 +545,21 @@
     "promoApplied": "Code applied",
     "promoInvalid": "That promo code isn't valid. Check it and try again.",
     "promoRemove": "Remove",
-    "promoCode": "Promo code"
+    "promoCode": "Promo code",
+    "confirming": "Confirming your payment",
+    "confirmingBody": "This usually takes a few seconds. Do not close this page.",
+    "stillWaitingNetwork": "Still waiting on the mobile money network. Your money is safe.",
+    "received": "Payment received",
+    "startLearning": "Start learning",
+    "backToDashboard": "Back to dashboard",
+    "stillProcessing": "Still processing",
+    "stillProcessingBody": "Mobile money can take a few minutes to confirm. If you were charged, your access will appear automatically. There is no need to pay again.",
+    "checkPayments": "Check my payments",
+    "notFoundPayment": "We couldn't find that payment. If you were charged, it will show in your billing history.",
+    "hostedIntro": "You'll be taken to Fapshi's secure page to pay with MTN Mobile Money or Orange Money. Keep your phone nearby to approve the payment, then you'll be brought back here.",
+    "continueToPayment": "Continue to payment",
+    "notFoundPaymentTitle": "Payment not found",
+    "goToMyCourses": "Go to my courses"
   },
   "dash": {
     "goodMorning": "Good Morning",

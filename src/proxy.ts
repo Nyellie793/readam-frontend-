@@ -101,7 +101,12 @@ export function proxy(req: NextRequest) {
 
   /* ── Auth-required routes (onboarding, welcome-back) ───── */
   if (AUTH_REQUIRED.test(pathname) && !isAuth) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    // Carry the destination so signing in lands back here — a student who
+    // finishes a Fapshi payment in a browser that is not signed in must
+    // still reach /payment/status?payment=… afterwards.
+    const login = new URL("/login", req.url);
+    login.searchParams.set("next", `${pathname}${req.nextUrl.search}`);
+    return NextResponse.redirect(login);
   }
 
   /* ── Guest-only routes (login, signup) ──────────────────── */

@@ -529,6 +529,7 @@ export interface CourseListItem {
     medium: string | null;
     status: "pending" | "successful" | "failed" | "expired";
     promo_code_id: string | null;
+    payment_link?: string | null;
     webhook_received_at: string | null;
     created_at: string;
     course_title: string | null;
@@ -690,6 +691,8 @@ export interface CourseListItem {
     bundle_course_ids: string[] | null;
     /** Set when the purchase carried a promo code. */
     promo_code_id: string | null;
+    /** Hosted Fapshi checkout URL — set only when method was "link". */
+    payment_link?: string | null;
     webhook_received_at: string | null;
     created_at: string;
   }
