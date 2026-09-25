@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
-import { Captions, CaptionsOff } from "lucide-react";
+import { AlertTriangle, Captions, CaptionsOff } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useHlsSource } from "@/hooks/useHlsSource";
 import TranscriptPanel from "./TranscriptPanel";
 
 export interface VideoCaptions {
@@ -39,6 +40,10 @@ export default function VideoPlayer({
   // Drives the transcript highlight. Kept separate from progress reporting so
   // the panel updates every tick while the API is still written every 15s.
   const [position, setPosition] = useState(0);
+
+  // Sets the element's source: natively on Safari, through hls.js elsewhere.
+  // See the hook for why `src` is deliberately not a JSX attribute below.
+  const { failed, retry } = useHlsSource(videoRef, src);
 
   function reportProgress(completed = false) {
     const video = videoRef.current;
@@ -96,26 +101,38 @@ export default function VideoPlayer({
    * it. `default` on <track> is only honoured on first render, so this is set
    * imperatively and re-run whenever the lesson or track list changes.
    */
+  /**
+   * Only the <track> elements rendered below count. The stream's own manifest
+   * lists an auto-generated subtitle track in the same language, which Safari
+   * (natively) and hls.js (unless told otherwise) expose alongside ours in
+   * `video.textTracks`; toggling every match would show the captions twice.
+   */
+  const ownTextTracks = useCallback((): TextTrack[] => {
+    const video = videoRef.current;
+    if (!video) return [];
+    return Array.from(video.querySelectorAll<HTMLTrackElement>("track[data-readam-track]")).map(
+      (el) => el.track
+    );
+  }, []);
+
   const applyTracks = useCallback(
     (lang: string | null, visible: boolean) => {
-      const video = videoRef.current;
-      if (!video) return;
-      for (const textTrack of Array.from(video.textTracks)) {
+      for (const textTrack of ownTextTracks()) {
         textTrack.mode = visible && textTrack.language === lang ? "showing" : "disabled";
       }
     },
-    []
+    [ownTextTracks]
   );
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video || trackCount === 0) return;
 
-    const langs = Array.from(video.textTracks).map((t) => t.language);
+    const langs = ownTextTracks().map((t) => t.language);
     const preferred = langs.includes(locale) ? locale : langs[0];
     setActiveLang(preferred);
     applyTracks(preferred, showCaptions);
-  }, [locale, trackCount, src, showCaptions, applyTracks]);
+  }, [locale, trackCount, src, showCaptions, applyTracks, ownTextTracks]);
 
   function chooseLang(lang: string) {
     setActiveLang(lang);
@@ -130,10 +147,10 @@ export default function VideoPlayer({
   return (
     <>
       <div className="overflow-hidden rounded-2xl bg-gray-950 shadow-lg">
+      <div className="relative">
       <video
         ref={videoRef}
         key={src}
-        src={src}
         poster={poster}
         controls
         // Required for cross-origin <track> files to load at all.
@@ -160,9 +177,31 @@ export default function VideoPlayer({
         onEnded={() => reportProgress(true)}
       >
         {tracks.map((t) => (
-          <track key={t.lang} kind="subtitles" srcLang={t.lang} label={t.label} src={t.src} />
+          <track
+            key={t.lang}
+            data-readam-track=""
+            kind="subtitles"
+            srcLang={t.lang}
+            label={t.label}
+            src={t.src}
+          />
         ))}
       </video>
+
+      {failed && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gray-950/95 px-6 text-center text-white/80">
+          <AlertTriangle className="size-7 text-orange-400" />
+          <p className="text-sm">{t("lessonFailed")}</p>
+          <button
+            type="button"
+            onClick={retry}
+            className="rounded-lg border border-white/20 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/10"
+          >
+            {t("tryAgain")}
+          </button>
+        </div>
+      )}
+      </div>
 
       {trackCount > 0 && (
         <div className="flex flex-wrap items-center gap-2 border-t border-white/10 bg-gray-950 px-3 py-2">

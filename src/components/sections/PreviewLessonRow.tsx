@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Lock, PlayCircle, FileText, Eye, Loader2, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import HlsVideo from "@/components/shared/HlsVideo";
 import STUDENT from "@/services/student.service";
 import { errorMessage } from "@/lib/api";
 import type { ModuleLesson, LessonContentResponse } from "@/types/api.types";
@@ -119,8 +120,7 @@ export default function PreviewLessonRow({
           )}
 
           {!loading && !error && content?.type === "video" && content.content_url && (
-            <video
-              key={content.content_url}
+            <HlsVideo
               src={content.content_url}
               controls
               autoPlay
