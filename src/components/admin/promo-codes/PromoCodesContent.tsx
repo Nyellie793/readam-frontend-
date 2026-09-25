@@ -2,12 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Loader2, Plus, ShoppingBag, Ticket, TicketCheck, Wallet } from "lucide-react";
+import {
+  Copy,
+  Link2,
+  Loader2,
+  Plus,
+  RefreshCw,
+  ShoppingBag,
+  Ticket,
+  TicketCheck,
+  Wallet,
+} from "lucide-react";
 import StatCards from "@/components/admin/StatCards";
 import PromoCodePurchasesDialog from "@/components/admin/promo-codes/PromoCodePurchasesDialog";
 import { Badge } from "@/components/ui/Badge";
 import ADMIN from "@/services/admin.service";
 import { errorMessage } from "@/lib/api";
+import { SITE_URL } from "@/lib/constants";
 import { cn, xaf } from "@/lib/utils";
 import type { AdminPromoCodeItem, PromoCodeSummary } from "@/types/api.types";
 import type { StatCardData } from "@/types/dashboard.types";
@@ -119,6 +130,41 @@ export default function PromoCodesContent() {
       toast.success(`${code} copied.`);
     } catch {
       toast.error("Could not copy. Select the code and copy it by hand.");
+    }
+  }
+
+  /** The influencer's own stats page. Private: the token is the only key. */
+  function statsLink(item: AdminPromoCodeItem): string {
+    return `${SITE_URL}/promo/${item.share_token}`;
+  }
+
+  async function copyStatsLink(item: AdminPromoCodeItem) {
+    try {
+      await navigator.clipboard.writeText(statsLink(item));
+      toast.success(`Stats link for ${item.code} copied. Send it to the influencer.`);
+    } catch {
+      toast.error("Could not copy the link.");
+    }
+  }
+
+  async function resetStatsLink(item: AdminPromoCodeItem) {
+    // One click would otherwise cut off a link the influencer already has.
+    if (
+      !window.confirm(
+        `Reset the stats link for ${item.code}? The link they have now will stop working and you will need to send them the new one.`
+      )
+    ) {
+      return;
+    }
+    setBusyId(item.id);
+    try {
+      const updated = await ADMIN.rotatePromoShareToken(item.id);
+      setItems((prev) => prev.map((p) => (p.id === item.id ? updated : p)));
+      toast.success(`New stats link issued for ${updated.code}. The old link no longer works.`);
+    } catch (e) {
+      toast.error(errorMessage(e, "Could not reset the link."));
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -287,6 +333,28 @@ export default function PromoCodesContent() {
                           </button>
                         </div>
                         <p className="text-xs text-gray-400">{item.label ?? "No label"}</p>
+                        <div className="mt-1.5 flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => void copyStatsLink(item)}
+                            title={statsLink(item)}
+                            className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+                          >
+                            <Link2 className="size-3" />
+                            Copy stats link
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void resetStatsLink(item)}
+                            disabled={busyId === item.id}
+                            aria-label={`Reset the stats link for ${item.code}`}
+                            title="Issue a new link; the old one stops working"
+                            className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+                          >
+                            <RefreshCw className="size-3" />
+                            Reset
+                          </button>
+                        </div>
                       </td>
                       <td className="px-5 py-4 text-right text-base font-black tabular-nums text-gray-900">
                         {item.successful_purchases}

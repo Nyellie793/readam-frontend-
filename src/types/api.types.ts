@@ -272,6 +272,8 @@ export interface CourseListItem {
     label: string | null;
     is_active: boolean;
     created_at: string;
+    /** Secret in the influencer's stats link, /promo/{share_token}. */
+    share_token: string;
     /** Payments Fapshi confirmed, and what they were worth. */
     successful_purchases: number;
     revenue_xaf: number;
@@ -308,6 +310,29 @@ export interface CourseListItem {
   export interface PromoCodePurchasesResponse {
     items: PromoCodePurchaseItem[];
     total: number;
+    page: number;
+    page_size: number;
+  }
+
+  /** One purchase as the code's holder sees it: what, when, whether it cleared. Never who. */
+  export interface PromoCodeStatsPurchase {
+    course_title: string | null;
+    amount: number;
+    status: "pending" | "successful" | "failed" | "expired";
+    created_at: string;
+  }
+
+  /** GET /v1/promo-codes/stats/{share_token} — public, opened with the share link. */
+  export interface PromoCodeStatsPage {
+    code: string;
+    is_active: boolean;
+    created_at: string;
+    successful_purchases: number;
+    total_attempts: number;
+    revenue_xaf: number;
+    last_used_at: string | null;
+    purchases: PromoCodeStatsPurchase[];
+    purchases_total: number;
     page: number;
     page_size: number;
   }

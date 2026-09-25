@@ -114,6 +114,10 @@ const ADMIN = {
   updatePromoCode: (id: string, body: { is_active?: boolean; label?: string }) =>
     api.patch<AdminPromoCodeItem>(`/v1/admin/promo-codes/${id}`, body),
 
+  /** POST /v1/admin/promo-codes/{id}/rotate-share-token — new stats link; the old one stops working */
+  rotatePromoShareToken: (id: string) =>
+    api.post<AdminPromoCodeItem>(`/v1/admin/promo-codes/${id}/rotate-share-token`, {}, true),
+
   /** GET /v1/admin/promo-codes/{id}/purchases?page=1 — every payment made with the code */
   getPromoCodePurchases: (id: string, page = 1, pageSize = 20) =>
     api.get<PromoCodePurchasesResponse>(

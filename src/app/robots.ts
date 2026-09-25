@@ -20,6 +20,8 @@ export default function robots(): MetadataRoute.Robots {
         "/welcome-back",
         "/select-role",
         "/reset-password",
+        // Influencer stats pages: the token in the URL is the only key.
+        "/promo/",
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
