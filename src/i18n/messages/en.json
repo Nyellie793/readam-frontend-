@@ -622,6 +622,8 @@
     "lessonFailed": "This lesson could not be loaded.",
     "videoNotUploaded": "Video not uploaded yet.",
     "pdfNotUploaded": "PDF not uploaded yet.",
+    "pdfOpen": "Open PDF",
+    "pdfOpenHint": "Tap below to read this PDF in your browser's viewer, where you can scroll and zoom.",
     "loadingCourse": "Loading course…",
     "loadingLesson": "Loading lesson…",
     "sectionFailed": "This section failed to load",

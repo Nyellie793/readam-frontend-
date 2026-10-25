@@ -622,6 +622,8 @@
     "lessonFailed": "Impossible de charger cette leçon.",
     "videoNotUploaded": "Vidéo pas encore téléversée.",
     "pdfNotUploaded": "PDF pas encore téléversé.",
+    "pdfOpen": "Ouvrir le PDF",
+    "pdfOpenHint": "Appuyez ci-dessous pour lire ce PDF dans la visionneuse de votre navigateur, où vous pouvez défiler et zoomer.",
     "loadingCourse": "Chargement du cours…",
     "loadingLesson": "Chargement de la leçon…",
     "sectionFailed": "Impossible de charger cette section",

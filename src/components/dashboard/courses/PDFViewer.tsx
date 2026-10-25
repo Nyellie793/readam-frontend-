@@ -2,6 +2,7 @@
 
 import { FileWarning, BookOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
+import PdfEmbed from "@/components/shared/PdfEmbed";
 
 interface PdfViewerProps {
   title: string;
@@ -25,7 +26,11 @@ export default function PdfViewer({ title, fileUrl }: PdfViewerProps) {
       {/* Real PDF, rendered by the browser's own PDF viewer */}
       <div className="flex-1">
         {fileUrl ? (
-          <iframe src={fileUrl} title={title} className="h-full min-h-[calc(100vh-56px)] w-full border-0" />
+          <PdfEmbed
+            title={title}
+            fileUrl={fileUrl}
+            className="h-full min-h-[calc(100vh-56px)] w-full"
+          />
         ) : (
           <div className="flex h-full min-h-[calc(100vh-56px)] flex-col items-center justify-center gap-2 text-gray-400">
             <FileWarning className="size-8" />

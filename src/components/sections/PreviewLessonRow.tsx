@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Lock, PlayCircle, FileText, Eye, Loader2, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import HlsVideo from "@/components/shared/HlsVideo";
+import PdfEmbed from "@/components/shared/PdfEmbed";
 import STUDENT from "@/services/student.service";
 import { errorMessage } from "@/lib/api";
 import type { ModuleLesson, LessonContentResponse } from "@/types/api.types";
@@ -129,10 +130,10 @@ export default function PreviewLessonRow({
           )}
 
           {!loading && !error && content?.type === "pdf" && content.content_url && (
-            <iframe
-              src={content.content_url}
+            <PdfEmbed
               title={content.title}
-              className="h-[70vh] w-full rounded-xl border-0"
+              fileUrl={content.content_url}
+              className="h-[70vh] w-full rounded-xl"
             />
           )}
 
