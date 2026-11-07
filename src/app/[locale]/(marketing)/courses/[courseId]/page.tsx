@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { BookOpen, ArrowLeft, Check } from "lucide-react";
+import { BookOpen, ArrowLeft, Check, ChevronDown } from "lucide-react";
 import Footer from "@/components/layout/Footer";
 import { getPublicCourse } from "@/lib/public-api";
 import CoursePurchaseCta from "@/components/sections/CoursePurchaseCta";
@@ -124,13 +124,19 @@ export default async function PublicCoursePage({
               {modules.length > 0 ? (
                 <div className="mt-4 space-y-4">
                   {modules.map((m) => (
-                    <div
+                    <details
                       key={m.id}
-                      className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+                      open
+                      className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
                     >
-                      <div className="border-b border-gray-50 bg-gray-50/60 px-5 py-3">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-gray-50 bg-gray-50/60 px-5 py-3 [&::-webkit-details-marker]:hidden">
                         <h3 className="text-sm font-bold text-gray-900">{m.title}</h3>
-                      </div>
+                        <span className="flex shrink-0 items-center gap-2 text-xs text-gray-400">
+                          {m.lessons?.length ?? 0}{" "}
+                          {(m.lessons?.length ?? 0) === 1 ? "lesson" : "lessons"}
+                          <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                        </span>
+                      </summary>
                       <ul className="divide-y divide-gray-50">
                         {[...(m.lessons ?? [])]
                           .sort((a, b) => a.order - b.order)
@@ -138,7 +144,7 @@ export default async function PublicCoursePage({
                             <PreviewLessonRow key={l.id} lesson={l} courseId={course.id} />
                           ))}
                       </ul>
-                    </div>
+                    </details>
                   ))}
                 </div>
               ) : (
