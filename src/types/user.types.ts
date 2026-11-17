@@ -14,6 +14,8 @@ export interface RegisterPayload {
   full_name: string;
   email: string;
   password: string;
+  /** A referral or promo code. Optional; an unknown one never blocks signup. */
+  referral_code?: string;
 }
 
 export interface SetRolePayload {

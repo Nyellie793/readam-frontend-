@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   Ticket,
+  UserPlus,
   Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -197,7 +198,14 @@ export default function PromoStatsContent() {
                 </div>
 
                 {/* Headline numbers */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                  <Stat
+                    label={t("signups")}
+                    value={String(data.signups)}
+                    sub={t("signupsSub")}
+                    icon={UserPlus}
+                    tone="blue"
+                  />
                   <Stat
                     label={t("purchases")}
                     value={String(data.successful_purchases)}

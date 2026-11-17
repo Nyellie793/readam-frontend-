@@ -34,9 +34,15 @@ const AUTH = {
   refresh: (p: RefreshPayload) =>
     api.post<TokenPair>("/v1/auth/refresh", p),
 
-  /** POST /v1/auth/google — sign in with Google ID token */
-  google: (google_id_token: string) =>
-    api.post<AuthResponse>("/v1/auth/google", { google_id_token }),
+  /**
+   * POST /v1/auth/google — sign in with Google ID token. The referral code is
+   * applied only if this call creates the account.
+   */
+  google: (google_id_token: string, referral_code?: string) =>
+    api.post<AuthResponse>("/v1/auth/google", {
+      google_id_token,
+      ...(referral_code ? { referral_code } : {}),
+    }),
 
   /** PATCH /v1/auth/me — update name/email/phone/avatar. Send only fields you want to change. */
   updateProfile: (body: { full_name?: string; email?: string; phone?: string; avatar_url?: string }) =>

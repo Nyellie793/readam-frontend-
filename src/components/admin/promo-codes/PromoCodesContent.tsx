@@ -11,10 +11,12 @@ import {
   ShoppingBag,
   Ticket,
   TicketCheck,
+  UserPlus,
   Wallet,
 } from "lucide-react";
 import StatCards from "@/components/admin/StatCards";
 import PromoCodePurchasesDialog from "@/components/admin/promo-codes/PromoCodePurchasesDialog";
+import PromoCodePeopleDialog from "@/components/admin/promo-codes/PromoCodePeopleDialog";
 import { Badge } from "@/components/ui/Badge";
 import ADMIN from "@/services/admin.service";
 import { errorMessage } from "@/lib/api";
@@ -24,6 +26,14 @@ import type { AdminPromoCodeItem, PromoCodeSummary } from "@/types/api.types";
 import type { StatCardData } from "@/types/dashboard.types";
 
 const PAGE_SIZE = 20;
+
+type OwnerFilter = "influencer" | "user" | "any";
+
+const OWNER_TABS: { value: OwnerFilter; label: string }[] = [
+  { value: "influencer", label: "Influencer codes" },
+  { value: "user", label: "User referral codes" },
+  { value: "any", label: "All" },
+];
 
 
 /** Share of attempts that turned into a paid purchase. Null when nothing was tried. */
@@ -43,6 +53,9 @@ export default function PromoCodesContent() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [includeInactive, setIncludeInactive] = useState(true);
+  // Matches the API's default, so the page opens on the influencer codes an
+  // admin issued rather than one row per user who has opened their referral page.
+  const [owner, setOwner] = useState<OwnerFilter>("influencer");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,11 +64,12 @@ export default function PromoCodesContent() {
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [viewing, setViewing] = useState<AdminPromoCodeItem | null>(null);
+  const [viewingPeople, setViewingPeople] = useState<AdminPromoCodeItem | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    ADMIN.getPromoCodes(page, includeInactive, PAGE_SIZE)
+    ADMIN.getPromoCodes(page, includeInactive, PAGE_SIZE, owner)
       .then((d) => {
         if (cancelled) return;
         setItems(d.items);
@@ -72,7 +86,7 @@ export default function PromoCodesContent() {
     return () => {
       cancelled = true;
     };
-  }, [page, includeInactive]);
+  }, [page, includeInactive, owner]);
 
   async function handleCreate() {
     const code = newCode.trim();
@@ -83,14 +97,23 @@ export default function PromoCodesContent() {
         code,
         label: newLabel.trim() || null,
       });
-      setItems((prev) => [created, ...prev]);
-      setTotal((n) => n + 1);
-      setSummary((s) =>
-        s ? { ...s, total_codes: s.total_codes + 1, active_codes: s.active_codes + 1 } : s
-      );
+      // A new code is an influencer code, so it belongs in the influencer and
+      // "all" lists but not the user-referral one, whose rows and totals it
+      // would otherwise corrupt until the next refetch.
+      if (owner !== "user") {
+        setItems((prev) => [created, ...prev]);
+        setTotal((n) => n + 1);
+        setSummary((s) =>
+          s ? { ...s, total_codes: s.total_codes + 1, active_codes: s.active_codes + 1 } : s
+        );
+      }
       setNewCode("");
       setNewLabel("");
-      toast.success(`Code ${created.code} created. Share it with the influencer.`);
+      toast.success(
+        owner === "user"
+          ? `Code ${created.code} created. Switch to Influencer codes to see it.`
+          : `Code ${created.code} created. Share it with the influencer.`
+      );
     } catch (e) {
       toast.error(errorMessage(e, "Could not create that code."));
     } finally {
@@ -184,6 +207,12 @@ export default function PromoCodesContent() {
           icon: Wallet,
         },
         {
+          id: "signups",
+          label: "Sign-ups via codes",
+          value: String(summary.total_signups),
+          icon: UserPlus,
+        },
+        {
           id: "active",
           label: "Active codes",
           value: String(summary.active_codes),
@@ -269,6 +298,29 @@ export default function PromoCodesContent() {
               Best-performing first. Attempts include failed and pending payments.
             </p>
           </div>
+          <div className="flex flex-wrap items-center gap-3">
+          <div role="tablist" aria-label="Kind of code" className="flex rounded-xl bg-gray-100 p-0.5">
+            {OWNER_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={owner === tab.value}
+                onClick={() => {
+                  setOwner(tab.value);
+                  setPage(1);
+                }}
+                className={cn(
+                  "rounded-[10px] px-3 py-1.5 text-xs font-semibold transition",
+                  owner === tab.value
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
           <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-600">
             <input
               type="checkbox"
@@ -281,15 +333,18 @@ export default function PromoCodesContent() {
             />
             Show inactive codes
           </label>
+          </div>
         </div>
 
         {error && <p className="px-5 pt-4 text-sm text-red-500">{error}</p>}
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="border-b border-gray-100 bg-gray-50">
               <tr>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500">Code</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500">Sign-ups</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500">Buyers</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500">Purchases</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500">Revenue</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500">Attempts</th>
@@ -302,14 +357,14 @@ export default function PromoCodesContent() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
-                    <td colSpan={7} className="px-5 py-4">
+                    <td colSpan={9} className="px-5 py-4">
                       <div className="h-4 animate-pulse rounded bg-gray-100" />
                     </td>
                   </tr>
                 ))
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-sm text-gray-400">
+                  <td colSpan={9} className="px-5 py-10 text-center text-sm text-gray-400">
                     No promo codes yet. Create one above and share it.
                   </td>
                 </tr>
@@ -332,7 +387,9 @@ export default function PromoCodesContent() {
                             <Copy className="size-3.5" />
                           </button>
                         </div>
-                        <p className="text-xs text-gray-400">{item.label ?? "No label"}</p>
+                        <p className="text-xs text-gray-400">
+                          {item.owner ? `Referral code · ${item.owner.full_name}` : (item.label ?? "No label")}
+                        </p>
                         <div className="mt-1.5 flex items-center gap-1">
                           <button
                             type="button"
@@ -356,6 +413,8 @@ export default function PromoCodesContent() {
                           </button>
                         </div>
                       </td>
+                      <td className="px-5 py-4 text-right tabular-nums text-gray-900">{item.signups}</td>
+                      <td className="px-5 py-4 text-right tabular-nums text-gray-900">{item.buyers}</td>
                       <td className="px-5 py-4 text-right text-base font-black tabular-nums text-gray-900">
                         {item.successful_purchases}
                       </td>
@@ -378,6 +437,13 @@ export default function PromoCodesContent() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setViewingPeople(item)}
+                            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+                          >
+                            People
+                          </button>
                           <button
                             type="button"
                             onClick={() => setViewing(item)}
@@ -438,6 +504,11 @@ export default function PromoCodesContent() {
         key={viewing?.id ?? "closed"}
         promo={viewing}
         onClose={() => setViewing(null)}
+      />
+      <PromoCodePeopleDialog
+        key={`people-${viewingPeople?.id ?? "closed"}`}
+        promo={viewingPeople}
+        onClose={() => setViewingPeople(null)}
       />
     </>
   );

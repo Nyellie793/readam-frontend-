@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import { LOCALES, isLocale } from "@/i18n/locales";
 import ServiceWorkerRegister from "@/components/shared/ServiceWorkerRegister";
 import InstallPrompt from "@/components/shared/InstallPrompt";
+import ReferralCapture from "@/components/shared/ReferralCapture";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -141,6 +142,7 @@ export default async function RootLayout({
           <NetworkProvider />
           <RouteProgress />
           <ServiceWorkerRegister />
+          <ReferralCapture />
 
           {children}
 

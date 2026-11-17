@@ -5,6 +5,7 @@ import type {
   AdminPromoCodesResponse,
   CourseSalesSort,
   PromoCodePurchasesResponse,
+  ReferredPeoplePage,
 } from "@/types/api.types";
 
 const ADMIN = {
@@ -100,10 +101,18 @@ const ADMIN = {
     api.get(`/v1/admin/payments?page=${page}&page_size=${pageSize}`),
 
   /* ── Promo codes ─────────────────────────────────────────────────────────── */
-  /** GET /v1/admin/promo-codes — every code with its purchases, best first, plus totals */
-  getPromoCodes: (page = 1, includeInactive = true, pageSize = 20) =>
+  /**
+   * GET /v1/admin/promo-codes — every code with its purchases, best first, plus totals.
+   * `owner` narrows to users' own referral codes or to the influencer codes an admin issued.
+   */
+  getPromoCodes: (
+    page = 1,
+    includeInactive = true,
+    pageSize = 20,
+    owner: "any" | "user" | "influencer" = "any"
+  ) =>
     api.get<AdminPromoCodesResponse>(
-      `/v1/admin/promo-codes?page=${page}&page_size=${pageSize}&include_inactive=${includeInactive}`
+      `/v1/admin/promo-codes?page=${page}&page_size=${pageSize}&include_inactive=${includeInactive}&owner=${owner}`
     ),
 
   /** POST /v1/admin/promo-codes — 409 if the code already exists */
@@ -117,6 +126,12 @@ const ADMIN = {
   /** POST /v1/admin/promo-codes/{id}/rotate-share-token — new stats link; the old one stops working */
   rotatePromoShareToken: (id: string) =>
     api.post<AdminPromoCodeItem>(`/v1/admin/promo-codes/${id}/rotate-share-token`, {}, true),
+
+  /** GET /v1/admin/promo-codes/{id}/people — everyone the code brought in, failed payments included */
+  getPromoCodePeople: (id: string, page = 1, pageSize = 20) =>
+    api.get<ReferredPeoplePage>(
+      `/v1/admin/promo-codes/${id}/people?page=${page}&page_size=${pageSize}`
+    ),
 
   /** GET /v1/admin/promo-codes/{id}/purchases?page=1 — every payment made with the code */
   getPromoCodePurchases: (id: string, page = 1, pageSize = 20) =>

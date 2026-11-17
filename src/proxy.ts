@@ -13,7 +13,7 @@
  * ─────
  *   /admin/*    → must be authenticated AND have role admin|super_admin
  *   /tutor/*    → tutor, or admin (they share the course editor)
- *   /onboarding-* /welcome-back /dashboard/* /notifications /settings
+ *   /onboarding-* /welcome-back /dashboard/* /notifications /settings /referrals
  *   /checkout /payment/* → must be authenticated
  *   /login /signup → redirect to home if already authenticated
  */
@@ -27,7 +27,7 @@ const ADMIN_LOGIN = ROUTES.adminLogin;
 const ADMIN_ROUTES = /^\/admin(\/|$)/;
 const TUTOR_ROUTES = /^\/tutor(\/|$)/;
 const AUTH_REQUIRED =
-  /^\/(onboarding-\d|welcome-back|dashboard|notifications|settings|checkout|payment)(\/|$)/;
+  /^\/(onboarding-\d|welcome-back|dashboard|notifications|settings|referrals|checkout|payment)(\/|$)/;
 const GUEST_ONLY = /^\/(login|signup)(\/|$)/;
 
 /**

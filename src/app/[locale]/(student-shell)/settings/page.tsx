@@ -5,6 +5,7 @@ import PaymentHistoryTable from "@/components/settings/PaymentHistoryTable";
 import LanguageSelector from "@/components/settings/LanguageSelector";
 import PreferencesToggles from "@/components/settings/PreferencesToggles";
 import SecurityForm from "@/components/settings/SecurityForm";
+import ReferralSettingsCard from "@/components/settings/ReferralSettingsCard";
 import { useTranslations } from "next-intl";
 
 export default function SettingsPage() {
@@ -24,6 +25,10 @@ export default function SettingsPage() {
         <SettingsSection id="billing" title={t("billingPlan")} description={t("billingPlanDesc")}>
           <SubscriptionCard />
           <PaymentHistoryTable />
+        </SettingsSection>
+
+        <SettingsSection id="referrals" title={t("referralsTitle")} description={t("referralsDesc")}>
+          <ReferralSettingsCard />
         </SettingsSection>
 
         <SettingsSection id="language" title={t("languageTitle")} description={t("languageBody")}>

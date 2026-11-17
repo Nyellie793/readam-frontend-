@@ -13,7 +13,12 @@ interface StatCardsProps {
  */
 export default function StatCards({ stats }: StatCardsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-4 sm:grid-cols-2",
+        stats.length === 5 ? "lg:grid-cols-5" : "lg:grid-cols-4"
+      )}
+    >
       {stats.map((stat) => {
         const Icon = stat.icon;
         const isDark = stat.tone === "dark";

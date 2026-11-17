@@ -7,6 +7,7 @@ import AUTH from "@/services/auth.service";
 import { saveSession, clearSession, getStoredUser, isAdmin } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import { ApiRequestError } from "@/lib/api";
+import { clearStoredReferralCode, getStoredReferralCode } from "@/lib/referral";
 import type { LoginPayload, RegisterPayload } from "@/types/user.types";
 
 
@@ -76,8 +77,11 @@ export function useAuth() {
     try {
       const { role, ...registerPayload } = payload;
 
-      // Step 1: create the account
-      const data = await AUTH.register(registerPayload);
+      // Step 1: create the account. A code typed on the form wins; otherwise
+      // the one remembered from a share link.
+      const referral_code = registerPayload.referral_code ?? getStoredReferralCode() ?? undefined;
+      const data = await AUTH.register({ ...registerPayload, referral_code });
+      clearStoredReferralCode(); // spent: the account now carries it
       saveSession(data);
       sessionStorage.setItem("login_type", "signup");
 
@@ -109,7 +113,9 @@ export function useAuth() {
   const googleAuth = useCallback(async (idToken: string, role?: "student" | "tutor") => {
     setLoading(true);
     try {
-      const data = await AUTH.google(idToken);
+      // Only used if this sign-in creates the account; the API ignores it otherwise.
+      const data = await AUTH.google(idToken, getStoredReferralCode() ?? undefined);
+      if (!data.user.role) clearStoredReferralCode(); // a brand-new account has just used it
       saveSession(data);
 
       if (!data.user.role) {

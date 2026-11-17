@@ -4,14 +4,30 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { z } from "zod/v4";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import { useGoogleRedirectResult } from "@/hooks/useGoogleRedirectResult";
 import Link from "next/link";
+import REFERRAL from "@/services/referral.service";
+import { ApiRequestError } from "@/lib/api";
+import {
+  clearStoredReferralCode,
+  getStoredReferralCode,
+  normalizeReferralCode,
+  storeReferralCode,
+} from "@/lib/referral";
 
-type FormData = { full_name: string; email: string; password: string; terms: true };
+type FormData = {
+  full_name: string;
+  email: string;
+  password: string;
+  referral_code?: string;
+  terms: true;
+};
+
+type ReferralStatus = "idle" | "checking" | "applied" | "unknown";
 
 interface SignupFormProps {
   /** Chosen on /select-role and passed down from the page, which reads it
@@ -32,19 +48,80 @@ export default function SignupForm({ role: initialRole }: SignupFormProps) {
     googleAuth(idToken, role)
   );
   const [showPw, setShowPw] = useState(false);
+  const [referralStatus, setReferralStatus] = useState<ReferralStatus>("idle");
+  // Each check takes a ticket; only the latest may write its result, so a slow
+  // check from page load cannot overwrite the one for what was typed since.
+  const referralTicket = useRef(0);
 
   const schema = z.object({
     full_name: z.string().min(2, t("errName")),
     email: z.email(t("errEmail")),
     password: z.string().min(8, t("errPassword")),
+    referral_code: z.string().optional(),
     terms: z.literal(true, { error: t("errTerms") }),
   });
-  const { register, handleSubmit, formState: { errors } } =
+  const { register, handleSubmit, setValue, formState: { errors } } =
     useForm<FormData>({ resolver: zodResolver(schema) });
 
-  function onSubmit({ full_name, email, password }: FormData) {
+  // A code remembered from a share link (/signup?ref=… or any page that was
+  // opened with one) fills the box. Read here, not during render, because the
+  // form is prerendered and the server cannot see the browser's storage.
+  useEffect(() => {
+    const remembered = getStoredReferralCode();
+    if (!remembered) return;
+    setValue("referral_code", remembered);
+    void checkReferral(remembered);
+  }, [setValue]);
+
+  /**
+   * Tell the visitor whether the code works, but never gate signup on it: the
+   * API ignores an unknown code, and a stale link must not stop anyone
+   * registering. A working code is remembered so the Google button (whose
+   * redirect leaves the page) still carries it.
+   */
+  async function checkReferral(raw: string) {
+    const ticket = ++referralTicket.current;
+    const code = normalizeReferralCode(raw);
+    if (!raw.trim()) {
+      clearStoredReferralCode();
+      setReferralStatus("idle");
+      return;
+    }
+    if (!code) {
+      // Malformed. Forget the remembered code too, or registration would
+      // quietly fall back to it while the box says it was not recognised.
+      clearStoredReferralCode();
+      setReferralStatus("unknown");
+      return;
+    }
+    setReferralStatus("checking");
+    try {
+      const ok = await REFERRAL.check(code);
+      if (ticket !== referralTicket.current) return;
+      storeReferralCode(ok.code);
+      setReferralStatus("applied");
+    } catch (err) {
+      if (ticket !== referralTicket.current) return;
+      // Only a definite "not valid" forgets the code. A dropped connection
+      // says nothing about it, so the remembered one stays.
+      if (err instanceof ApiRequestError && err.status === 400) {
+        clearStoredReferralCode();
+        setReferralStatus("unknown");
+      } else {
+        setReferralStatus("idle");
+      }
+    }
+  }
+
+  function onSubmit({ full_name, email, password, referral_code }: FormData) {
     // role is passed separately — useAuth.register calls /v1/auth/role after /v1/auth/register
-    registerUser({ full_name: full_name, email, password, role });
+    registerUser({
+      full_name: full_name,
+      email,
+      password,
+      role,
+      referral_code: normalizeReferralCode(referral_code) ?? undefined,
+    });
   }
 
   return (
@@ -105,6 +182,32 @@ export default function SignupForm({ role: initialRole }: SignupFormProps) {
             </button>
           </div>
           {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>}
+        </div>
+
+        <div>
+          <label className="text-sm font-semibold text-gray-700">
+            {t("referralCode")}{" "}
+            <span className="font-normal text-gray-400">({t("optional")})</span>
+          </label>
+          <input type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false}
+            {...register("referral_code", {
+              onBlur: (e) => void checkReferral(e.target.value),
+            })}
+            placeholder={t("referralCodePlaceholder")}
+            className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3.5 font-mono text-base uppercase tracking-widest placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-gray-300 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+          {referralStatus === "checking" && (
+            <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
+              <Loader2 className="h-3 w-3 animate-spin" /> {t("referralChecking")}
+            </p>
+          )}
+          {referralStatus === "applied" && (
+            <p className="mt-1 flex items-center gap-1 text-xs text-teal-600">
+              <CheckCircle2 className="h-3.5 w-3.5" /> {t("referralApplied")}
+            </p>
+          )}
+          {referralStatus === "unknown" && (
+            <p className="mt-1 text-xs text-orange-500">{t("referralUnknown")}</p>
+          )}
         </div>
 
         <div>

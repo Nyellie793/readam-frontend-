@@ -272,8 +272,13 @@ export interface CourseListItem {
     label: string | null;
     is_active: boolean;
     created_at: string;
+    /** Set on a user's own referral code; null on an influencer's. */
+    owner: { id: string; full_name: string } | null;
     /** Secret in the influencer's stats link, /promo/{share_token}. */
     share_token: string;
+    /** Accounts that signed up with the code, and distinct people who paid with it. */
+    signups: number;
+    buyers: number;
     /** Payments Fapshi confirmed, and what they were worth. */
     successful_purchases: number;
     revenue_xaf: number;
@@ -287,6 +292,7 @@ export interface CourseListItem {
     active_codes: number;
     successful_purchases: number;
     revenue_xaf: number;
+    total_signups: number;
   }
 
   export interface AdminPromoCodesResponse {
@@ -331,12 +337,66 @@ export interface CourseListItem {
     total_attempts: number;
     revenue_xaf: number;
     last_used_at: string | null;
+    /** Accounts that signed up with the code — a count only. */
+    signups: number;
     purchases: PromoCodeStatsPurchase[];
     purchases_total: number;
     page: number;
     page_size: number;
   }
   
+  // ── Referrals ─────────────────────────────────────────────────────────────
+  //
+  // Every user has a referral code, created the first time they ask for it.
+  // It is attribution only: no money figures anywhere until compensation is
+  // decided.
+
+  /** GET /v1/referrals/check/{code} — public. The canonical form of a working code. */
+  export interface ReferralCheckResponse {
+    code: string;
+  }
+
+  /** GET /v1/referrals/me */
+  export interface ReferralOverview {
+    code: string;
+    /** False once an admin has deactivated it. */
+    is_active: boolean;
+    created_at: string;
+    /** Accounts that signed up with the code. */
+    signups: number;
+    /** Distinct people who have paid for a course with it. */
+    buyers: number;
+    /** Course purchases that cleared. */
+    purchases: number;
+  }
+
+  export interface ReferredPurchase {
+    payment_id: string;
+    course_title: string | null;
+    /** Null on the referrer's own page: users never see money figures. Admins get the amount. */
+    amount: number | null;
+    /** Always "successful" on the referrer's own page; an admin also sees the rest. */
+    status: "pending" | "successful" | "failed" | "expired";
+    created_at: string;
+  }
+
+  export interface ReferredPersonItem {
+    user_id: string;
+    full_name: string;
+    joined_at: string;
+    /** True when they registered with the code; false when they only typed it at checkout. */
+    signed_up_with_code: boolean;
+    purchases: ReferredPurchase[];
+  }
+
+  /** GET /v1/referrals/me/people and GET /v1/admin/promo-codes/{id}/people */
+  export interface ReferredPeoplePage {
+    items: ReferredPersonItem[];
+    total: number;
+    page: number;
+    page_size: number;
+  }
+
   export interface AdminTutorListItem {
     id: string;
     email: string;
