@@ -126,10 +126,9 @@ export default async function PublicCoursePage({
                   {modules.map((m) => (
                     <details
                       key={m.id}
-                      open
                       className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
                     >
-                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 border-b border-gray-50 bg-gray-50/60 px-5 py-3 [&::-webkit-details-marker]:hidden">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 bg-gray-50/60 group-open:border-b group-open:border-gray-50 px-5 py-3 [&::-webkit-details-marker]:hidden">
                         <h3 className="text-sm font-bold text-gray-900">{m.title}</h3>
                         <span className="flex shrink-0 items-center gap-2 text-xs text-gray-400">
                           {m.lessons?.length ?? 0}{" "}
